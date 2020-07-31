@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "workspaces": ["packages/reactive", "packages/demo"],
+  "scripts": {
+      "demo": "cd ./packages/demo&&yarn start",
+      "lib": "cd ./packages/reactive && yarn run build"
+  }
+}
