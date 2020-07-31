@@ -1,6 +1,6 @@
 {
   "name": "re-active",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
@@ -9,15 +9,17 @@
     "../../README.md"
   ],
   "types": "dist/types",
-  "author": "",
+  "author": {
+    "email": "kutlugsahin@gmail.com",
+    "name": "Kutlu Sahin"
+  },
   "license": "ISC",
   "umd": "dist/umd/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:types": "tsc --emitDeclarationOnly",
     "build:rollup": "rollup -c",
-    "build": "npm run build:types && npm run build:rollup",
-    "prepublishOnly": "yarn build"
+    "build": "npm run build:types && npm run build:rollup"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
