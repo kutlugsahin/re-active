@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent, reactive } from "reactive";
+import { createComponent, reactive } from "re-active";
 
 interface Item {
 	name: string;

@@ -1,8 +1,9 @@
 {
   "private": true,
-  "workspaces": ["packages/reactive", "packages/demo"],
+  "workspaces": ["packages/re-active", "packages/demo"],
   "scripts": {
       "demo": "cd ./packages/demo&&yarn start",
-      "lib": "cd ./packages/reactive && yarn run build"
+      "lib": "cd ./packages/re-active && yarn run build",
+      "publish:lib": "cd ./packages/re-active && npm publish"
   }
 }

@@ -1,9 +1,16 @@
 {
-  "name": "reactive",
+  "name": "re-active",
   "version": "1.0.0",
   "description": "",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
+  "files": [
+    "./dist",
+    "../../README.md"
+  ],
+  "types": "dist/types",
+  "author": "",
+  "license": "ISC",
   "umd": "dist/umd/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,13 +19,6 @@
     "build": "npm run build:types && npm run build:rollup",
     "prepublishOnly": "yarn build"
   },
-  "files": [
-    "./dist",
-    "../../README.md"
-  ],
-  "types": "dist/types",
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.10.5",

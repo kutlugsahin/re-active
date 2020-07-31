@@ -1,4 +1,4 @@
-import { createStore, watch, createSelectors, createActions } from 'reactive';
+import { createStore, watch, createSelectors, createActions } from 're-active';
 
 export interface TodoItem {
 	text: string;

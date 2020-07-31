@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent } from 'reactive';
+import { createComponent } from 're-active';
 import { values, actions } from '../store';
 import { ListItem } from './ListItem';
 

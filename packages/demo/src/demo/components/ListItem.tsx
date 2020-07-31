@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent } from 'reactive';
+import { createComponent } from 're-active';
 import { actions, TodoItem } from '../store';
 
 interface ListItemProps {
