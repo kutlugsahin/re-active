@@ -14,7 +14,7 @@
   },
   "files": [
     "./dist",
-    "../../readme.md"
+    "../../README.md"
   ],
   "types": "dist/types",
   "author": "",
