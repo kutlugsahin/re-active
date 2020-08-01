@@ -1652,6 +1652,25 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
+"@re-active/core@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@re-active/core/-/core-1.0.3.tgz#fea7bb52b068e113489b7eb8fa35633495328e90"
+  integrity sha512-SCyAuhVysu45vvZdyv57F5ebxvlJITEuaZojpP/N01hDtd7yss0XF1BN0iHKyIXmhaNhSY/zlmFW2n+7gGqdBQ==
+
+"@re-active/react@^1.0.0":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@re-active/react/-/react-1.0.3.tgz#02d249f6c06e1e0623b1887b52a8182987e1ad85"
+  integrity sha512-ofVZNMAKsewt2KrHX8NFdFa9h9RUe+eh12P1+zdtAOAgT2HJ600rcZxOGQxGhYbuS8SZzVpyk2TeYbBnh+cV2g==
+  dependencies:
+    "@re-active/core" "1.0.3"
+
+"@re-active/store@^1.0.0":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@re-active/store/-/store-1.0.3.tgz#6e89ea3b89fda0e78e4796abf0b078acf1aad57d"
+  integrity sha512-QLf34hNiTVoYwelnDlVtiGl5NcSTWyLAX2JDSNRm+HOYspf8gEM0b5RtdkC1fwR74aHyR/mGyt04iz2ZurTgkQ==
+  dependencies:
+    "@re-active/core" "1.0.3"
+
 "@sheerun/mutationobserver-shim@^0.3.2":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@sheerun/mutationobserver-shim/-/mutationobserver-shim-0.3.3.tgz#5405ee8e444ed212db44e79351f0c70a582aae25"
@@ -10994,9 +11013,9 @@ websocket-driver@>=0.5.1:
     websocket-extensions ">=0.1.1"
 
 websocket-extensions@>=0.1.1:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
-  integrity sha512-nqHUnMXmBzT0w570r2JpJxfiSD1IzoI+HGVdd3aZ0yNi3ngvQ4jv1dtHt5VGxfI2yj5yqImPhOK4vmIh2xMbGg==
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
+  integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
 whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3, whatwg-encoding@^1.0.5:
   version "1.0.5"
