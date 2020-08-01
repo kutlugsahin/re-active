@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent, reactive } from "re-active";
+import { createComponent, reactive } from "@re-active/react";
 
 interface Item {
 	name: string;

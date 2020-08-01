@@ -7,14 +7,12 @@ const extensions = [
     '.js', '.jsx', '.ts', '.tsx',
 ];
 
-const name = 'Reactive';
+const name = 'ReactorStore';
 
 export default {
     input: './src/index.ts',
 
-    // Specify here external modules which you don't want to include in your bundle (for instance: 'lodash', 'moment' etc.)
-    // https://rollupjs.org/guide/en#external-e-external
-    external: ['react'],
+    external: ['@re-active/core'],
 
     plugins: [
         // Allows node_modules resolution
@@ -40,7 +38,7 @@ export default {
 
         // https://rollupjs.org/guide/en#output-globals-g-globals
         globals: {
-            "react": "React",
+            "@re-active/core": "ReactorCore",
         },
     }],
 };

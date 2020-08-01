@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent, onMounted } from 're-active';
+import { createComponent, onMounted } from '@re-active/react';
 import './styles.css';
 import { Header } from './components/Header';
 import { List } from './components/List';

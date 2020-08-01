@@ -1,4 +1,4 @@
-import { Calculated, computed } from '../shared';
+import { Calculated, computed } from '@re-active/core';
 import { getGlobalStore } from './createStore';
 
 export type OmitStateParameter<T extends (state: any, ...params: any[]) => any> = T extends (state: any, ...params: infer P) => any ? P : never;

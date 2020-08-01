@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent } from 're-active';
+import { createComponent } from '@re-active/react';
 import { values, actions } from '../store';
 
 

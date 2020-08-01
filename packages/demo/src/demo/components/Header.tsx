@@ -1,5 +1,5 @@
 import React from 'react';
-import { computed, createComponent, reactive } from 're-active';
+import { computed, createComponent, reactive } from '@re-active/react';
 import { actions } from '../store';
 
 export const Header = createComponent(() => {

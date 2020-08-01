@@ -1,9 +1,15 @@
 {
   "private": true,
-  "workspaces": ["packages/re-active", "packages/demo"],
+  "workspaces": [
+    "packages/core",
+    "packages/store",
+    "packages/react",
+    "packages/demo"
+  ],
   "scripts": {
       "demo": "cd ./packages/demo&&yarn start",
       "lib": "cd ./packages/re-active && yarn run build",
-      "publish:lib": "cd ./packages/re-active && npm publish"
+      "publish:lib": "cd ./packages/re-active && npm publish",
+      "inc": "node build.js inc"
   }
 }

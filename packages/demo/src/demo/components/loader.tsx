@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from 'react';
-import { createComponent, reactive, onMounted } from 're-active';
+import { createComponent, reactive, onMounted } from '@re-active/react';
 
 const load = () => {
 	const isLoading = reactive(true);
