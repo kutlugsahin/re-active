@@ -1,4 +1,4 @@
-import { computed as vendorComputed, ReactiveEffect, effect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef } from "@vue/reactivity";
+import { computed as vendorComputed, ReactiveEffect, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive } from "@vue/reactivity";
 
 type Reactive<T> = T extends object ? T : { value: T }
 
@@ -99,7 +99,7 @@ export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, o
     let oldValue: ReturnType<T>;
     let newValue: ReturnType<T>;
 
-    const eff = effect(() => {
+    const eff = vendorEffect(() => {
         oldValue = newValue;
         newValue = computedVal.value;
         clb(newValue, oldValue);
@@ -114,6 +114,30 @@ export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, o
     }
 
     return dispose;
+}
+
+export type Effect = {
+    isActive: boolean;
+    dispose: () => void;
+}
+
+export interface EffectOptions {
+    scheduler: (job: ReactiveEffect<any>) => void;
+}
+
+export const effect = (fn: () => any, options?: EffectOptions): Effect => {
+    const eff = vendorEffect(fn, options);
+
+    return {
+        get isActive() {
+            return eff.active;
+        },
+        dispose: () => stop(eff),
+    }
+}
+
+export const isReactive = (value: any) => {
+    return vendorIsReactive(value);
 }
 
 export const createTickScheduler = () => {

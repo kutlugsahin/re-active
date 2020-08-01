@@ -1,4 +1,4 @@
-import { computed, effect, isReactive, reactive as vueReactive, stop } from '@vue/reactivity';
+import { computed, effect, isReactive, reactive } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 import { createTickScheduler } from './shared';
 import { beginRegisterLifecyces, endRegisterLifecycles } from './lifecycle';
@@ -9,7 +9,7 @@ export type ReactiveComponent<P = {}> = (props: P) => Renderer;
 const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 	// convert props to a reactive object
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const reactiveProps = useMemo(() => isReactive(props) ? props : vueReactive({ ...props }), []) as P;
+	const reactiveProps = useMemo(() => isReactive(props) ? props : reactive({ ...props }), []) as P;
 
 	// keep the old props object for future comparison
 	const prevProps = useRef<P>(props);
@@ -80,8 +80,8 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			});
 
 			function dispose() {
-				stop(renderEffect);
-				stop(computedRender.effect);
+				renderEffect.dispose()
+				computedRender.dispose();
 			}
 
 			return {

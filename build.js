@@ -64,6 +64,13 @@ function increment(name) {
 
 function publish(name) {
     increment(name);
+
+    projectNames.forEach(p => {
+        if (p !== name && projects[p].changed) {
+            increment(p);
+        }
+    });
+
     commit();
 
     projectNames.forEach(p => {
