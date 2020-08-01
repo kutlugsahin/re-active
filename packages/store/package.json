@@ -35,6 +35,6 @@
 		"typescript": "^3.9.7"
 	},
 	"dependencies": {
-		"@re-active/core": "^1.0.0"
+		"@re-active/core": "1.0.3"
 	}
 }

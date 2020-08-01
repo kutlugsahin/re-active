@@ -11,8 +11,9 @@ const projectDirs = packageJson.workspaces;
 const projectNames = ['core', 'react', 'store'];
 const scopeName = '@re-active';
 
+console.log(projectDirs.filter(p => projectNames.some(name => p.indexOf(`/${name}`) > -1)))
 
-const projects = projectDirs.filter(p => projectNames.some(name => p.indexOf(`/${name}`))).reduce((acc, dir) => {
+const projects = projectDirs.filter(p => projectNames.some(name => p.indexOf(`/${name}`) > -1)).reduce((acc, dir) => {
     const name = dir.split('/')[1];
     const folderPath = path.join(__dirname, dir);
     const packageJsonPath = path.join(folderPath, 'package.json');
@@ -28,6 +29,8 @@ const projects = projectDirs.filter(p => projectNames.some(name => p.indexOf(`/$
     return acc;
 }, {});
 
+console.log(projects);
+
 function build(name) {
     const { folderPath } = projects[name];
     exec(`cd ${folderPath} && npm run build`, (err, stdout) => {
@@ -36,7 +39,7 @@ function build(name) {
 }
 
 function increment(name) {
-    const [major, minor, patch] = projects[name].version.split('.');
+    const [major, minor, patch] = projects[name].package.version.split('.');
     const newVersion = `${major}.${minor}.${(+patch) + 1}`;
 
     projects[name].package.version = newVersion;
@@ -47,12 +50,12 @@ function increment(name) {
         const project = projects[p];
         const { package } = project;
 
-        if (packageName in package.dependencies) {
+        if (packageName in (package.dependencies || {})) {
             package.dependencies[packageName] = newVersion;
             project.changed = true;
         }
 
-        if (packageName in package.devDependencies) {
+        if (packageName in (package.devDependencies || {})) {
             package.devDependencies[packageName] = newVersion;
             project.changed = true;
         }
@@ -64,8 +67,12 @@ function publish(name) {
     commit();
 
     projectNames.forEach(p => {
-        exec(`cd ${projects[p].folderPath} && npm publish --access=public`, (err, stdout) => {
+        const command = `cd ${projects[p].folderPath} && npm publish --access=public`;
+        console.log(`executing ${command}`)
+        exec(command, (err, stdout, stderr) => {
+            console.log(err);
             console.log(stdout);
+            console.error(stderr);
         });
     })
 }
@@ -95,12 +102,14 @@ if (process.argv[2] === 'build') {
 if (process.argv[2] === 'publish') {
     const name = process.argv[3];
 
+    console.log(`publishing ${name}...`);
+
     if (projectNames.includes(name)) {
         publish(name);
     } else {
         console.log('project name should be one of ' + projectNames.join(' | '));
     }
-    process.exit(0);
+    // process.exit(0);
 }
 
 if (process.argv.length === 2) {
