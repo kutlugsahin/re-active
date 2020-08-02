@@ -1,7 +1,7 @@
-import { computed, effect, isReactive, reactive } from '@re-active/core';
-import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
+import { computed, effect, isReactive, reactive, Calculated } from '@re-active/core';
+import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref } from 'react';
 import { createTickScheduler } from './shared';
-import { beginRegisterLifecyces, endRegisterLifecycles } from './lifecycle';
+import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 
 export type Renderer = () => JSX.Element;
 export type ReactiveComponent<P = {}> = (props: P) => Renderer;
@@ -42,21 +42,25 @@ const setup = (setupFunction: Function): Renderer => {
 	return setupFunction();
 }
 
+interface ComponentState {
+	computedRender: Calculated<JSX.Element>;
+	lifecycles: LifeCycle;
+	dispose: () => void;
+}
+
 // reactive react component implementation
-export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<P> {
+export function createComponent<P = {}, H = {}>(reactiveComponent: ReactiveComponent<P>): React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>> {
 
 	// creating a functional component
-	return (props: P) => {
+	return forwardRef((props: P, ref: Ref<H>) => {
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
 
-		// creating a computed value for the render of the reactive component
-		// attaching the lifecycle callbacks
-		// dispose handle of computed render to be called in unmount
-		const { computedRender, lifecycles, dispose } = useMemo(() => {
+		let componentState = useRef<ComponentState>();
 
+		if (!componentState.current) {
 			// empty object to be filled with lifecycles
-			beginRegisterLifecyces()
+			beginRegisterLifecyces(ref);
 
 			// one time call for the 'reactive component' retrieving the render function which will be called for future renders
 			// in this phase we get the lifecycle calls to be referenced in lifecycle phases
@@ -84,13 +88,29 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				computedRender.dispose();
 			}
 
-			return {
+			componentState.current = {
 				computedRender,
 				lifecycles,
 				dispose,
 			};
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, []);
+		} else {
+			const { context, refs, imperativeHandler } = componentState.current.lifecycles;
+			// call useContext to match hook call order
+			for (const ctx of context) {
+				useContext(ctx);
+			}
+
+			// call useRef to match hook call order
+			for (const _ of refs) {
+				useRef();
+			}
+
+			if (imperativeHandler) {
+				useImperativeHandle(ref, imperativeHandler);
+			}
+		}
+		
+		const { computedRender, lifecycles, dispose } = componentState.current;
 
 		// call onUpdated
 		useEffect(() => {
@@ -109,5 +129,5 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 		// return the cached render
 		return computedRender.value;
-	};
+	});
 }

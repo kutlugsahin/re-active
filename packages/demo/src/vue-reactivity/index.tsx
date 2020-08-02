@@ -1,5 +1,5 @@
-import React from 'react';
-import { createComponent, reactive } from "@re-active/react";
+import { createComponent, imperativeHandle, onMounted, reactive, useContext, ref } from "@re-active/react";
+import React, { createContext } from 'react';
 
 interface Item {
 	name: string;
@@ -13,6 +13,10 @@ const items = Array(10).fill(null).map((_, i) => ({
 	selected: false,
 }))
 
+const Context = createContext({
+	name: 'kutlu'
+});
+
 export const List = createComponent(() => {
 
 	const state = reactive({
@@ -23,24 +27,43 @@ export const List = createComponent(() => {
 		state.items.find(p => p.id === id)!.selected = true;
 	}
 
+	const divRef = ref(null);
+
+	onMounted(() => {
+		console.log(divRef.current)
+	})
+
+	const contextValue = reactive({
+		name: 'kutlu'
+	})
+
 	return () => {
 		console.log('list render');
 		return (
-			<div>
-				{state.items.map(item => <ListItem key={item.id} item={item} onClick={onItemClick} />)}
-			</div>
+			<Context.Provider value={contextValue}>
+				<div ref={divRef}>
+					<button onClick={() => contextValue.name = 'ahmet'}>update</button>
+					{state.items.map(item => <ListItem key={item.id} item={item} onClick={onItemClick} />)}
+				</div>
+			</Context.Provider>
 		);
 	}
 })
 
 const ListItem = createComponent((props: { item: Item, onClick: any }) => {
 
+	const x = useContext(Context);
+
+	let labelHandle = ref<LabelHandle>();
 
 	return () => {
 		console.log('list item render');
 		return (
-			<div className={props.item.selected ? 'selected' : ''} onClick={() => props.onClick(props.item.id)}>
-				<Label item={props.item}/>
+			<div className={props.item.selected ? 'selected' : ''} onClick={() => {
+				props.onClick(props.item.id);
+				labelHandle.current?.alert()
+			}}>
+				<Label item={props.item} ref={labelHandle}/> {x.name}
 			</div>
 		)
 	}
@@ -50,7 +73,15 @@ interface LabelProps {
 	item: any
 }
 
-const Label = createComponent((props: LabelProps) => {
+interface LabelHandle {
+	alert: () => void
+};
+ 
+const Label = createComponent<LabelProps, LabelHandle>((props) => {
+
+	imperativeHandle({
+		alert: () => alert(props.item.name),
+	});
 
 	return () => {
 		console.log('label render')
