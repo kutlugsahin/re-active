@@ -1,11 +1,11 @@
 {
 	"name": "@re-active/core",
-	"version": "1.0.6",
+	"version": "1.0.8",
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
 	"files": [
-		"./dist",
-		"../../README.md"
+		"dist",
+		"README.md"
 	],
 	"types": "dist/types",
 	"author": "Kutlu Sahin <kutlugsahin@gmail.com>",

@@ -1,12 +1,12 @@
 {
 	"name": "@re-active/react",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "",
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
 	"files": [
-		"./dist",
-		"../../README.md"
+		"dist",
+		"README.md"
 	],
 	"types": "dist/types",
 	"author": {
@@ -37,7 +37,7 @@
 		"react": ">=16.13.1"
 	},
 	"dependencies": {
-		"@re-active/core": "1.0.6"
+		"@re-active/core": "1.0.8"
 	},
 	"peerDependencies": {
 		"react": ">=16.13.1"
