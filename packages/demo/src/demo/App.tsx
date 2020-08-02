@@ -1,15 +1,16 @@
-import React from 'react';
 import { createComponent, onMounted } from '@re-active/react';
-import './styles.css';
+import React from 'react';
+import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { List } from './components/List';
-import { Footer } from './components/Footer';
 import { actions } from './store';
+import './styles.css';
 
 export const App = createComponent(() => {
 	onMounted(() => {
 		actions.populateStore();
 	})
+
 
 	return () => (
 		<section className="todoapp">

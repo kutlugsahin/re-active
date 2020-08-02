@@ -1,5 +1,5 @@
 import { createStore, createSelectors, createActions } from '@re-active/store';
-import { watch } from '@re-active/react';
+import { effect, watch } from '@re-active/react';
 
 export interface TodoItem {
 	text: string;
@@ -73,7 +73,7 @@ export const actions = createActions({
 
 		state.todos = todos;
 		state.filter = filter;
-	}
+	},
 })
 
 

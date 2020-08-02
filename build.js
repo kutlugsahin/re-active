@@ -103,7 +103,6 @@ const reader = readline.createInterface({
 
 if (process.argv[2] === 'build') {
     projectNames.forEach(build);
-    process.exit(0);
 }
 
 if (process.argv[2] === 'publish') {

@@ -1,4 +1,4 @@
-import { reactive } from "@vue/reactivity"
+import { reactive } from '@re-active/core'
 
 export type State = { [key: string]: any };
 

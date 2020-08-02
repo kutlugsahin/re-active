@@ -36,12 +36,24 @@ export const List = createComponent(() => {
 const ListItem = createComponent((props: { item: Item, onClick: any }) => {
 
 
-
-
 	return () => {
 		console.log('list item render');
 		return (
-			<div className={props.item.selected ? 'selected' : ''} onClick={() => props.onClick(props.item.id)}>{props.item.name}</div>
+			<div className={props.item.selected ? 'selected' : ''} onClick={() => props.onClick(props.item.id)}>
+				<Label item={props.item}/>
+			</div>
 		)
+	}
+})
+
+interface LabelProps {
+	item: any
+}
+
+const Label = createComponent((props: LabelProps) => {
+
+	return () => {
+		console.log('label render')
+		return <label>{props.item.name}</label>
 	}
 })
