@@ -1,5 +1,5 @@
 import { computed, effect, isReactive, reactive, Calculated } from '@re-active/core';
-import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, createElement } from 'react';
 import { createTickScheduler } from './shared';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 
@@ -48,11 +48,13 @@ interface ComponentState {
 	dispose: () => void;
 }
 
+// React.ForwardRefExoticComponent < React.PropsWithoutRef<P> & React.RefAttributes < H >>
+
 // reactive react component implementation
-export function createComponent<P = {}, H = {}>(reactiveComponent: ReactiveComponent<P>): React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>> {
+export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<P> {
 
 	// creating a functional component
-	return forwardRef((props: P, ref: Ref<H>) => {
+	return <H>(props: P, ref?: Ref<H>) => {
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
 
@@ -109,7 +111,7 @@ export function createComponent<P = {}, H = {}>(reactiveComponent: ReactiveCompo
 				useImperativeHandle(ref, imperativeHandler);
 			}
 		}
-		
+
 		const { computedRender, lifecycles, dispose } = componentState.current;
 
 		// call onUpdated
@@ -129,5 +131,10 @@ export function createComponent<P = {}, H = {}>(reactiveComponent: ReactiveCompo
 
 		// return the cached render
 		return computedRender.value;
-	});
+	};
+}
+
+createComponent.withHandle = <P = {}, H = {}> (reactiveComponent: ReactiveComponent<P>):
+	React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>> => {
+	return forwardRef(createComponent<P>(reactiveComponent) as ForwardRefRenderFunction<H, P>);
 }

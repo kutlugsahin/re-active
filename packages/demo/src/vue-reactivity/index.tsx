@@ -77,10 +77,12 @@ interface LabelHandle {
 	alert: () => void
 };
  
-const Label = createComponent<LabelProps, LabelHandle>((props) => {
+const Label = createComponent.withHandle<LabelProps, LabelHandle>((props: LabelProps) => {
 
 	imperativeHandle({
-		alert: () => alert(props.item.name),
+		alert() {
+			alert(props.item.name)
+		},
 	});
 
 	return () => {

@@ -55,8 +55,13 @@ export function ref<T>(initialVal?: T | null) {
 }
 
 export function imperativeHandle<T>(handler: T) {
-    currentLifecycleHandle!.imperativeHandler = handler;
-    return reactUseImperativeHandle(currentLifecycleHandle?.selfRef, () => handler);
+    if (!currentLifecycleHandle?.selfRef) {
+        console.error('Trying to use define imperative handle in a component without handle. Use createComponent.withHandle to define your component');
+        return;
+    }
+
+    currentLifecycleHandle!.imperativeHandler = () => handler;
+    return reactUseImperativeHandle(currentLifecycleHandle?.selfRef, currentLifecycleHandle!.imperativeHandler);
 }
 
 export const isInSetupPhase = () => _isInSetupPhase;
