@@ -31,6 +31,10 @@ export const reactive = <T>(val: T): Reactive<T> => {
     }
 }
 
+reactive.ref = <T>(val: T): { value: T } => {
+    return ref(val);
+}
+
 export type Calculated<T> = {
     value: T,
     watch: (listener: (olVal: T, newVal: T) => void) => () => void

@@ -31,11 +31,30 @@ const projects = projectDirs.filter(p => projectNames.some(name => p.indexOf(`/$
 
 console.log(projects);
 
-function build(name) {
+async function runCommand(commmand) {
+    return new Promise((res, rej) => {
+        const child_process = exec(commmand);
+        child_process.on('exit', () => {
+            child_process.removeAllListeners();
+            res();
+        });
+
+        child_process.on('error', (err) => {
+            console.log(err);
+            child_process.removeAllListeners();
+            child_process.kill('SIGKILL');
+            res();
+        })
+
+        child_process.stdout.on('data', (msg) => {
+            console.log(msg)
+        });
+    })
+}
+
+async function build(name) {
     const { folderPath } = projects[name];
-    exec(`cd ${folderPath} && npm run build`, (err, stdout) => {
-        console.log(stdout);
-    });
+    await runCommand(`cd ${folderPath} && npm run build`);
 }
 
 function increment(name) {
@@ -62,7 +81,7 @@ function increment(name) {
     })
 }
 
-function publish(name) {
+async function publish(name) {
     increment(name);
 
     projectNames.forEach(p => {
@@ -73,15 +92,10 @@ function publish(name) {
 
     commit();
 
-    projectNames.forEach(p => {
-        const command = `cd ${projects[p].folderPath} && npm publish --access=public`;
-        console.log(`executing ${command}`)
-        exec(command, (err, stdout, stderr) => {
-            console.log(err);
-            console.log(stdout);
-            console.error(stderr);
-        });
-    })
+    await Promise.all(projectNames
+        .map(p => projects[p])
+        .filter(p => p.changed)
+        .map(p => runCommand(`cd ${p.folderPath} && npm publish --access=public`)));
 }
 
 function saveProject(name) {
@@ -96,13 +110,22 @@ function commit() {
     projectNames.forEach(saveProject);
 }
 
+async function buildAll() {
+    await Promise.all(projectNames.map(name => build(name)));
+    process.exit(0);
+}
+
+async function publishProject(name) {
+    await publish(name);
+    process.exit(0);
+}
 
 const reader = readline.createInterface({
     input: process.stdin,
 })
 
 if (process.argv[2] === 'build') {
-    projectNames.forEach(build);
+    buildAll();
 }
 
 if (process.argv[2] === 'publish') {
@@ -111,11 +134,10 @@ if (process.argv[2] === 'publish') {
     console.log(`publishing ${name}...`);
 
     if (projectNames.includes(name)) {
-        publish(name);
+        publishProject(name);
     } else {
         console.log('project name should be one of ' + projectNames.join(' | '));
     }
-    // process.exit(0);
 }
 
 if (process.argv.length === 2) {
