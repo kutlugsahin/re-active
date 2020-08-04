@@ -1,6 +1,7 @@
 import { computed as vendorComputed, ReactiveEffect, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive } from "@vue/reactivity";
-
 export type Reactive<T> = T extends object ? T : { value: T }
+
+export type Scheduler = (run: () => void) => any;
 
 const ref = <T>(val: T): { value: T } => {
     const observed = vendorRef<T>(val);
@@ -94,43 +95,11 @@ export const computedFn = <T extends (...p: any[]) => any>(fn: T): T => {
 }
 
 export interface WatchOptions {
-    immediate?: boolean;
-    scheduler?: (job: ReactiveEffect<any>) => void;
-}
-
-export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue: ReturnType<T>) => void>(fn: T, clb: R, options?: WatchOptions) => {
-    const computedVal = vendorComputed(fn);
-    let oldValue: ReturnType<T>;
-    let newValue: ReturnType<T>;
-
-    const eff = vendorEffect(() => {
-        oldValue = newValue;
-        newValue = computedVal.value;
-        clb(newValue, oldValue);
-    }, {
-        lazy: false,
-        scheduler: options?.scheduler,
-    })
-
-    const dispose = () => {
-        stop(eff);
-        stop(computedVal.effect);
-    }
-
-    return dispose;
-}
-
-export type Effect = {
-    isActive: boolean;
-    dispose: () => void;
-}
-
-export interface EffectOptions {
-    scheduler: (job: ReactiveEffect<any>) => void;
+    scheduler?: Scheduler;
 }
 
 export const effect = (fn: () => any, options?: EffectOptions): Effect => {
-    const eff = vendorEffect(fn, options);
+    const eff = vendorEffect(fn , options);
 
     return {
         get isActive() {
@@ -140,13 +109,40 @@ export const effect = (fn: () => any, options?: EffectOptions): Effect => {
     }
 }
 
+export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue: ReturnType<T>) => void>(fn: T, clb: R, options?: WatchOptions) => {
+    let oldValue: ReturnType<T>;
+    let newValue: ReturnType<T>;
+
+    return effect(() => {
+        oldValue = newValue;
+        newValue = fn();
+        
+        if (options?.scheduler) {
+            options?.scheduler(() => clb(newValue, oldValue));
+        } else {
+            clb(newValue, oldValue)
+        }
+    }, {
+        scheduler: options?.scheduler,
+    }).dispose;
+}
+
+export type Effect = {
+    isActive: boolean;
+    dispose: () => void;
+}
+
+export interface EffectOptions {
+    scheduler?: Scheduler;
+}
+
 export const isReactive = (value: any) => {
     return vendorIsReactive(value);
 }
 
 export const createTickScheduler = () => {
     let isRunning = false;
-    return (job: ReactiveEffect<any>) => {
+    return (job: () => void) => {
         if (!isRunning) {
             isRunning = true;
 
@@ -154,6 +150,18 @@ export const createTickScheduler = () => {
                 job();
                 isRunning = false;
             })
+        }
+    }
+}
+
+export const createImmediateScheduler = (immediate: boolean = true) => {
+    let firstRun = immediate;
+
+    return (job: () => void) => {
+        if (firstRun) {
+            job();
+        } else {
+            firstRun = true;
         }
     }
 }

@@ -17,6 +17,7 @@ let currentLifecycleHandle: LifeCycle | null = null;
 let _isInSetupPhase = false;
 
 export const beginRegisterLifecyces = (selfRef: any) => {
+    _isInSetupPhase = true;
     currentLifecycleHandle = {
         onMounted: [],
         onUnmounted: [],
@@ -29,6 +30,7 @@ export const beginRegisterLifecyces = (selfRef: any) => {
 }
 
 export const endRegisterLifecycles = () => {
+    _isInSetupPhase = false;
     return currentLifecycleHandle!;
 }
 

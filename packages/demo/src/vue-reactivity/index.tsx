@@ -1,4 +1,4 @@
-import { createComponent, imperativeHandle, onMounted, reactive, useContext, ref } from "@re-active/react";
+import { createComponent, imperativeHandle, onMounted, reactive, useContext, ref, watch } from "@re-active/react";
 import React, { createContext } from 'react';
 
 interface Item {
@@ -23,11 +23,16 @@ export const List = createComponent(() => {
 		items,
 	})
 
+	const divRef = ref(null);
+	watch(() => state.items.length, (newV) => {
+		console.log(divRef.current);
+	})
+
+
 	function onItemClick(id: number) {
 		state.items.find(p => p.id === id)!.selected = true;
 	}
 
-	const divRef = ref(null);
 
 	onMounted(() => {
 		console.log(divRef.current)
@@ -42,6 +47,7 @@ export const List = createComponent(() => {
 		return (
 			<Context.Provider value={contextValue}>
 				<div ref={divRef}>
+					<button onClick={() => state.items.push({ name: 'kutlu', id: 333, selected: false })}>add</button>
 					<button onClick={() => contextValue.name = 'ahmet'}>update</button>
 					{state.items.map(item => <ListItem key={item.id} item={item} onClick={onItemClick} />)}
 				</div>
@@ -63,7 +69,7 @@ const ListItem = createComponent((props: { item: Item, onClick: any }) => {
 				props.onClick(props.item.id);
 				labelHandle.current?.alert()
 			}}>
-				<Label item={props.item} ref={labelHandle}/> {x.name}
+				<Label item={props.item} ref={labelHandle} /> {x.name}
 			</div>
 		)
 	}
@@ -76,7 +82,7 @@ interface LabelProps {
 interface LabelHandle {
 	alert: () => void
 };
- 
+
 const Label = createComponent.withHandle<LabelProps, LabelHandle>((props: LabelProps) => {
 
 	imperativeHandle({

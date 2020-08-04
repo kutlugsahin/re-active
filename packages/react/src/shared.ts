@@ -1,5 +1,27 @@
 import { Computed, computed as coreComputed, watch as coreWatch, WatchOptions, reactive, computedFn, createTickScheduler } from '@re-active/core';
-import { isInSetupPhase, onUnmounted } from "./lifecycle";
+import { isInSetupPhase, onUnmounted, onMounted } from "./lifecycle";
+
+const createOnMountScheduler = () => {
+	let shouldRunEffect = false;
+	let jobRef: () => void;
+
+	if (isInSetupPhase()) {
+		onMounted(() => {
+			shouldRunEffect = true;
+			jobRef?.();
+		});
+	} else {
+		shouldRunEffect = true;
+	}
+
+	return (job: () => void) => {
+		if (shouldRunEffect) {
+			job();
+		} else {
+			jobRef = job;
+		}
+	}
+}
 
 const disposeEffectOnUnmount = (dispose: () => void) => {
 	if (isInSetupPhase()) {
@@ -16,7 +38,9 @@ const computed = <T extends () => any>(fn: T): Computed<T> => {
 }
 
 const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue: ReturnType<T>) => void>(fn: T, clb: R, options?: WatchOptions) => {
-	const dispose = coreWatch(fn, clb, options);
+	const dispose = coreWatch(fn, clb, {
+		scheduler: options?.scheduler ?? createOnMountScheduler()
+	});
 
 	if (isInSetupPhase()) {
 		onUnmounted(() => {
@@ -33,4 +57,5 @@ export {
 	reactive,
 	computedFn,
 	createTickScheduler,
+	createOnMountScheduler,
 }
