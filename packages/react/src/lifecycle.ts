@@ -7,7 +7,6 @@ export interface LifeCycle {
     onUnmounted: Callback[];
     onUpdated: Callback[];
     context: React.Context<any>[];
-    refs: null[];
     selfRef: any;
     imperativeHandler: any;
 }
@@ -23,7 +22,6 @@ export const beginRegisterLifecyces = (selfRef: any) => {
         onUnmounted: [],
         onUpdated: [],
         context: [],
-        refs: [],
         selfRef,
         imperativeHandler: null,
     }
@@ -51,14 +49,16 @@ export function useContext<T>(context: React.Context<T>) {
     return reactUseContext(context);
 }
 
-export function ref<T>(initialVal?: T | null) {
-    currentLifecycleHandle?.refs.push(null);
-    return reactUseRef<T>(initialVal || null);
+export function ref<T>() {
+    let _value: T;
+    return {
+        get current() { return _value; },
+        set current(value: T) { value = value}
+    }
 }
 
 export function imperativeHandle<T>(handler: T) {
     if (!currentLifecycleHandle?.selfRef) {
-        console.error('Trying to use define imperative handle in a component without handle. Use createComponent.withHandle to define your component');
         return;
     }
 

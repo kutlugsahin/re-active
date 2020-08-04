@@ -96,15 +96,10 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				dispose,
 			};
 		} else {
-			const { context, refs, imperativeHandler } = componentState.current.lifecycles;
+			const { context, imperativeHandler } = componentState.current.lifecycles;
 			// call useContext to match hook call order
 			for (const ctx of context) {
 				useContext(ctx);
-			}
-
-			// call useRef to match hook call order
-			for (const _ of refs) {
-				useRef();
 			}
 
 			if (imperativeHandler) {

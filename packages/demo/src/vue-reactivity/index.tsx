@@ -23,7 +23,11 @@ export const List = createComponent(() => {
 		items,
 	})
 
-	const divRef = ref(null);
+	const divRef = {
+		_value: undefined,
+		get current() { return this._value },
+		set current(val: any) { this._value = val; }
+	};
 	watch(() => state.items.length, (newV) => {
 		console.log(divRef.current);
 	})
