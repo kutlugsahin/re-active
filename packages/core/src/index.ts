@@ -1,4 +1,4 @@
-import { computed as vendorComputed, ReactiveEffect, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive } from "@vue/reactivity";
+import { computed as vendorComputed, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive } from "@vue/reactivity";
 export type Reactive<T> = T extends object ? T : { value: T }
 
 export type Scheduler = (run: () => void) => any;
