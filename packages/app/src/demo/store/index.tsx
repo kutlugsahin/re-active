@@ -50,18 +50,18 @@ export const actions = createActions({
 	setFilter(state: StoreState, filter: Filter) {
 		state.filter = filter;
 	},
-	createTodo(state: StoreState,text: string) {
-		state.todos.unshift({
+	createTodo(state: StoreState, text: string) {
+		state.todos.push({
 			text,
 			dateCreated: Date.now(),
 			isCompleted: false,
 			isEditing: false,
 		});
 	},
-	removeTodo(state: StoreState,todo: TodoItem) {
+	removeTodo(state: StoreState, todo: TodoItem) {
 		state.todos.splice(state.todos.indexOf(todo), 1);
 	},
-	checkAll(state: StoreState,check: boolean) {
+	checkAll(state: StoreState, check: boolean) {
 		state.todos.forEach(p => p.isCompleted = check);
 	},
 	clearCompleted(state: StoreState) {
@@ -73,16 +73,24 @@ export const actions = createActions({
 
 		state.todos = todos;
 		state.filter = filter;
+		saveChanges();
 	},
 })
 
 
-watch(() => {
-	return {
-		todos: values.todosAll,
-		filter: values.filter,
-	}
-}, ({ todos, filter }) => {
-	localStorage.setItem('todos', JSON.stringify(todos));
-	localStorage.setItem('filter', JSON.stringify(filter));
-});
+function saveChanges() {
+	watch(() => {
+		return {
+			todos: values.todosAll,
+			filter: values.filter,
+		}
+	}, ({ todos, filter }) => {
+		localStorage.setItem('todos', JSON.stringify(todos));
+		localStorage.setItem('filter', JSON.stringify(filter));
+	});
+
+	effect(() => {
+		console.log(values.todosAll[0]);
+	})
+}
+

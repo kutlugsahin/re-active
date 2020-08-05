@@ -5,3 +5,4 @@ export { effect, isReactive } from '@re-active/core';
 
 export type { Calculated, Computed, Effect, EffectOptions, WatchOptions } from '@re-active/core';
 export type { ReactiveComponent, Renderer } from './component';
+    
