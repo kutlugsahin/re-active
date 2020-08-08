@@ -35,7 +35,7 @@ export const values = createSelectors({
         return state.table;
     },
     editingItem(state) {
-        return state.table?.selectedRow?.data || state.selectedTreeNode?.data;
+        return state.table.selectedRow?.data || state.selectedTreeNode?.data;
     }
 });
 // ================ ACTIONS ===========================
