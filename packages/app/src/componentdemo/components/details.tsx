@@ -8,10 +8,6 @@ export const Details = createComponent(() => {
         let item = values.editingItem;
 
         if (!item) {
-            item = values.selectedTreeNode?.data;
-        }
-
-        if (!item) {
             return <p>Select an item</p>;
         }
 
