@@ -1,3 +1,9 @@
+:root{
+    --primary-color: #375b71e6;
+    --selected-color: #375b7181;
+    --hover-color: #375b7148;
+}
+
 .nodecontainer {
     margin-left: 15px;
 }
@@ -12,11 +18,11 @@
 }
 
 .node:hover {
-    background-color: rgba(29, 161, 242, 0.2);
+    background-color: var(--hover-color);
 }
 
 .node.selected {
-    background-color: rgba(29, 161, 242, 0.5);
+    background-color: var(--selected-color);
     border-radius: 4px;
 }
 
@@ -32,7 +38,7 @@
 
 .header {
     height: 40px;
-    background-color: rgb(29, 161, 242);
+    background-color: var(--primary-color);
     box-shadow:  0px 1px 6px 1px rgb(153 158 167);
     z-index: 2;
 }
@@ -148,7 +154,7 @@
   padding-bottom: 12px;
   padding-left: 8px;
   text-align: left;
-  background-color: rgba(29, 161, 242, 0.9);
+  background-color: var(--primary-color);
   color: white;
 }
 
@@ -170,11 +176,11 @@
 }
 
 .table tbody tr:hover {
-    background-color: rgba(29, 161, 242, .2);
+    background-color: var(--hover-color);
 }
 
 .table tbody tr.selected {
-    background-color: rgba(29, 161, 242, .4);
+    background-color: var(--selected-color);
 }
 
 .detailpanel h3 {
