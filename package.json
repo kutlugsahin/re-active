@@ -7,9 +7,9 @@
     "packages/app"
   ],
   "scripts": {
-      "demo": "cd ./packages/app&&yarn start",
-      "lib": "cd ./packages/re-active && yarn run build",
-      "publish:lib": "cd ./packages/re-active && npm publish core",
-      "inc": "node build.js inc"
+    "build": "node build.js build",
+    "demo": "cd ./packages/app&&yarn start",
+    "publish:lib": "node build.js publish core",
+    "inc": "node build.js inc"
   }
 }
