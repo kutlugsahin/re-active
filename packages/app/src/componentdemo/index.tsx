@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tree, Node } from './components';
+import { Tree, Node } from './components/tree';
 import { createComponent } from '@re-active/react';
 import './styles.css';
 import { values, actions } from './store';

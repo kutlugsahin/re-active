@@ -13,12 +13,13 @@ createStore<Store>({
     selectedTreeNode: null,
 })
 
+// ================ SELECTORS ===========================
 export const values = createSelectors({
     tree(state: Store) {
         return state.tree
     }
 });
-
+// ================ ACTIONS ===========================
 export const actions = createActions({
     selectTreeNode(state: Store, node: Node) {
         state.selectedTreeNode = node;
@@ -36,6 +37,7 @@ export const actions = createActions({
     }
 });
 
+// ================ WATCHERS ===========================
 watchStore((state: Store) => state.selectedTreeNode, (newNode, oldNode) => {
     if (oldNode) oldNode.selected = false;
     if (newNode) newNode.selected = true;
