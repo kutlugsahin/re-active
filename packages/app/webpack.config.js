@@ -5,7 +5,7 @@ module.exports = {
     entry: './main.ts',
     watch: true,
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'public'),
         filename: 'index.js',
     },
     resolve: {
@@ -35,7 +35,7 @@ module.exports = {
             }]
     },
     devServer: {
-        contentBase: path.join(__dirname, 'dist'),
+        contentBase: path.join(__dirname, 'public'),
         port: 3000,
         hot: true,
         liveReload: false,

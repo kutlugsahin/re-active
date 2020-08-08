@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "bundle": "webpack --watch",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --open"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
