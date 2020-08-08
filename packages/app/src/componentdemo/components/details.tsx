@@ -5,7 +5,11 @@ import { Item } from '../store/utils';
 
 export const Details = createComponent(() => {
     return () => {
-        const item = values.editingItem;
+        let item = values.editingItem;
+
+        if (!item) {
+            item = values.selectedTreeNode?.data;
+        }
 
         if (!item) {
             return <p>Select an item</p>;

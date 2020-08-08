@@ -54,6 +54,7 @@ export const actions = createActions({
         state.table.loading = true;
         await actions.loadChildren(node);        
         state.table.loading = false;
+        state.table.selectedRow = null;
         state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
     },
     async expandTreeNode(state: Store, node: Node) {
