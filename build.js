@@ -54,7 +54,7 @@ async function runCommand(commmand) {
 
 async function build(name) {
     const { folderPath } = projects[name];
-    await runCommand(`cd ${folderPath} && npm run build`);
+    await runCommand(`cd ${folderPath} && yarn build`);
 }
 
 function increment(name) {
