@@ -19,7 +19,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:types": "tsc --emitDeclarationOnly",
 		"build:rollup": "rollup -c",
-		"build": "npm run build:types && npm run build:rollup"
+		"build": "yarn run build:types && yarn run build:rollup"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.10.5",
