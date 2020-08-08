@@ -1,0 +1,89 @@
+
+
+.node {
+    padding: 2px 0px;
+    cursor: pointer;
+    transition: background-color .2s ease;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+
+.node:hover {
+    background-color: rgba(160, 193, 255, 0.3);
+}
+
+.node.selected {
+    background-color: rgb(160, 193, 255);
+    border-radius: 4px;
+}
+
+.app {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    height: 60px;
+    background-color: rgb(48, 86, 155);
+    box-shadow:  0px 1px 6px 1px rgb(153 158 167);
+}
+
+.main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
+.treepanel {
+    min-height: 0;
+    width: 400px;
+    border-right: 1px solid rgba(48, 86, 155, .2);
+    box-shadow:  -1px 0px 6px -1px rgb(153 158 167);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.caret {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    transition: transform .2s ease;
+    color: rgb(75, 82, 131);
+    width: 26px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.caret.expanded {
+    transform: rotate(90deg);
+}
+
+.loading {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    color: rgb(75, 82, 131);
+    width: 26px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: spin 1s infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

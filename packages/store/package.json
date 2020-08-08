@@ -30,7 +30,6 @@
 		"@rollup/plugin-babel": "^5.1.0",
 		"@rollup/plugin-commonjs": "^14.0.0",
 		"@rollup/plugin-node-resolve": "^8.4.0",
-		"@vue/reactivity": "^3.0.0-rc.5",
 		"rollup": "^2.23.0",
 		"typescript": "^3.9.7"
 	},

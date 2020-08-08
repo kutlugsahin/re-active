@@ -1,6 +1,6 @@
 import { createComponent, imperativeHandle, onMounted, reactive, useContext, ref, watch } from "@re-active/react";
 import React, { createContext } from 'react';
-
+import '../style.css';
 interface Item {
 	name: string;
 	id: number;
@@ -51,6 +51,7 @@ export const List = createComponent(() => {
 		return (
 			<Context.Provider value={contextValue}>
 				<div ref={divRef}>
+					2222222
 					<button onClick={() => state.items.push({ name: 'kutlu', id: 333, selected: false })}>add</button>
 					<button onClick={() => contextValue.name = 'ahmet'}>update</button>
 					{state.items.map(item => <ListItem key={item.id} item={item} onClick={onItemClick} />)}
