@@ -8,7 +8,7 @@ export const Details = createComponent(() => {
         const item = values.editingItem;
 
         if (!item) {
-            return null;
+            return <p>Select an item</p>;
         }
 
         return (

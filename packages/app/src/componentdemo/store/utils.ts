@@ -32,6 +32,8 @@ export const nodes: Node<Item>[] = Array(10).fill(null).map((_, i) => {
         })
     };
 
+    node.children.forEach(p => p.parent = node);
+
     return node;
 })
 
@@ -43,6 +45,7 @@ export type Node<T = any> = {
     loading: boolean;
     expanded: boolean;
     selected: boolean;
+    parent?: Node<T>;
 }
 
 export interface Item {
@@ -64,7 +67,7 @@ export async function fetchItems(node: Node<Item>) {
     })
 }
 
-export function makeTreeNode(item: Item): Node<Item> {
+export function makeTreeNode(item: Item, parent?: Node): Node<Item> {
     return {
         data: item,
         expanded: false,
@@ -72,6 +75,7 @@ export function makeTreeNode(item: Item): Node<Item> {
         loading: false,
         selected: false,
         children: [],
+        parent
     }
 }
 

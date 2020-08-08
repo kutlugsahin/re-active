@@ -7,6 +7,10 @@ export const Main = createComponent(() => {
     return () => {
         return (
             <div className="maincontainer">
+                <div className="actions">
+                    <button onClick={actions.gotoParentFolder}>←</button>
+                    <button onClick={actions.browseCurrentTableItem}>↴</button>
+                </div>
                 <Table />
             </div>
         )
@@ -14,6 +18,13 @@ export const Main = createComponent(() => {
 })
 
 export const Table = createComponent(() => {
+
+    function onKeyDown(e: React.KeyboardEvent) {
+        if (e.keyCode === 8) {
+            actions.gotoParentFolder();
+        }
+    }
+
     return () => {
         const { loading, rows } = values.tableState;
 
@@ -22,7 +33,7 @@ export const Table = createComponent(() => {
         }
 
         return (
-            <div className="tablecontainer">
+            <div className="tablecontainer" onKeyDown={onKeyDown} tabIndex={-1}>
                 <table className={loading ? 'table loading': 'table'}>
                     <thead>
                         <tr>

@@ -1,5 +1,5 @@
 import { createStore, createSelectors, createActions, watchStore } from '@re-active/store';
-import { Dictionary, Item, Node, fetchItems, nodes, makeItem, makeTreeNode, RowItem } from './utils';
+import { Dictionary, Item, Node, fetchItems, nodes, makeTreeNode, RowItem } from './utils';
 
 interface Store {
     items: Dictionary<Item>;
@@ -45,7 +45,7 @@ export const actions = createActions({
             node.loading = true;
             const newItems = await fetchItems(node);
             newItems.forEach(p => state.items[p.id] = p);
-            node.children = newItems.map(makeTreeNode);
+            node.children = newItems.map(p => makeTreeNode(p, node));
             node.loading = false;
         }
     },
@@ -68,6 +68,18 @@ export const actions = createActions({
         state.selectedTreeNode.expanded = true;
         treeNode.expanded = true;
         actions.selectTreeNode(treeNode);
+    },
+    async browseCurrentTableItem(state) {
+        const selectedItem = state.table.selectedRow;
+        if (selectedItem) {
+            actions.browseTableItem(selectedItem);
+        }
+    },
+    gotoParentFolder() {
+        const currentTreeNode = values.selectedTreeNode;
+        if (currentTreeNode && currentTreeNode.parent) {
+            actions.selectTreeNode(currentTreeNode.parent);
+        }
     }
 });
 
