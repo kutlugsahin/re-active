@@ -28,6 +28,8 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "@re-active/react": "1.0.11",
+    "@re-active/store": "1.0.11"
   }
 }
