@@ -4,7 +4,8 @@ import { createComponent } from '@re-active/react';
 import './styles.css';
 import { values, actions } from './store';
 import { Item } from './store/utils';
-
+import { Main } from './components/main';
+import { Details } from './components/details';
 
 export const App = createComponent(() => {
 
@@ -23,6 +24,12 @@ export const App = createComponent(() => {
                         renderNode={renderNode}
                         onExpanded={actions.expandTreeNode}
                     />
+                </div>
+                <div className="mainpanel">
+                    <Main/>
+                </div>
+                <div className="detailpanel">
+                    <Details />
                 </div>
             </div>
         </div>

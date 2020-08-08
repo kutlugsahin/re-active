@@ -9,6 +9,10 @@ export function makeItem(id: string) {
     }
 }
 
+function randomIntFromInterval(min, max) { // min and max included 
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 export const nodes: Node<Item>[] = Array(10).fill(null).map((_, i) => {
     const node: Node<Item> = {
         id: `${i}`,
@@ -16,7 +20,7 @@ export const nodes: Node<Item>[] = Array(10).fill(null).map((_, i) => {
         expanded: false,
         loading: false,
         selected: false,
-        children: Array(5).fill(null).map((_, j) => {
+        children: Array(randomIntFromInterval(5, 30)).fill(null).map((_, j) => {
             return {
                 data: makeItem(`${i}-${j}`),
                 expanded: false,
@@ -53,7 +57,7 @@ export interface Item {
 export async function fetchItems(node: Node<Item>) {
     return new Promise<Item[]>(res => {
         setTimeout(() => {
-            res(Array(5).fill(null).map((_, i) => {
+            res(Array(randomIntFromInterval(5,30)).fill(null).map((_, i) => {
                 return makeItem(`${node.id}-${i}`);
             }));
         }, 500);
@@ -69,4 +73,9 @@ export function makeTreeNode(item: Item): Node<Item> {
         selected: false,
         children: [],
     }
+}
+
+export interface RowItem {
+    selected: boolean;
+    data: Item
 }

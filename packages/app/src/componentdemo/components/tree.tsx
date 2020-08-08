@@ -95,6 +95,6 @@ export const TreeNode = createComponent((props: TreeNodeProps) => {
 
 
 export const Loading = () => {
-    return <span className="loading">◠</span>
+    return <span className="loadingindicator">◠</span>
 }
 
