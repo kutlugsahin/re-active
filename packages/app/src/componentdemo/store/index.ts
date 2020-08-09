@@ -65,9 +65,8 @@ export const actions = createActions({
         state.table.selectedRow = item;
     },
     async browseTableItem(state: Store, item: RowItem) {
-        const treeNode = state.selectedTreeNode.children.find(p => p.id === item.data.id);
         state.selectedTreeNode.expanded = true;
-        treeNode.expanded = true;
+        const treeNode = state.selectedTreeNode.children.find(p => p.id === item.data.id);
         actions.selectTreeNode(treeNode);
     },
     async browseCurrentTableItem(state) {

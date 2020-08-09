@@ -99,7 +99,7 @@ export interface WatchOptions {
 }
 
 export const effect = (fn: () => any, options?: EffectOptions): Effect => {
-    const eff = vendorEffect(fn , options);
+    const eff = vendorEffect(fn, options);
 
     return {
         get isActive() {
@@ -116,7 +116,7 @@ export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, o
     return effect(() => {
         oldValue = newValue;
         newValue = fn();
-        
+
         if (options?.scheduler) {
             options?.scheduler(() => clb(newValue, oldValue));
         } else {

@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "bundle": "webpack --watch",
-    "start": "webpack-dev-server --open"
+    "start": "webpack-dev-server --open",
+    "build": "webpack --mode=production",
+    "prod": "http-server public"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
@@ -14,22 +16,23 @@
     "@babel/plugin-transform-flow-strip-types": "^7.10.4",
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-typescript": "^7.10.4",
+    "@types/react": "16.9.44",
+    "@types/react-dom": "16.9.8",
     "babel-loader": "^8.1.0",
-    "style-loader": "1.2.1",
     "css-loader": "^4.2.0",
+    "http-server": "^0.12.3",
+    "style-loader": "1.2.1",
     "ts-loader": "^8.0.2",
     "typescript": "^3.9.7",
     "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
-    "@types/react-dom": "16.9.8",
-    "@types/react": "16.9.44"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0",
+    "@re-active/react": "1.0.11",
+    "@re-active/store": "1.0.11",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "@re-active/react": "1.0.11",
-    "@re-active/store": "1.0.11"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }

@@ -85,7 +85,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				scheduler: createTickScheduler()
 			});
 
-			function dispose() {
+			const dispose = () => {
 				renderEffect.dispose()
 				computedRender.dispose();
 			}
