@@ -48,6 +48,8 @@ interface ComponentState {
 	dispose: () => void;
 }
 
+const scheduler = createTickScheduler();
+
 // React.ForwardRefExoticComponent < React.PropsWithoutRef<P> & React.RefAttributes < H >>
 
 // reactive react component implementation
@@ -82,7 +84,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				forceUpdate();
 				return computedRender.value;
 			}, {
-				scheduler: createTickScheduler()
+				scheduler,
 			});
 
 			const dispose = () => {

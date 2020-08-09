@@ -141,13 +141,25 @@ export const isReactive = (value: any) => {
 }
 
 export const createTickScheduler = () => {
+    
+    let jobs = new Set<() => void>();
+
     let isRunning = false;
+
     return (job: () => void) => {
+        if (!jobs.has(job)) {
+            jobs.add(job);
+        }
+
         if (!isRunning) {
             isRunning = true;
 
             Promise.resolve().then(() => {
-                job();
+                for (const jobtorun of jobs) {
+                    jobtorun();
+                }
+
+                jobs = new Set();
                 isRunning = false;
             })
         }
