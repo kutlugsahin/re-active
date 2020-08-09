@@ -52,6 +52,8 @@
 .treepanel {
     min-height: 0;
     width: 300px;
+    flex-basis: 300px;
+    flex-shrink: 0;
     border-right: 1px solid rgba(48, 86, 155, .2);
     box-shadow:  -1px 0px 6px -1px rgb(153 158 167);
     padding: 10px;
@@ -104,6 +106,8 @@
     flex: 1;
     background-color: #fafafa;
     position: relative;
+    flex-shrink: 1;
+    min-width: 0;
     z-index: 0;
     display: flex;
     flex-direction: column;
@@ -112,6 +116,8 @@
 .detailpanel {
     min-height: 0;
     width: 250px;
+    flex-basis: 250px;
+    flex-shrink: 0;
     border-left: 1px solid rgba(48, 86, 155, .2);
     box-shadow:  1px 0px 6px -1px rgb(153 158 167);
     padding: 20px;
