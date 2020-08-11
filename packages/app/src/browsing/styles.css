@@ -148,6 +148,7 @@
     border-collapse: collapse;
     font-size: 14px;
     transition: opacity 0.2s ease;
+    table-layout : fixed;
 }
 
 .table.loading {
