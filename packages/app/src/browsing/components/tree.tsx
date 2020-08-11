@@ -29,7 +29,7 @@ interface TreeNodeProps<T = any> {
 
 export const Tree = createComponent((props: TreeProps<any>) => {
     return () => {
-        console.log(`tree render`);
+        // console.log(`tree render`);
         return (
             <div>
                 {props.nodes.map(node =>
@@ -70,7 +70,7 @@ export const TreeNode = createComponent((props: TreeNodeProps) => {
     }
 
     return () => {
-        console.log(`tree node render: ${props.node.id}`);
+        // console.log(`tree node render: ${props.node.id}`);
 
         const { renderNode, node, onClick } = props;
         const { selected, expanded, children } = props.node;

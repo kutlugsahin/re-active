@@ -13,39 +13,45 @@ function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export const nodes: Node<Item>[] = Array(200).fill(null).map((_, i) => {
+const nodes: Dictionary<ItemNode> = {};
+
+Array(200).fill(null).forEach((_, i) => {
     const node: Node<Item> = {
         id: `${i}`,
         data: makeItem(`${i}`),
-        expanded: false,
-        loading: false,
-        selected: false,
-        children: Array(randomIntFromInterval(200, 200)).fill(null).map((_, j) => {
-            return {
-                data: makeItem(`${i}-${j}`),
-                expanded: false,
-                id: `${i}-${j}`,
-                loading: false,
-                selected: false,
-                children: [],
-            }
-        })
+        children: [],
     };
 
-    node.children.forEach(p => p.parent = node);
+    nodes[node.id] = node;
+});
 
-    return node;
-})
+for (const key in nodes) {
+    if (Object.prototype.hasOwnProperty.call(nodes, key)) {
+        const parentNode = nodes[key];
+
+        Array(200).fill(null).forEach((_, i) => {
+            const node: Node<Item> = {
+                id: `${key}-${i}`,
+                data: makeItem(`${key}-${i}`),
+                children: [],
+                parent: parentNode.id
+            };
+
+            nodes[node.id] = node;
+
+            parentNode.children.push(node.id);
+        });     
+    }
+}
+
+export const defaultNodes = nodes;
 
 export type Dictionary<T> = { [key: string]: T };
 export type Node<T = any> = {
     id: string;
     data: T;
-    children?: Node<T>[];
-    loading: boolean;
-    expanded: boolean;
-    selected: boolean;
-    parent?: Node<T>;
+    children?: string[];
+    parent?: string;
 }
 
 export interface Item {
@@ -57,25 +63,24 @@ export interface Item {
     col4: string;
 }
 
-export async function fetchItems(node: Node<Item>) {
+export type ItemNode = Node<Item>;
+
+export async function fetchItems(id:string) {
     return new Promise<Item[]>(res => {
         setTimeout(() => {
             res(Array(randomIntFromInterval(200,200)).fill(null).map((_, i) => {
-                return makeItem(`${node.id}-${i}`);
+                return makeItem(`${id}-${i}`);
             }));
         }, 500);
     })
 }
 
-export function makeTreeNode(item: Item, parent?: Node): Node<Item> {
+export function makeTreeNode(item: Item, parent?: string): Node<Item> {
     return {
         data: item,
-        expanded: false,
         id: item.id,
-        loading: false,
-        selected: false,
         children: [],
-        parent
+        parent,
     }
 }
 

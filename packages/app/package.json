@@ -27,7 +27,8 @@
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "@types/redux": "3.6.0",
-    "@types/react-redux": "7.1.9"
+    "@types/react-redux": "7.1.9",
+    "@types/redux-thunk": "2.1.0"
   },
   "dependencies": {
     "@re-active/react": "1.0.11",
@@ -37,6 +38,7 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
     "redux": "4.0.5",
-    "react-redux": "7.2.1"
+    "react-redux": "7.2.1",
+    "redux-thunk": "2.3.0"
   }
 }
