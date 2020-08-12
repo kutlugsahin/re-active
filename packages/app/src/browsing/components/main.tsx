@@ -62,12 +62,13 @@ export const Row = createComponent((props: RowProps) => {
         const { name, id, col1, col2, col3 } = props.item.data;
         return (
             <tr
-                className={props.item.selected ? 'selected' : ''}
+                id={`row-${id}`}
+                className={props.item.selected ? 'row selected' : 'row'}
                 onClick={() => actions.selectTableItem(props.item)}
                 onDoubleClick={() => actions.browseTableItem(props.item)}
             >
-                <td>{id}</td>
-                <td>{name}</td>
+                <td className="id">{id}</td>
+                <td className="name">{name}</td>
                 <td>{col1}</td>
                 <td>{col2}</td>
                 <td>{col3}</td>

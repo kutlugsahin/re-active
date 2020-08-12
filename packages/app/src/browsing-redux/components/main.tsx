@@ -1,9 +1,8 @@
-import { createComponent } from '@re-active/react';
-import React, { useDebugValue } from 'react';
-import { RowItem, Item } from '../store/utils';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectSelectedTreeNodeId, selectLoadingTreeIds, selectTableRows, selectSelectedTableItemId } from '../store/selectors';
-import { gotoParentFolder, browseCurrentTableItem, selectTableItem } from '../store/actions';
+import { browseCurrentTableItem, gotoParentFolder, selectTableItem } from '../store/actions';
+import { selectLoadingTreeIds, selectSelectedTableItemId, selectSelectedTreeNodeId, selectTableRows } from '../store/selectors';
+import { Item } from '../store/utils';
 
 export const Main = () => {
     const dispatch = useDispatch();
@@ -69,14 +68,15 @@ export const Row = (props: RowProps) => {
     const { name, id, col1, col2, col3 } = props.item;
     return (
         <tr
+            id={`row-${id}`}
             className={selected ? 'selected' : ''}
             onClick={() => dispatch(selectTableItem(props.item.id))}
             onDoubleClick={() => {
                 dispatch(browseCurrentTableItem(props.item.id))
             }}
         >
-            <td>{id}</td>
-            <td>{name}</td>
+            <td className="id">{id}</td>
+            <td className="name">{name}</td>
             <td>{col1}</td>
             <td>{col2}</td>
             <td>{col3}</td>

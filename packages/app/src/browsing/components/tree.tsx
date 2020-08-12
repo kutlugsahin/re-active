@@ -78,6 +78,7 @@ export const TreeNode = createComponent((props: TreeNodeProps) => {
         return (
             <div className="nodecontainer">
                 <div
+                    id={`node-${node.id}`}
                     className={selected ? 'node selected' : 'node'}
                     onClick={() => onClick(node)}
                     onDoubleClick={onNodeExpand}

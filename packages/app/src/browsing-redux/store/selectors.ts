@@ -39,3 +39,15 @@ export const selectTableRows = (state: Store) => {
 
     return [];
 }
+
+export const selectEditingItem = (state: Store) => {
+    if (state.selectedTableItemId) {
+        return state.items[state.selectedTableItemId].data;
+    }
+
+    if (state.selectedTreeNodeId) {
+        return state.items[state.selectedTreeNodeId].data;
+    }
+
+    return null;
+}

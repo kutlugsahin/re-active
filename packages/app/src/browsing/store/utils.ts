@@ -1,3 +1,5 @@
+const nodeGenerationCount = 200;
+
 export function makeItem(id: string) {
     return {
         id,
@@ -13,14 +15,14 @@ function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export const nodes: Node<Item>[] = Array(200).fill(null).map((_, i) => {
+export const nodes: Node<Item>[] = Array(nodeGenerationCount).fill(null).map((_, i) => {
     const node: Node<Item> = {
         id: `${i}`,
         data: makeItem(`${i}`),
         expanded: false,
         loading: false,
         selected: false,
-        children: Array(randomIntFromInterval(200, 200)).fill(null).map((_, j) => {
+        children: Array(nodeGenerationCount).fill(null).map((_, j) => {
             return {
                 data: makeItem(`${i}-${j}`),
                 expanded: false,
@@ -60,7 +62,7 @@ export interface Item {
 export async function fetchItems(node: Node<Item>) {
     return new Promise<Item[]>(res => {
         setTimeout(() => {
-            res(Array(randomIntFromInterval(200,200)).fill(null).map((_, i) => {
+            res(Array(nodeGenerationCount).fill(null).map((_, i) => {
                 return makeItem(`${node.id}-${i}`);
             }));
         }, 500);

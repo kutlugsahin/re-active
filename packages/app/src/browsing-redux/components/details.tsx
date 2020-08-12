@@ -1,26 +1,11 @@
 import React from 'react';
-import { Item } from '../store/utils';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectSelectedTableItemId, selectSelectedTreeNodeId } from '../store/selectors';
-import { Store } from '../store';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateItem } from '../store/actions';
+import { selectEditingItem } from '../store/selectors';
+import { Item } from '../store/utils';
 
 export const Details = () => {
-
-    const selectedTableId = useSelector(selectSelectedTableItemId);
-    const selectedTreeId = useSelector(selectSelectedTreeNodeId);
-
-    const item = useSelector((state: Store) => {
-        if (selectedTableId) {
-            return state.items[selectedTableId].data;
-        }
-
-        if (selectedTreeId) {
-            return state.items[selectedTreeId].data;
-        }
-
-        return null;
-    })
+    const item = useSelector(selectEditingItem);
 
     if (!item) {
         return <p>Select an item</p>;
@@ -52,7 +37,7 @@ export const Field = (props: FieldProps) => {
         <div className="field">
             <label className="label" htmlFor="">{props.label}</label>
             <div>
-                <input className="input" type="text" value={props.item[props.path]} onChange={e => {
+                <input id={`input-${props.path}-${props.item.id}`} className="input" type="text" value={props.item[props.path]} onChange={e => {
                     dispatch(updateItem(props.item.id, props.path, e.target.value));
                 }} />
             </div>

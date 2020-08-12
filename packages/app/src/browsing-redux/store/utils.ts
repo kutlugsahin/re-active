@@ -1,3 +1,5 @@
+const nodeGenerationCount = 200;
+
 export function makeItem(id: string) {
     return {
         id,
@@ -15,7 +17,7 @@ function randomIntFromInterval(min, max) { // min and max included
 
 const nodes: Dictionary<ItemNode> = {};
 
-Array(200).fill(null).forEach((_, i) => {
+Array(nodeGenerationCount).fill(null).forEach((_, i) => {
     const node: Node<Item> = {
         id: `${i}`,
         data: makeItem(`${i}`),
@@ -29,7 +31,7 @@ for (const key in nodes) {
     if (Object.prototype.hasOwnProperty.call(nodes, key)) {
         const parentNode = nodes[key];
 
-        Array(200).fill(null).forEach((_, i) => {
+        Array(nodeGenerationCount).fill(null).forEach((_, i) => {
             const node: Node<Item> = {
                 id: `${key}-${i}`,
                 data: makeItem(`${key}-${i}`),
@@ -68,7 +70,7 @@ export type ItemNode = Node<Item>;
 export async function fetchItems(id:string) {
     return new Promise<Item[]>(res => {
         setTimeout(() => {
-            res(Array(randomIntFromInterval(200,200)).fill(null).map((_, i) => {
+            res(Array(nodeGenerationCount).fill(null).map((_, i) => {
                 return makeItem(`${id}-${i}`);
             }));
         }, 500);

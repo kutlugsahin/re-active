@@ -6,8 +6,13 @@
   "scripts": {
     "bundle": "webpack --watch",
     "start": "webpack-dev-server --open",
+    "start:redux": "webpack-dev-server --open --env.demo=redux",
     "build": "webpack --mode=production",
-    "prod": "http-server public"
+    "build:redux": "webpack --mode=production --env.demo=redux",
+    "prod": "yarn build&&http-server public",
+    "prod:redux": "yarn build:redux&&http-server public",
+    "perf": "node ./performance/index.js",
+    "perf:redux": "node ./performance/index.js redux"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
@@ -39,6 +44,7 @@
     "webpack-dev-server": "^3.11.0",
     "redux": "4.0.5",
     "react-redux": "7.2.1",
-    "redux-thunk": "2.3.0"
+    "redux-thunk": "2.3.0",
+    "puppeteer": "5.2.0"
   }
 }

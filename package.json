@@ -9,6 +9,9 @@
   "scripts": {
     "build": "node build.js build",
     "demo": "cd ./packages/app&&yarn start",
+    "demo:prod": "cd ./packages/app&&yarn build&&yarn prod",
+    "demo:redux": "cd ./packages/app&&yarn start:redux",
+    "demo:prod:redux": "cd ./packages/app&&yarn build&&yarn prod:redux",
     "publish:lib": "node build.js publish core",
     "inc": "node build.js inc"
   }

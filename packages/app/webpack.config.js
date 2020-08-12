@@ -1,8 +1,8 @@
 const path = require("path");
 
-module.exports = {
+module.exports = (env) => ({
     mode: 'development',
-    entry: './main.ts',
+    entry: env && env.demo === 'redux' ? './main-redux.ts' : './main.ts',
     output: {
         path: path.resolve(__dirname, 'public'),
         filename: 'index.js',
@@ -39,4 +39,4 @@ module.exports = {
         hot: true,
         liveReload: false,
     }
-}
+})

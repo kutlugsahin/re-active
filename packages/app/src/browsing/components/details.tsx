@@ -37,8 +37,8 @@ export const Field = createComponent((props: FieldProps) => {
             <div className="field">
                 <label className="label" htmlFor="">{props.label}</label>
                 <div>
-                    <input className="input" type="text" value={props.item[props.path]} onChange={e => {
-                        props.item[props.path] = e.target.value;
+                    <input id={`input-${props.path}-${props.item.id}`} className="input" type="text" value={props.item[props.path]} onInput={e => {
+                        props.item[props.path] = (e.target as any).value;
                     }} />
                 </div>
             </div>
