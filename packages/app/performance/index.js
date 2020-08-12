@@ -49,7 +49,7 @@ async function runTest() {
 
     await type('#input-name-0-0-1');    
 
-    await page.screenshot({ path: path.resolve(__dirname, 'dist', 'example.jpg') });
+    await page.screenshot({ path: path.resolve(__dirname, 'dist', isRedux ? 'final-redux.jpg' : 'final.jpg') });
 
     await page.tracing.stop();
 };
