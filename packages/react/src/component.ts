@@ -57,7 +57,7 @@ const scheduler = createTickScheduler();
 export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<P> {
 
 	// creating a functional component
-	return <H>(props: P, ref?: Ref<H>) => {
+	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
 
@@ -130,6 +130,10 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 		// return the cached render
 		return computedRender.value;
 	};
+
+	(ReactiveComponent as any).displayName = reactiveComponent.name || undefined;
+
+	return ReactiveComponent;
 }
 
 createComponent.withHandle = <P = {}, H = {}> (reactiveComponent: ReactiveComponentWithHandle<P, H>):
