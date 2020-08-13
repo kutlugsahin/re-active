@@ -5,6 +5,7 @@ import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './life
 
 export type Renderer = () => JSX.Element;
 export type ReactiveComponent<P = {}> = (props: P) => Renderer;
+export type ReactiveComponentWithHandle<P, H> = (props: P, ref: Ref<H>) => Renderer;
 
 const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 	// convert props to a reactive object
@@ -64,12 +65,12 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 		if (!componentState.current) {
 			// empty object to be filled with lifecycles
-			beginRegisterLifecyces(ref);
+			beginRegisterLifecyces();
 
 			// one time call for the 'reactive component' retrieving the render function which will be called for future renders
 			// in this phase we get the lifecycle calls to be referenced in lifecycle phases
 
-			const renderer = setup(() => reactiveComponent(reactiveProps));
+			const renderer = setup(() => (reactiveComponent as ReactiveComponentWithHandle<P, H>)(reactiveProps, ref!));
 
 			// keep the ref of the lifecycle obj
 			const lifecycles = endRegisterLifecycles();
@@ -131,7 +132,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 	};
 }
 
-createComponent.withHandle = <P = {}, H = {}> (reactiveComponent: ReactiveComponent<P>):
+createComponent.withHandle = <P = {}, H = {}> (reactiveComponent: ReactiveComponentWithHandle<P, H>):
 	React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>> => {
-	return forwardRef(createComponent<P>(reactiveComponent) as ForwardRefRenderFunction<H, P>);
+	return forwardRef(createComponent<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, P>);
 }

@@ -1,5 +1,5 @@
-import { createComponent, imperativeHandle, onMounted, reactive, useContext, ref, watch } from "@re-active/react";
-import React, { createContext } from 'react';
+import { createComponent, imperativeHandle, onMounted, reactive, useContext, watch } from "@re-active/react";
+import React, { createContext, Ref, RefObject } from 'react';
 import '../style.css';
 interface Item {
 	name: string;
@@ -7,7 +7,7 @@ interface Item {
 	selected: boolean;
 }
 
-const items = Array(10).fill(null).map((_, i) => ({
+const items = Array(1).fill(null).map((_, i) => ({
 	name: `item ${i}`,
 	id: i,
 	selected: false,
@@ -65,16 +65,16 @@ const ListItem = createComponent((props: { item: Item, onClick: any }) => {
 
 	const x = useContext(Context);
 
-	let labelHandle = ref<LabelHandle>();
+	let labelHandle: LabelHandle;
 
 	return () => {
 		console.log('list item render');
 		return (
 			<div className={props.item.selected ? 'selected' : ''} onClick={() => {
 				props.onClick(props.item.id);
-				labelHandle.current?.alert()
+				labelHandle.alert()
 			}}>
-				<Label item={props.item} ref={labelHandle} /> {x.name}
+				<Label item={props.item} ref={e => labelHandle = e} /> {x.name}
 			</div>
 		)
 	}
@@ -88,9 +88,9 @@ interface LabelHandle {
 	alert: () => void
 };
 
-const Label = createComponent.withHandle<LabelProps, LabelHandle>((props: LabelProps) => {
+const Label = createComponent.withHandle((props: LabelProps, ref: Ref<LabelHandle>) => {
 
-	imperativeHandle({
+	imperativeHandle(ref, {
 		alert() {
 			alert(props.item.name)
 		},

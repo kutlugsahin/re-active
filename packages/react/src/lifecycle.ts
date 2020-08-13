@@ -1,4 +1,4 @@
-import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject} from 'react';
+import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject, Ref} from 'react';
 
 type Callback = () => void;
 
@@ -7,7 +7,6 @@ export interface LifeCycle {
     onUnmounted: Callback[];
     onUpdated: Callback[];
     context: React.Context<any>[];
-    selfRef: any;
     imperativeHandler: any;
 }
 
@@ -15,14 +14,13 @@ export interface LifeCycle {
 let currentLifecycleHandle: LifeCycle | null = null;
 let _isInSetupPhase = false;
 
-export const beginRegisterLifecyces = (selfRef: any) => {
+export const beginRegisterLifecyces = () => {
     _isInSetupPhase = true;
     currentLifecycleHandle = {
         onMounted: [],
         onUnmounted: [],
         onUpdated: [],
         context: [],
-        selfRef,
         imperativeHandler: null,
     }
 }
@@ -49,21 +47,9 @@ export function useContext<T>(context: React.Context<T>) {
     return reactUseContext(context);
 }
 
-export function ref<T>() {
-    let _value: T;
-    return {
-        get current() { return _value; },
-        set current(value: T) { value = value}
-    }
-}
-
-export function imperativeHandle<T>(handler: T) {
-    if (!currentLifecycleHandle?.selfRef) {
-        return;
-    }
-
+export function imperativeHandle<H, T>(ref: Ref<H>, handler: T) {
     currentLifecycleHandle!.imperativeHandler = () => handler;
-    return reactUseImperativeHandle(currentLifecycleHandle?.selfRef, currentLifecycleHandle!.imperativeHandler);
+    return reactUseImperativeHandle(ref, currentLifecycleHandle!.imperativeHandler);
 }
 
 export const isInSetupPhase = () => _isInSetupPhase;

@@ -43,7 +43,7 @@ export type Dictionary<T> = { [key: string]: T };
 export type Node<T = any> = {
     id: string;
     data: T;
-    children?: Node<T>[];
+    children: Node<T>[];
     loading: boolean;
     expanded: boolean;
     selected: boolean;
