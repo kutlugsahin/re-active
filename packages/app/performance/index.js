@@ -1,6 +1,9 @@
 const puppeteer = require('puppeteer');
 const { execSync, exec } = require('child_process');
 const path = require('path');
+const fs = require('fs');
+
+const distFolder = path.resolve(__dirname, './dist');
 
 const packagejsonpath = path.resolve(__dirname, '../');
 let browser;
@@ -47,7 +50,11 @@ async function runTest() {
 
     await page.waitFor('#row-0-0-1.selected');
 
-    await type('#input-name-0-0-1');    
+    await type('#input-name-0-0-1');   
+    
+    if (!fs.existsSync(distFolder)) {
+        fs.mkdirSync(distFolder);
+    }    
 
     await page.screenshot({ path: path.resolve(__dirname, 'dist', isRedux ? 'final-redux.jpg' : 'final.jpg') });
 

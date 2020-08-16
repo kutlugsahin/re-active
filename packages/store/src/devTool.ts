@@ -40,18 +40,4 @@
 //             options: false,
 //         }
 //     });
-// } 
-
-
-
-// function attach(store: any) {
-    
-// }
-
-// function c(obj: any, path: string) {
-//     const cpm = computed(() => obj[path]);
-
-//     cpm.watch((newVal, oldVal) => {
-        
-//     })
 // }
