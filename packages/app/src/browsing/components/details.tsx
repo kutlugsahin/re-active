@@ -1,6 +1,6 @@
 import React from 'react';
 import { createComponent } from '@re-active/react';
-import { values } from '../store';
+import { values, actions } from '../store';
 import { Item } from '../store/utils';
 
 export const Details = createComponent(function Details() {
@@ -12,7 +12,7 @@ export const Details = createComponent(function Details() {
         }
 
         return (
-            <div>
+            <div key={item.id}>
                 <h3>{item.name}</h3>
                 <Field item={item} label="name" path="name" />
                 <Field item={item} label="Col1" path="col1" />
@@ -31,17 +31,17 @@ interface FieldProps {
     path: string
 }
 
-export function Field(props: FieldProps) {
-    // return () => {
+export const Field = createComponent((props: FieldProps) => {
+    return () => {
         return (
             <div className="field">
                 <label className="label" htmlFor="">{props.label}</label>
                 <div>
                     <input id={`input-${props.path}-${props.item.id}`} className="input" type="text" value={props.item[props.path]} onChange={e => {
-                        props.item[props.path] = e.target.value;
+                        actions.updateItem(props.item.id, props.path, e.target.value);
                     }} />
                 </div>
             </div>
         )
-    // }
-}
+    }
+});

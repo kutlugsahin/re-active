@@ -1,7 +1,9 @@
-import { OmitStateParameter, CancelablePromise, GeneratorReturn, GeneratorAction, Callback, AbortPromise } from './types';
+import { OmitStateParameter, CancelablePromise, GeneratorReturn, GeneratorAction, Callback, AbortPromise, Action, Actionize } from './types';
 import { getGlobalStore } from './createStore';
 import { Signal } from './types';
 import { action } from '.';
+
+
 
 function abortPromise<T>(abortResult?: T): AbortPromise<T> {
     let resolve: () => void;
@@ -123,6 +125,36 @@ export const takeLatest = <T extends GeneratorAction>(fn: T): ((...p: Parameters
         }
 
         promise = callable(...p.slice(1));
+
+        return promise;
+    }
+}
+
+export const debounce = <T extends Action>(fn: T) => {
+    let timer: NodeJS.Timeout | null;
+    let callable = action(fn);
+    let resolver: any;
+    let promise: CancelablePromise<any>;
+
+    function cancel() {
+        if (timer) clearTimeout(timer);
+        if (resolver) resolver();
+    }
+
+    return function (...p: Parameters<T>) {
+        cancel();
+
+        promise = new Promise(res => {
+            resolver = res;
+        }) as CancelablePromise<any>;
+
+        promise.cancel = cancel;
+
+        timer = setTimeout(() => {
+            Promise.resolve(callable(...p.slice(1))).then(resolver);
+            resolver = null;
+            timer = null;
+        }, 100);
 
         return promise;
     }

@@ -1,4 +1,4 @@
-import { createStore, createSelectors, createActions, watchStore, takeLatest, action, ActionGenerator, isCancelled } from '@re-active/store';
+import { createStore, createSelectors, createActions, watchStore, takeLatest, action, ActionGenerator, isCancelled, debounce } from '@re-active/store';
 import { Dictionary, Item, Node, fetchItems, nodes, makeTreeNode, RowItem } from './utils';
 
 interface Store {
@@ -13,7 +13,15 @@ interface Store {
 }
 
 createStore<Store>({
-    items: {},
+    items: nodes.reduce((acc: Dictionary<Item>, node) => {
+        acc[node.id] = node.data;
+
+        node.children.forEach(p => {
+            acc[p.id] = p.data
+        });
+
+        return acc;
+    }, {}),
     tree: nodes,
     selectedTreeNode: null,
     table: {
@@ -87,6 +95,9 @@ const actionMap = {
         if (currentTreeNode && currentTreeNode.parent) {
             actions.selectTreeNode(currentTreeNode.parent);
         }
+    },
+    updateItem(state: Store, id: string, path: string, value: any) {
+        state.items[id][path] = value;
     }
 };
 
