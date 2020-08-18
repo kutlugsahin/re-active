@@ -1,4 +1,5 @@
 const nodeGenerationCount = 10;
+const fetchTimeout = 500;
 
 export function makeItem(id: string) {
     return {
@@ -65,7 +66,7 @@ export async function fetchItems(node: Node<Item>) {
             res(Array(nodeGenerationCount).fill(null).map((_, i) => {
                 return makeItem(`${node.id}-${i}`);
             }));
-        }, 1500);
+        }, fetchTimeout);
     })
 }
 

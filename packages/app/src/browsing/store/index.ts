@@ -56,8 +56,8 @@ const actionMap = {
         try {
             state.selectedTreeNode = node;
             state.table.loading = true;
-            yield* actionMap.loadChildren(state,node);
-            
+            yield* actionMap.loadChildren(state, node);
+
             state.table.selectedRow = null;
             state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
         } finally {

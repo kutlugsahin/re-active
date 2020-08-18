@@ -20,11 +20,7 @@ export const App = createComponent(() => {
                 <div className="treepanel">
                     <Tree
                         nodes={values.tree}
-                        onSelected={(node) => {
-                            actions.selectTreeNode(node).then(() => {
-                                console.log('concluded:')
-                            })
-                        }}
+                        onSelected={actions.selectTreeNode}
                         renderNode={renderNode}
                         onExpanded={actions.expandTreeNode}
                     />
