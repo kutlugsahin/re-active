@@ -1,9 +1,9 @@
 import React from 'react';
-import { Tree, Node } from './components/tree';
+import { Tree } from './components/tree';
 import { createComponent } from '@re-active/react';
 import './styles.css';
 import { values, actions } from './store';
-import { Item } from './store/utils';
+import { Item, Node } from './store/utils';
 import { Main } from './components/main';
 import { Details } from './components/details';
 
@@ -20,7 +20,11 @@ export const App = createComponent(() => {
                 <div className="treepanel">
                     <Tree
                         nodes={values.tree}
-                        onSelected={actions.selectTreeNode}
+                        onSelected={(node) => {
+                            actions.selectTreeNode(node).then(() => {
+                                console.log('concluded:')
+                            })
+                        }}
                         renderNode={renderNode}
                         onExpanded={actions.expandTreeNode}
                     />

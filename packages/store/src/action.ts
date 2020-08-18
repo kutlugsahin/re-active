@@ -1,22 +1,42 @@
 import { getGlobalStore } from './createStore';
+import { Action, Actionize, OmitStateParameter, Dictionary, Actions, Callback } from './types';
+import { generatorFlow } from './flow';
 
-export type OmitStateParameter<T extends (state: any, ...params: any[]) => any> = T extends (state: any, ...params: infer P) => any ? P : never;
+const isAction = Symbol('isAction');
 
-export type FunctionWithoutState<T extends (state: any, ...params: any[]) => any> = (...p: OmitStateParameter<T>) => ReturnType<T>;
-
-export const action = <T extends (s: any, ...p: any[]) => any>(fn: T): FunctionWithoutState<T> => {
-	return (...params: OmitStateParameter<T>) => {
-		return fn(getGlobalStore() as any, ...params);
-	}
+enum ActionType {
+	sync,
+	async,
+	generator
 }
 
-export type Dictionary<T> = { [key: string]: T };
+function getActionType(fn: Action): ActionType {
+	if (fn.constructor === (function* () { }).constructor) return ActionType.generator;
+	if (fn.constructor === (async function () { }).constructor) return ActionType.async;
+	return ActionType.sync
+}
 
-export type Action<S = any> = (s: S, ...params: any[]) => void;
-export type ActionMap<S = any> = { [key: string]: Action<S> }
-export type ActionMapWithoutState<T extends ActionMap> = { [key in keyof T]: FunctionWithoutState<T[key]> }
 
-type Actions<T extends Dictionary<Action>> = { [key in keyof T]: FunctionWithoutState<T[key]> }
+export const action = <T extends Action>(fn: T): Actionize<T> => {
+	let actionized: any;
+
+	switch (getActionType(fn)) {
+		case ActionType.generator:
+			actionized = generatorFlow(fn);
+			break;
+		default:
+			actionized = (...params: OmitStateParameter<T>) => {
+				return fn(getGlobalStore() as any, ...params);
+			}
+			break;
+	}
+
+	actionized[isAction] = true;
+
+	return actionized as Actionize<T>;
+}
+
+
 export const createActions = <S, T extends Dictionary<Action<S>>>(actions: T): Actions<T> => {
 
 	const result: any = {};

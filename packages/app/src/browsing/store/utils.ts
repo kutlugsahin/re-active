@@ -1,4 +1,4 @@
-const nodeGenerationCount = 200;
+const nodeGenerationCount = 10;
 
 export function makeItem(id: string) {
     return {
@@ -65,7 +65,7 @@ export async function fetchItems(node: Node<Item>) {
             res(Array(nodeGenerationCount).fill(null).map((_, i) => {
                 return makeItem(`${node.id}-${i}`);
             }));
-        }, 500);
+        }, 1500);
     })
 }
 

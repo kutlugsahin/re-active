@@ -1,4 +1,4 @@
-import { createStore, createSelectors, createActions, watchStore } from '@re-active/store';
+import { createStore, createSelectors, createActions, watchStore, takeLatest, action, ActionGenerator, isCancelled } from '@re-active/store';
 import { Dictionary, Item, Node, fetchItems, nodes, makeTreeNode, RowItem } from './utils';
 
 interface Store {
@@ -39,23 +39,30 @@ export const values = createSelectors({
     }
 });
 // ================ ACTIONS ===========================
-export const actions = createActions({
-    async loadChildren(state: Store, node: Node) {
-        if (node.children.length === 0) {
-            node.loading = true;
-            const newItems = await fetchItems(node);
-            newItems.forEach(p => state.items[p.id] = p);
-            node.children = newItems.map(p => makeTreeNode(p, node));
+const actionMap = {
+    *loadChildren(state: Store, node: Node) {
+        try {
+            if (node.children.length === 0) {
+                node.loading = true;
+                const newItems: Item[] = yield fetchItems(node);
+                newItems.forEach(p => state.items[p.id] = p);
+                node.children = newItems.map(p => makeTreeNode(p, node));
+            }
+        } finally {
             node.loading = false;
         }
     },
-    async selectTreeNode(state: Store, node: Node) {
-        state.selectedTreeNode = node;
-        state.table.loading = true;
-        await actions.loadChildren(node);        
-        state.table.loading = false;
-        state.table.selectedRow = null;
-        state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
+    *selectTreeNode(state: Store, node: Node) {
+        try {
+            state.selectedTreeNode = node;
+            state.table.loading = true;
+            yield* actionMap.loadChildren(state,node);
+            
+            state.table.selectedRow = null;
+            state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
+        } finally {
+            state.table.loading = false;
+        }
     },
     async expandTreeNode(state: Store, node: Node) {
         node.expanded = !node.expanded;
@@ -81,7 +88,12 @@ export const actions = createActions({
             actions.selectTreeNode(currentTreeNode.parent);
         }
     }
-});
+};
+
+export const actions = createActions({
+    ...actionMap,
+    selectTreeNode: takeLatest(actionMap.selectTreeNode),
+})
 
 // ================ WATCHERS ===========================
 watchStore((state: Store) => state.selectedTreeNode, (newNode, oldNode) => {
@@ -93,3 +105,4 @@ watchStore((state: Store) => state.table.selectedRow, (newItem, oldItem) => {
     if (oldItem) oldItem.selected = false;
     if (newItem) newItem.selected = true;
 })
+

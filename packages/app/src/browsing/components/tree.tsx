@@ -1,16 +1,7 @@
 import React from 'react';
 import { createComponent } from '@re-active/react';
-
+import { Node } from '../store/utils';
 // =============== TYPES ============================
-export interface Node<T = any> {
-    data: T;
-    id: string;
-    children?: Node<T>[];
-    selected: boolean;
-    expanded: boolean;
-    loading: boolean;
-}
-
 export interface TreeProps<T> {
     nodes: Node<T>[];
     onExpanded: (node: Node<T>) => void;
