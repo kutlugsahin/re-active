@@ -1,17 +1,18 @@
 export type OmitStateParameter<T extends (state: any, ...params: any[]) => any> = T extends (state: any, ...params: infer P) => any ? P : never;
 
-// export type FunctionWithoutState<T extends (state: any, ...params: any[]) => any> = (...p: OmitStateParameter<T>) => ReturnType<T>;
+export type Action = (...params: any[]) => any;
 
-export type Action<S = any, R = any> = (s: S, ...params: any[]) => R;
-
-export type SyncAction = (s: any, ...p: any[]) => any;
-export type AsyncAction = (s: any, ...p: any[]) => Promise<any>;
-export type GeneratorAction = (s: any, ...p: any[]) => Generator<any, any, any>;
+export type SyncAction = (...p: any[]) => any;
+export type AsyncAction = (...p: any[]) => Promise<any>;
+export type GeneratorAction = (...p: any[]) => Generator<any, any, any>;
 
 export type ActionGenerator<TReturn = any> = Generator<any, TReturn, any>;
 
 export type Actionize<T extends Action> = T extends GeneratorAction ?
     (...params: OmitStateParameter<T>) => CancelablePromise<GeneratorReturn<T>> : (...params: OmitStateParameter<T>) => ReturnType<T>;
+
+export type Callable<T extends Action> = T extends GeneratorAction ?
+    (...params: Parameters<T>) => CancelablePromise<GeneratorReturn<T>> : (...params: Parameters<T>) => ReturnType<T>;
 
 export type Dictionary<T> = { [key: string]: T };
 

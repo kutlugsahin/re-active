@@ -2,6 +2,7 @@ import { OmitStateParameter, CancelablePromise, GeneratorReturn, GeneratorAction
 import { getGlobalStore } from './createStore';
 import { Signal } from './types';
 import { action } from '.';
+import { callable } from './action';
 
 
 
@@ -47,8 +48,8 @@ export const isCancelled = () => void 0;
 
 export function generatorFlow<T extends (...p: any[]) => Generator>(fn: T) {
 
-    return (...params: OmitStateParameter<T>): CancelablePromise<GeneratorReturn<T>> => {
-        const iterator = fn(getGlobalStore() as any, ...params);
+    return (...params: Parameters<T>): CancelablePromise<GeneratorReturn<T>> => {
+        const iterator = fn(...params);
         let currentIteration: IteratorResult<any, any> = { done: false, value: null };
         let abortControl: AbortPromise | undefined = abortPromise();
 
@@ -117,14 +118,14 @@ export const all = (promises: Promise<any>[]) => {
 
 export const takeLatest = <T extends GeneratorAction>(fn: T): ((...p: Parameters<T>) => Promise<GeneratorReturn<T>>) => {
     let promise: CancelablePromise<GeneratorReturn<T>>;
-    let callable = action(fn);
+    let callableAction = callable(fn);
 
     return async function (...p: Parameters<T>) {
         if (promise && promise.cancel) {
             promise.cancel();
         }
 
-        promise = callable(...p.slice(1));
+        promise = callableAction(...p);
 
         return promise;
     }
@@ -132,7 +133,7 @@ export const takeLatest = <T extends GeneratorAction>(fn: T): ((...p: Parameters
 
 export const debounce = <T extends Action>(fn: T) => {
     let timer: NodeJS.Timeout | null;
-    let callable = action(fn);
+    let callableAction = callable(fn);
     let resolver: any;
     let promise: CancelablePromise<any>;
 
@@ -151,7 +152,7 @@ export const debounce = <T extends Action>(fn: T) => {
         promise.cancel = cancel;
 
         timer = setTimeout(() => {
-            Promise.resolve(callable(...p.slice(1))).then(resolver);
+            Promise.resolve(callableAction(...p)).then(resolver);
             resolver = null;
             timer = null;
         }, 100);

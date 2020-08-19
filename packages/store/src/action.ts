@@ -1,6 +1,6 @@
 import { getGlobalStore } from './createStore';
-import { Action, Actionize, OmitStateParameter, Dictionary, Actions, Callback } from './types';
 import { generatorFlow } from './flow';
+import { Action, Actionize, Actions, Callable, Dictionary, OmitStateParameter } from './types';
 
 const isAction = Symbol('isAction');
 
@@ -16,8 +16,7 @@ function getActionType(fn: Action): ActionType {
 	return ActionType.sync
 }
 
-
-export const action = <T extends Action>(fn: T): Actionize<T> => {
+export const callable = <T extends Action>(fn: T): Callable<T> => {
 	let actionized: any;
 
 	switch (getActionType(fn)) {
@@ -25,25 +24,49 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 			actionized = generatorFlow(fn);
 			break;
 		default:
-			actionized = (...params: OmitStateParameter<T>) => {
-				return fn(getGlobalStore() as any, ...params);
-			}
+			actionized = fn;
 			break;
 	}
 
-	actionized[isAction] = true;
-
-	return actionized as Actionize<T>;
+	return actionized as Callable<T>;
 }
 
+export const action = <T extends Action>(fn: T): Actionize<T> => {
 
-export const createActions = <S, T extends Dictionary<Action<S>>>(actions: T): Actions<T> => {
+	const callableAction = callable(fn);
+
+	let actionized: any = (...params: OmitStateParameter<T>) => {
+		return callableAction(getGlobalStore() as any, ...params);
+	}
+	
+	actionized[isAction] = true;
+	actionized.displayName = fn.name;
+
+	const proxyFn = new Proxy(actionized, {
+		apply(target, ctx, params) {
+			console.log(`${proxyFn.displayName || actionized.displayName} called with params: ${params}`)
+			Reflect.apply(target, ctx, params);
+		}
+	})
+
+	return proxyFn as Actionize<T>;
+}
+
+export const createActions = <S, T extends Dictionary<Action>>(actions: T): Actions<T> => {
 
 	const result: any = {};
 
 	for (const key in actions) {
 		if (Object.prototype.hasOwnProperty.call(actions, key)) {
-			result[key] = action(actions[key]);
+			const actionFn = actions[key] as any;
+
+			if ((actionFn as any)[isAction]) {
+				result[key] = actionFn;
+				result[key].displayName = `${key}.${(actionFn as any).displayName}`
+			} else {
+				result[key] = action(actions[key]);
+				result[key].displayName = key;
+			}
 		}
 	}
 
