@@ -98,13 +98,14 @@ const actionMap = {
     },
     updateItem(state: Store, id: string, path: string, value: any) {
         state.items[id][path] = value;
-    }
+    },
 };
 
 export const actions = createActions({
     ...actionMap,
     selectTreeNode: takeLatest(actionMap.selectTreeNode),
-})
+});
+
 
 // ================ WATCHERS ===========================
 watchStore((state: Store) => state.selectedTreeNode, (newNode, oldNode) => {

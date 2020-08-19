@@ -44,7 +44,7 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 
 	const proxyFn = new Proxy(actionized, {
 		apply(target, ctx, params) {
-			console.log(`${proxyFn.displayName || actionized.displayName} called with params: ${params}`)
+			console.log(`${proxyFn.displayName || actionized.displayName} called with params: `, ...params)
 			Reflect.apply(target, ctx, params);
 		}
 	})
@@ -52,24 +52,33 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 	return proxyFn as Actionize<T>;
 }
 
-export const createActions = <S, T extends Dictionary<Action>>(actions: T): Actions<T> => {
+export const createActions = <S, T extends Dictionary<Action | Object>>(actions: T): Actions<T> => {
 
-	const result: any = {};
+	function makeActionObject(actionMap: T, parentDisplayName: string = '') {		
+		const result: any = {};
 
-	for (const key in actions) {
-		if (Object.prototype.hasOwnProperty.call(actions, key)) {
-			const actionFn = actions[key] as any;
+		for (const key in actionMap) {
+			if (Object.prototype.hasOwnProperty.call(actionMap, key)) {
+				const actionFn = actionMap[key] as any;
+				const actionName = parentDisplayName ? `${parentDisplayName}.${key}` : key;
 
-			if ((actionFn as any)[isAction]) {
-				result[key] = actionFn;
-				result[key].displayName = `${key}.${(actionFn as any).displayName}`
-			} else {
-				result[key] = action(actions[key]);
-				result[key].displayName = key;
+				if (actionFn[isAction]) {
+					result[key] = actionFn;
+					result[key].displayName = actionName
+				} else if (typeof actionFn === 'object') {
+					result[key] = makeActionObject(actionFn, actionName)
+				} else {
+					result[key] = action(actionMap[key] as Action);
+					result[key].displayName = actionName;
+				}
 			}
 		}
+
+		return result;
 	}
 
-	return result as Actions<T>;
+	return makeActionObject(actions) as Actions<T>;
 }
+
+
 

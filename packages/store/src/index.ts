@@ -3,4 +3,4 @@ export { generatorFlow, take, takeLatest, all, race, signal, isCancelled, deboun
 export { selector, createSelectors } from './selector';
 export { createStore, watchStore } from './createStore';
 
-export type { ActionGenerator, CancelablePromise, Signal } from './types';
+export type { ActionGenerator, CancelablePromise, Signal, Callable } from './types';
