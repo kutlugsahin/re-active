@@ -239,25 +239,25 @@ Since we leverage the whole reactivity system we no longer need react hooks. No 
     ```jsx
     import { createComponent, reactive, onMounted, onUnmounted } from "@re-active/react";
 
-    export const Lifecycle = createComponent((props) => {
-    let timer;
+    export const Timer = createComponent((props) => {
+        let timer;
 
-    const seconds = reactive(0);
+        const seconds = reactive(0);
 
-    onMounted(() => {
-        timer = setInterval(() => {
-        seconds.value++;
-        }, 1000);
-    });
+        onMounted(() => {
+            timer = setInterval(() => {
+            seconds.value++;
+            }, 1000);
+        });
 
-    onUnmounted(() => {
-        clearInterval(timer);
-    });
+        onUnmounted(() => {
+            clearInterval(timer);
+        });
 
-    return () => {
-        const item = props.data;
-        return <Example {...props}>{seconds.value} seconds passed</Example>;
-    };
+        return () => {
+            const item = props.data;
+            return <Example {...props}>{seconds.value} seconds passed</Example>;
+        };
     });
     ```
 
@@ -265,29 +265,29 @@ Since we leverage the whole reactivity system we no longer need react hooks. No 
 
     ```jsx
     function timer(){
-    let interval;
+        let interval;
 
-    const seconds = reactive(0);
+        const seconds = reactive(0);
 
-    onMounted(() => {
-        interval = setInterval(() => {
-        seconds.value++;
-        }, 1000);
-    });
+        onMounted(() => {
+            interval = setInterval(() => {
+            seconds.value++;
+            }, 1000);
+        });
 
-    onUnmounted(() => {
-        clearInterval(interval);
-    });
+        onUnmounted(() => {
+            clearInterval(interval);
+        });
 
-    return seconds;
+        return seconds;
     }
 
     export const Lifecycle = createComponent(() => {
-    const seconds = timer();
+        const seconds = timer();
 
-    return () => (
-        return <div>{seconds.value} seconds passed</div>;
-    );
+        return () => (
+            return <div>{seconds.value} seconds passed</div>;
+        );
     });
     ```
 
