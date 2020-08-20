@@ -121,3 +121,86 @@ const Component = createComponent(() => {
 ```
 
 In the example above, the _unusedValue_ may seem to be used in the renderer at first look and the component may be expected to re-render as a result of updating this variable but this is not correct. Actually it's not used in the render and it does not affect the rendered content. It's referenced in the callback and the callback function is not part of the rendered markup. Reactive components are smart to only render if a reactive value is referenced in the resulting markup.
+
+## Lifecycles and Handle / Ref
+
+Since we leverage the whole reactivity system we no longer need react hooks. No *useState* is needed since state is managed with reactive values. No *useState* and *useCallback* because whatever we define in the component scope will persist. And also no dependency arrays needed since there is no stale state scenario. React hooks needed those little hacks trying to create stateful functions in a single function. But reactive component defines a closure (component scope) to address this issue and this is how you actually define a stateful function in javascript by the nature of the language  
+
+- **onMounted**: accepts a callback to be called when the component is mounted
+- **onUnmounted** : accepts a callback to be called when the component is unmounted
+
+```jsx
+import { createComponent, reactive, onMounted, onUnmounted } from "@re-active/react";
+
+export const Lifecycle = createComponent((props) => {
+  let timer;
+
+  const seconds = reactive(0);
+
+  onMounted(() => {
+    timer = setInterval(() => {
+      seconds.value++;
+    }, 1000);
+  });
+
+  onUnmounted(() => {
+    clearInterval(timer);
+  });
+
+  return () => {
+    const item = props.data;
+    return <Example {...props}>{seconds.value} seconds passed</Example>;
+  };
+});
+```
+
+This lifecycle dependent logic can also be extracted and reused as follows
+
+```jsx
+function timer(){
+  let interval;
+
+  const seconds = reactive(0);
+
+  onMounted(() => {
+    interval = setInterval(() => {
+      seconds.value++;
+    }, 1000);
+  });
+
+  onUnmounted(() => {
+    clearInterval(interval);
+  });
+
+  return seconds;
+}
+
+export const Lifecycle = createComponent(() => {
+  const seconds = timer();
+
+  return () => (
+    return <div>{seconds.value} seconds passed</div>;
+  );
+});
+```
+
+- **imperativeHandle**: used set a ref
+- **createComponent.withHandle**: used to create component with a forwarded ref
+
+```jsx
+// works like React.forwardRef
+const Input = createComponent.withHandle((props, ref) => {
+
+  // we can keep a reference to input element simple as this
+  // React.createRef() can be used as well;
+  let input;
+
+  imperativeHandle(ref, {
+    focus() {
+      input.focus();
+    }
+  });
+
+  return () => <input ref={r => input = r} />;
+});
+```
