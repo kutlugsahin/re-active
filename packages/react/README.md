@@ -154,7 +154,7 @@ The reativity system is all about defining reactive values and creating reaction
     It is used to make boxed reactive object and not making the nested fields reactive.
 
      ```js
-    const r1 = reactive({ field: 'text' });
+    const r1 = reactive.ref({ field: 'text' });
     r1.value.field = 'new text'; // won't react
     r1.value = { field: 'new text' }; // will react
     ```
