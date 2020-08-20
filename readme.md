@@ -1,13 +1,12 @@
-# Reactive Component Api
+# @re-active
 
-This is an experimental implementation of a Reactive functional component for React inspired by Vue 3 composition api. Uses @vue/reactivity package for reactivity system.
+A reactive approach to create React application. Built on top of a reactivity system for making concise and high performant applications.
 
-## Api
+- ### ⚡🚀 Blazing Fast
+- ### ☕ Concise
+- ### 💡 Intuitive
 
-- createComponent
-- onMounted
-- onUnmounted
-- onUpdated
 
-See the article
+See docs for [@re-active/react](https://github.com/kutlugsahin/re-active/tree/master/packages/react) which is the core library for building
 
+See docs for [@re-active/store](https://github.com/kutlugsahin/re-active/tree/master/packages/store) a reactive state management library
