@@ -9,7 +9,7 @@ npm i @re-active/react
 
 ## Defining a reactive component with **createComponent**
 
-Reative component is very similar to a functional component. **createComponent** accepts a function that returns another function returning JSX. This allows a closure to be created which will persists as long as the component is alive.
+Reactive component is very similar to a functional component. **createComponent** accepts a function that returns another function returning JSX. This allows a closure to be created which will persists as long as the component is alive.
 
 ```jsx
 import { createComponent } from '@re-active/react';
@@ -196,6 +196,8 @@ watch(() => spinner, (newValue) => { console.log(newValue) })
 Caches and returns the value from calculation function. returned value is also reactive. Very useful for aggregating a data from various sources. Cached result is only invalidated if any of the referenced reactive values has changed.
 
 ```js
+import { reactive, computed } from '@re-active/react';
+
 const state = reactive({
     amount: 0,
     price: 10,
@@ -236,10 +238,8 @@ totalPrice.watch((newVal, oldVal) => {
 
 Since we leverage the whole reactivity system we no longer need react hooks. No *useState* is needed since state is managed with reactive values. No *useState* and *useCallback* because whatever we define in the component scope will persist. And also no dependency arrays needed since there is no stale state scenario. React hooks needed those little hacks trying to create stateful functions in a single function. But reactive component defines a closure (component scope) to address this issue and this is how you actually define a stateful function in javascript by the nature of the language  
 
-### onMounted
-Accepts a callback to be called when the component is mounted
-### onUnmounted
-Accepts a callback to be called when the component is unmounted
+### onMounted / onUnmounted
+Both accepts a callback to be called when the component is mounted or unmounted
 
 ```jsx
 import { createComponent, reactive, onMounted, onUnmounted } from "@re-active/react";
@@ -259,10 +259,7 @@ export const Timer = createComponent((props) => {
         clearInterval(timer);
     });
 
-    return () => {
-        const item = props.data;
-        return <Example {...props}>{seconds.value} seconds passed</Example>;
-    };
+    return () => <div>{seconds.value} seconds passed</div>;
 });
 ```
 
@@ -296,12 +293,11 @@ export const Lifecycle = createComponent(() => {
 });
 ```
 
-### imperativeHandle
-Used set a ref
-### createComponent.withHandle
-Used to create component with a forwarded ref
-
+### imperativeHandle and createComponent.withHandle
+**createComponent.withHandle** is used to create component with a forwarded ref just like React.forwardRef.
+You can expose the ref as any object to parent components using **imperativeHandle**.
 ```jsx
+
 // works like React.forwardRef
 const Input = createComponent.withHandle((props, ref) => {
 
@@ -311,7 +307,7 @@ const Input = createComponent.withHandle((props, ref) => {
 
     imperativeHandle(ref, {
         focus() {
-        input.focus();
+            input.focus();
         }
     });
 
