@@ -126,108 +126,111 @@ In the example above, the _unusedValue_ may seem to be used in the renderer at f
 
 The reativity system is all about defining reactive values and creating reactions when these reactive values are mutated. We can create **effect**s that will run when any referenced reactive value is changed, **computed** values that will be re calculated only if reactive values changed as well, we can also **watch** reactive values to compare with its previous value. @re-active/react package provides these functionalities which can be used inside component scope or anywhere in the application. @vue/reactivity package is used as the reactivity system which is fast and lightweight (3kb) library powering Vue 3. It is a standalone reactivity package and completely decoupled from Vue.js. 
 
-- **reactive**
+### reactive
 
-    reactive function accepts any type of values object, string, number, bool, arrays etc. Primity values returns a boxed result which you can access via _value_ property. Object and Array type of values can be accessed directly. Nested fields of the given object will also be reactive.
+reactive function accepts any type of values object, string, number, bool, arrays etc. Primity values returns a boxed result which you can access via _value_ property. Object and Array type of values can be accessed directly. Nested fields of the given object will also be reactive.
 
-    ```js
-    import { reactive } from '@re-active/react';
+```js
+import { reactive } from '@re-active/react';
 
-    const r1 = reactive('text');
-    r1 = 'new text' // won't react, don't do that you will loose the reactive object
-    r1.value = 'new text'; // reacts
+const r1 = reactive('text');
+r1 = 'new text' // won't react, don't do that you will loose the reactive object
+r1.value = 'new text'; // reacts
 
-    const r2 = reactive(0);
-    r3.value = 1; // reacts
+const r2 = reactive(0);
+r3.value = 1; // reacts
 
-    const r3 = reactive({ 
-        field: 'some text',
-        nested : { 
-            field: 'some other text' 
-        } 
-    });
-    r3.nested.field = 'new text'; // reacts
-    r3.field = 'new text'; // reacts
-    ```
-- **reactive.ref**
+const r3 = reactive({ 
+    field: 'some text',
+    nested : { 
+        field: 'some other text' 
+    } 
+});
+r3.nested.field = 'new text'; // reacts
+r3.field = 'new text'; // reacts
+```
+### reactive.ref
 
-    It is used to make boxed reactive object and not making the nested fields reactive.
+It is used to make boxed reactive object and not making the nested fields reactive.
 
-     ```js
-    const r1 = reactive.ref({ field: 'text' });
-    r1.value.field = 'new text'; // won't react
-    r1.value = { field: 'new text' }; // will react
-    ```
+```js
+const r1 = reactive.ref({ field: 'text' });
+r1.value.field = 'new text'; // won't react
+r1.value = { field: 'new text' }; // will react
+```
 
-- **effect**: takes a function which will only run when a referenced reactive value is changed
-    ```js
-    import { reactive, effect } from '@re-active/react';
-    
-    const greet = reactive('Hello');
+### effect 
+Takes a function which will only run when a referenced reactive value is changed
+```js
+import { reactive, effect } from '@re-active/react';
 
-    effect(() => {
-        console.log(`${greet.value} World`);
-    })
-    // prints "Hello World"
+const greet = reactive('Hello');
 
-    greet.value = 'Hi'
-    // prints "Hi World"
-    ```
+effect(() => {
+    console.log(`${greet.value} World`);
+})
+// prints "Hello World"
 
-- **watch**: works like effect but the callback function is called with new and old values returned by the watcher.
-    ```js
-    import { reactive, watch } from '@re-active/react';
-    
-    const spinner = reactive(0);
+greet.value = 'Hi'
+// prints "Hi World"
+```
 
-    watch(() => spinner.value, (newVal, olVal) => {
-        console.log(newVal, oldVal);
-    })
+### watch 
+Works like effect but the callback function is called with new and old values returned by the watcher.
+```js
+import { reactive, watch } from '@re-active/react';
 
-    // won't work since spinner reference is not changing, 
-    // value field should be accessed if it's a boxed reactive object
-    // otherwise it's inner fields should be accessed
-    watch(() => spinner, (newValue) => { console.log(newValue) })
-    ```
+const spinner = reactive(0);
 
-- **computed**: caches and returns the value from calculation function. returned value is also reactive. Very useful for aggregating a data from various sources. Cached result is only invalidated if any of the referenced reactive values has changed.
+watch(() => spinner.value, (newVal, olVal) => {
+    console.log(newVal, oldVal);
+})
 
-    ```js
-    const state = reactive({
-        amount: 0,
-        price: 10,
-        productName: 'apple'
-    });
+// won't work since spinner reference is not changing, 
+// value field should be accessed if it's a boxed reactive object
+// otherwise it's inner fields should be accessed
+watch(() => spinner, (newValue) => { console.log(newValue) })
+```
 
-    // computed values are lazy evaluated
-    const totalPrice = computed(() => {
-        console.log('total price is calculated');
-        return state.amount * state.price + "$";
-    });
+### computed 
+Caches and returns the value from calculation function. returned value is also reactive. Very useful for aggregating a data from various sources. Cached result is only invalidated if any of the referenced reactive values has changed.
 
-    state.amount = 1;
-    console.log(totalPrice.value);
-    // prints: total price is calculated;
-    // prints: 10$;
+```js
+const state = reactive({
+    amount: 0,
+    price: 10,
+    productName: 'apple'
+});
 
-    state.price = 20;
-    console.log(totalPrice.value);
-    // prints: total price is calculated;
-    // prints: 20$;
+// computed values are lazy evaluated
+const totalPrice = computed(() => {
+    console.log('total price is calculated');
+    return state.amount * state.price + "$";
+});
 
-    state.amount = 1; // amount is set to 1 which is the same so no invalidation for computed value
-    state.productName = 'banana'; // productName is not used in computed so no invalidation as well
-    console.log(totalPrice.value); // no re calculation, returns cached result.
-    // prints: 20$;
+state.amount = 1;
+console.log(totalPrice.value);
+// prints: total price is calculated;
+// prints: 10$;
 
-    // computed values can be watched
-    totalPrice.watch((newVal, oldVal) => {
-        if(newVal.slice(0, -1) > 500){
-            alert('Too expensive');
-        }
-    })
+state.price = 20;
+console.log(totalPrice.value);
+// prints: total price is calculated;
+// prints: 20$;
 
-    ```
+state.amount = 1; // amount is set to 1 which is the same so no invalidation for computed value
+state.productName = 'banana'; // productName is not used in computed so no invalidation as well
+console.log(totalPrice.value); // no re calculation, returns cached result.
+// prints: 20$;
+
+// computed values can be watched
+totalPrice.watch((newVal, oldVal) => {
+    if(newVal.slice(0, -1) > 500){
+        alert('Too expensive');
+    }
+})
+
+```
 
 ## Lifecycles and Handle / Ref
 
