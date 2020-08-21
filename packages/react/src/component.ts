@@ -1,4 +1,4 @@
-import { computed, effect, isReactive, reactive, Calculated } from '@re-active/core';
+import { computed, effect, isReactive, reactive, Calculated, readonly } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction } from 'react';
 import { createTickScheduler } from './shared';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
@@ -7,11 +7,23 @@ export type Renderer = () => JSX.Element;
 export type ReactiveComponent<P = {}> = (props: P) => Renderer;
 export type ReactiveComponentWithHandle<P, H> = (props: P, ref: Ref<H>) => Renderer;
 
+export interface ReactiveConfig {
+	readonlyProps: boolean;
+}
+
+let _config: ReactiveConfig = {
+	readonlyProps: false,
+};
+
+export function config(cfg: ReactiveConfig) {
+	Object.assign(_config, cfg);
+}
+
 const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
+
 	// convert props to a reactive object
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const reactiveProps = useMemo(() => isReactive(props) ? props : reactive({ ...props }), []) as P;
-
+	const reactiveProps = useMemo(() => readonly.shallow(props), []) as P;
 	// keep the old props object for future comparison
 	const prevProps = useRef<P>(props);
 
@@ -28,6 +40,10 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 		prevProps.current = props;
 	});
 
+	if (_config.readonlyProps) {
+		return useMemo(() => readonly(reactiveProps), []) as P;
+	}
+
 	// now we return a reactive props object which will also react to parent renders
 	return reactiveProps;
 }
@@ -37,7 +53,6 @@ const useForceUpdate = () => {
 	const [, forceRender] = useState({});
 	return () => forceRender({});
 }
-
 
 const setup = (setupFunction: Function): Renderer => {
 	return setupFunction();
@@ -136,7 +151,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 	return ReactiveComponent;
 }
 
-createComponent.withHandle = <P = {}, H = {}> (reactiveComponent: ReactiveComponentWithHandle<P, H>):
+createComponent.withHandle = <P = {}, H = {}>(reactiveComponent: ReactiveComponentWithHandle<P, H>):
 	React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>> => {
 	return forwardRef(createComponent<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, P>);
 }

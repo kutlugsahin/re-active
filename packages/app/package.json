@@ -28,7 +28,7 @@
     "http-server": "^0.12.3",
     "style-loader": "1.2.1",
     "ts-loader": "^8.0.2",
-    "typescript": "^3.9.7",
+    "typescript": "4.0.2",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "@types/redux": "3.6.0",
@@ -36,8 +36,6 @@
     "@types/redux-thunk": "2.1.0"
   },
   "dependencies": {
-    "@re-active/react": "1.0.11",
-    "@re-active/store": "1.0.11",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "webpack-cli": "^3.3.12",

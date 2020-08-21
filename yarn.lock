@@ -919,6 +919,25 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@re-active/core@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@re-active/core/-/core-1.0.13.tgz#cd225695b2e5b4421059cb4e2e5061792150e1b7"
+  integrity sha512-ZI+oal+qret836yIPNLnfyVYKZiAVl3OHxRb15iEBc41ni3C/jfILjO9z/xKj4qYpzgj83zIGEHl7v7EwsnmQA==
+
+"@re-active/react@1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@re-active/react/-/react-1.0.11.tgz#f02f47c4c20d389887c052397b9355133fc51774"
+  integrity sha512-OnnKudDLxHV6jjLkniq+Dyk33jR4sOCCx7q25nxrmsGKS0jCGAj9OIMCSdfG0YzpEZLyz5zoya2ZQGh/ZsqBRA==
+  dependencies:
+    "@re-active/core" "1.0.13"
+
+"@re-active/store@1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@re-active/store/-/store-1.0.11.tgz#a70450244d7fb516face94e39ca490a21fcf4def"
+  integrity sha512-nFBV+bp1dBhfrcS0Bcn3BZwUTgs0lUi+bojvK2xe0T5eR+cEG5UlWXIXlJhV03a7zfdWFDajk6SuA56JqfNuZw==
+  dependencies:
+    "@re-active/core" "1.0.13"
+
 "@rollup/plugin-babel@^5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-babel/-/plugin-babel-5.1.0.tgz#ad8b5803fa6e1feb0f168984edc040b90d966450"
@@ -5253,10 +5272,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^3.9.7:
-  version "3.9.7"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
-  integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
+typescript@4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.2.tgz#7ea7c88777c723c681e33bf7988be5d008d05ac2"
+  integrity sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
 
 unbzip2-stream@^1.3.3:
   version "1.4.3"

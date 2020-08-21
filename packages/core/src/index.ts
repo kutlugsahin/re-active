@@ -1,29 +1,28 @@
-import { computed as vendorComputed, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive } from "@vue/reactivity";
-export type Reactive<T> = T extends object ? T : { value: T }
+import { computed as vendorComputed, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive, readonly as vendorReadonly, shallowRef as vendorShallowRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, Ref } from "@vue/reactivity";
+
+type ReactiveObject<T> = T extends Ref ? T : UnwrapRef<T>;
+
+export type Reactive<T> = T extends object ? ReactiveObject<T> : Ref<UnwrapRef<T>>;
+export type ShallowReactive<T> = T extends object ? T : T extends Ref ? T : Ref<T>;
 
 export type Scheduler = (run: () => void) => any;
 
-const ref = <T>(val: T): { value: T } => {
-    const observed = vendorRef<T>(val);
-    return {
-        get value() {
-            return observed.value as T
-        },
-        set value(v: T) {
-            observed.value = v as UnwrapRef<T>;
-        }
-    }
+const ref = <T>(val: T): Ref<UnwrapRef<T>> => {
+    return vendorRef<T>(val);
+}
+
+const shallowRef = <T>(val: T): T extends Ref ? T : Ref<T> => {
+    return vendorShallowRef<T>(val);
 }
 
 export const reactive = <T>(val: T): Reactive<T> => {
     const type = typeof val;
 
     switch (type) {
-        case 'object':
-            return vendorReactive(val as any) as Reactive<T>;
         case 'bigint':
         case 'number':
         case 'string':
+        case 'function':
         case 'boolean': {
             return ref(val) as Reactive<T>
         }
@@ -32,9 +31,35 @@ export const reactive = <T>(val: T): Reactive<T> => {
     }
 }
 
-reactive.ref = <T>(val: T): { value: T } => {
+reactive.shallow = <T>(val: T): ShallowReactive<T> => {
+    const type = typeof val;
+
+    switch (type) {
+        case 'bigint':
+        case 'number':
+        case 'string':
+        case 'function':
+        case 'boolean': {
+            return shallowRef(val) as ShallowReactive<T>
+        }
+        default:
+            return vendorShallowReactive(val as any) as ShallowReactive<T>;
+    }
+}
+
+reactive.ref = <T>(val: T): Ref<UnwrapRef<T>> => {
     return ref(val);
 }
+
+reactive.shallowRef = <T>(val: T): T extends Ref<any> ? T : Ref<T> => {
+    return vendorShallowRef(val);
+}
+
+export const readonly = <T extends Object>(obj: T): T => {
+    return vendorReadonly(obj) as T;
+}
+
+readonly.shallow = vendorShallowReadonly;
 
 export type Calculated<T> = {
     value: T,
@@ -141,7 +166,7 @@ export const isReactive = (value: any) => {
 }
 
 export const createTickScheduler = () => {
-    
+
     let jobs = new Set<() => void>();
 
     let isRunning = false;

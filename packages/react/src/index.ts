@@ -1,4 +1,4 @@
-export { createComponent } from './component';
+export { createComponent, config } from './component';
 export { computed, reactive, watch, createTickScheduler } from './shared';
 export { onMounted, onUnmounted, onUpdated, useContext, imperativeHandle } from './lifecycle';
 export { effect, isReactive } from '@re-active/core';
