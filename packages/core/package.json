@@ -1,13 +1,13 @@
 {
 	"name": "@re-active/core",
-	"version": "1.0.14",
+	"version": "1.0.18",
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
 	"files": [
 		"dist",
 		"README.md"
 	],
-	"types": "dist/types",
+	"types": "dist/types/index.d.ts",
 	"author": "Kutlu Sahin <kutlugsahin@gmail.com>",
 	"license": "ISC",
 	"umd": "dist/umd/index.js",

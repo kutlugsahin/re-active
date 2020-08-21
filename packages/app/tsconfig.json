@@ -67,8 +67,8 @@
     "forceConsistentCasingInFileNames": true,  /* Disallow inconsistently-cased references to the same file. */
     "baseUrl": "./",
     "paths": {
-      "@re-active/core": ["../core/src/", "../core/dist/types"],
-      "@re-active/react": ["../react/src/", "../react/dist/types"],
+      "@re-active/core": ["../core/src/index.ts"],
+      "@re-active/react": ["../react/src/index.ts"],
       "@re-active/store": ["../react/store/index.ts"],
     },
   },

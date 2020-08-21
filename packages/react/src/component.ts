@@ -23,7 +23,7 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 
 	// convert props to a reactive object
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const reactiveProps = useMemo(() => readonly.shallow(props), []) as P;
+	const reactiveProps = useMemo(() => reactive({...props}), []) as P;
 	// keep the old props object for future comparison
 	const prevProps = useRef<P>(props);
 
@@ -34,6 +34,12 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 		for (const key in props) {
 			if (prev[key] !== props[key]) {
 				reactiveProps[key] = props[key];
+			}
+		}
+
+		for (const key in reactiveProps) {
+			if (key in props === false) {
+				reactiveProps[key] = undefined!;
 			}
 		}
 
