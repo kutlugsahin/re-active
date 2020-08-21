@@ -1,4 +1,4 @@
-const nodeGenerationCount = 50;
+const nodeGenerationCount = 200;
 const fetchTimeout = 500;
 
 export function makeItem(id: string) {
