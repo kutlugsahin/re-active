@@ -14,5 +14,14 @@
     "demo:prod:redux": "cd ./packages/app&&yarn build&&yarn prod:redux",
     "publish:lib": "node build.js publish core",
     "inc": "node build.js inc"
+  },
+  "author": {
+    "email": "kutlugsahin@gmail.com",
+    "name": "Kutlu Sahin"
+  },
+  "homepage": "https://kutlugsahin.gitbook.io/re-active/",
+  "description": "React redefined with reactivity",
+  "publishConfig": {
+    "registry": "https://www.npmjs.com/package/@re-active/react"
   }
 }
