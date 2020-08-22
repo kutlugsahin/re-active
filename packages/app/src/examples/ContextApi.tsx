@@ -3,17 +3,18 @@ import {
   createComponent,
   reactive,
   useContext,
-  effect
 } from "@re-active/react";
 
 const Context = React.createContext(null!);
 
-const Label = createComponent((props) => {
+const Label = createComponent(() => {
+
   const context = useContext(Context);
+
   return () => <label>{context.text}</label>;
 });
 
-export const ContextApi = createComponent((props) => {
+export const ContextApi = createComponent(() => {
   const contextValue = reactive({ text: "" });
 
   return () => (

@@ -1,6 +1,6 @@
 {
 	"name": "@re-active/react",
-	"version": "1.0.16",
+	"version": "1.0.17",
 	"description": "",
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
@@ -37,7 +37,7 @@
 		"react": ">=16.13.1"
 	},
 	"dependencies": {
-		"@re-active/core": "1.0.18"
+		"@re-active/core": "1.0.19"
 	},
 	"peerDependencies": {
 		"react": ">=16.13.1"

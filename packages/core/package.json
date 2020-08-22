@@ -1,6 +1,6 @@
 {
 	"name": "@re-active/core",
-	"version": "1.0.18",
+	"version": "1.0.19",
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
 	"files": [
