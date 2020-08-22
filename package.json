@@ -22,6 +22,6 @@
   "homepage": "https://kutlugsahin.gitbook.io/re-active/",
   "description": "React redefined with reactivity",
   "publishConfig": {
-    "registry": "https://www.npmjs.com/package/@re-active/react"
+    "registry": "https://npm.pkg.github.com/"
   }
 }

@@ -61,8 +61,6 @@ export const TreeNode = createComponent((props: TreeNodeProps) => {
     }
 
     return () => {
-        // console.log(`tree node render: ${props.node.id}`);
-
         const { renderNode, node, onClick } = props;
         const { selected, expanded, children } = props.node;
 

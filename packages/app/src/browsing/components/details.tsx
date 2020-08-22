@@ -1,7 +1,8 @@
 import React from 'react';
-import { createComponent } from '@re-active/react';
+import { createComponent, reactive } from '@re-active/react';
 import { values, actions } from '../store';
 import { Item } from '../store/utils';
+import { Reactive } from '@re-active/core';
 
 export const Details = createComponent(function Details() {
     return () => {
@@ -45,3 +46,39 @@ export const Field = createComponent((props: FieldProps) => {
         )
     }
 });
+
+type Render<T> = (props: T) => JSX.Element;
+type ReactiveC<R, T extends (render: Render<R>, setup: (props: any) => R) => void> = (render: R,) => {
+
+}
+
+
+type ReactComp<P, R> = (render: Render<R>, setup: (props: P) => R) => void;
+
+const defineComponent = <P, R>(setup: (props: P) => R, render: Render<Reactive<R>>) => {
+
+}
+
+
+
+defineComponent(() => {
+
+    const state = reactive({
+        a: 3,
+    });
+
+
+    const clicks = reactive(3);
+
+    return {
+        ...state,
+        clicks,
+    }
+
+
+}, ({ a, clicks }) => {
+
+    return <div></div>
+})
+
+

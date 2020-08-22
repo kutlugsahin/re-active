@@ -1,6 +1,5 @@
-import { computed, effect, isReactive, reactive, Calculated, readonly } from '@re-active/core';
+import { computed, effect, isReactive, reactive, Calculated, readonly, createTickScheduler } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction } from 'react';
-import { createTickScheduler } from './shared';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 
 export type Renderer = () => JSX.Element;

@@ -1,7 +1,7 @@
 export { createComponent, config } from './component';
-export { computed, reactive, watch, createTickScheduler } from './shared';
+export { computed, watch } from './shared';
 export { onMounted, onUnmounted, onUpdated, useContext, imperativeHandle } from './lifecycle';
-export { effect, isReactive } from '@re-active/core';
+export { effect, isReactive, readonly, toBox, toBoxes, reactive, isBox } from '@re-active/core';
 
-export type { Calculated, Computed, Effect, EffectOptions, WatchOptions } from '@re-active/core';
+export type { Calculated, Computed, Effect, EffectOptions, WatchOptions, Reactive, Box, ShallowReactive, Scheduler, UnBox } from '@re-active/core';
 export type { ReactiveComponent, Renderer, ReactiveComponentWithHandle } from './component';

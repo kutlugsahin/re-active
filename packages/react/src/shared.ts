@@ -1,4 +1,4 @@
-import { Computed, computed as coreComputed, watch as coreWatch, WatchOptions, reactive, computedFn, createTickScheduler } from '@re-active/core';
+import { Computed, computed as coreComputed, watch as coreWatch, WatchOptions, computedFn, createTickScheduler } from '@re-active/core';
 import { isInSetupPhase, onUnmounted, onMounted } from "./lifecycle";
 
 const createOnMountScheduler = () => {
@@ -54,8 +54,5 @@ const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue
 export {
 	watch,
 	computed,
-	reactive,
 	computedFn,
-	createTickScheduler,
-	createOnMountScheduler,
 }
