@@ -52,11 +52,11 @@ reactive.shallow = <T>(val: T): ShallowReactive<T> => {
     }
 }
 
-reactive.ref = <T>(val: T): Box<UnBox<T>> => {
+reactive.box = <T>(val: T): Box<UnBox<T>> => {
     return ref(val);
 }
 
-reactive.shallowRef = <T>(val: T): T extends Box<any> ? T : Box<T> => {
+reactive.shallowBox = <T>(val: T): T extends Box<any> ? T : Box<T> => {
     return vendorShallowRef(val);
 }
 

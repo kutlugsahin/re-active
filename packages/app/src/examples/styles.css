@@ -1,0 +1,13 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.example {
+  margin: 10px;
+}
+
+.example .content {
+  border: 1px solid #ccc;
+  padding: 10px;
+}
