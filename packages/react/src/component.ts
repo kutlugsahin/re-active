@@ -1,5 +1,5 @@
 import { computed, effect, isReactive, reactive, Calculated, readonly } from '@re-active/core';
-import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
 
@@ -57,7 +57,7 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 // a hack to force component re-render
 const useForceUpdate = () => {
 	const [, forceRender] = useState({});
-	return () => forceRender({});
+	return useCallback(() => forceRender({}), [forceRender]);
 }
 
 const setup = (setupFunction: Function): Renderer => {
@@ -88,18 +88,19 @@ const createComponentHandle = (): ComponentHandle => {
 	}
 }
 
-// React.ForwardRefExoticComponent < React.PropsWithoutRef<P> & React.RefAttributes < H >>
+
 
 // reactive react component implementation
 export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<P> {
-
+	
 	// creating a functional component
 	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
-
+		const didMount = useRef(false);
+		
 		let componentState = useRef<ComponentState>();
-
+		
 		if (!componentState.current) {
 			// schduler to re render component
 			const scheduler = tickScheduler();
@@ -126,14 +127,20 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
 			const computedRender = computed(() => renderer());
 
+			function update() {
+				if (didMount) {
+					forceUpdate();
+				}
+			}
+
 			const renderEffect = effect(() => {
 				componentHandle.willRender = true;
 
 				// re-render react component with tick scheduler
-				scheduler(forceUpdate);
+				update();
 
 				return computedRender.value;
-			});
+			}, {scheduler});
 
 			const dispose = () => {
 				renderEffect.dispose()
@@ -172,12 +179,14 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 		// call onMounted
 		useEffect(() => {
+			didMount.current = true;
 			lifecycles.onMounted.forEach(p => p());
 			return () => {
 				dispose();
 				// call onUnmounted
 				lifecycles.onUnmounted.forEach(p => p());
 			};
+
 		}, [dispose, lifecycles]);
 
 		// return the cached render

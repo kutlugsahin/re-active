@@ -12,10 +12,6 @@ export function makeItem(id: string) {
     }
 }
 
-function randomIntFromInterval(min, max) { // min and max included 
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
 export const nodes: Node<Item>[] = Array(nodeGenerationCount).fill(null).map((_, i) => {
     const node: Node<Item> = {
         id: `${i}`,
