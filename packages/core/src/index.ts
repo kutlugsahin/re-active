@@ -1,4 +1,30 @@
-import { computed as vendorComputed, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive, readonly as vendorReadonly, shallowRef as vendorShallowRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, Ref, toRefs, isRef, ReactiveFlags } from "@vue/reactivity";
+import { computed as vendorComputed, effect as vendorEffect, stop, reactive as vendorReactive, UnwrapRef, ref as vendorRef, ComputedRef, isReactive as vendorIsReactive, readonly as vendorReadonly, shallowRef as vendorShallowRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, Ref, toRefs, isRef, ReactiveFlags, ReactiveEffectOptions } from "@vue/reactivity";
+
+export type Callback = () => void;
+
+export const queueMicroTask = (clb: Callback) => {
+    Promise.resolve().then(clb);
+}
+
+export const tickScheduler = () => {
+
+    let _job: Callback | null = null;
+
+    let isRunning = false;
+
+    return (job: () => void) => {
+        _job = job;
+        if (!isRunning) {
+            isRunning = true;
+
+            queueMicroTask(() => {
+                _job?.();
+                _job = null;
+                isRunning = false;
+            })
+        }
+    }
+}
 
 const REF_MARKER = '__v_isRef';
 
@@ -124,10 +150,6 @@ export const computedFn = <T extends (...p: any[]) => any>(fn: T): T => {
     }) as T;
 }
 
-export interface WatchOptions {
-    scheduler?: Scheduler;
-}
-
 export const effect = (fn: () => any, options?: EffectOptions): Effect => {
     const eff = vendorEffect(fn, options);
 
@@ -141,19 +163,24 @@ export const effect = (fn: () => any, options?: EffectOptions): Effect => {
 
 export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue: ReturnType<T>) => void>(fn: T, clb: R, options?: WatchOptions) => {
     let oldValue: ReturnType<T>;
-    let newValue: ReturnType<T>;
+
+    const sheduler: Scheduler = options?.flush === 'sync' ? p => p() : tickScheduler();
+
+    function notify(newValue: ReturnType<T>) {
+        clb(newValue, oldValue);
+        oldValue = newValue;
+    }
 
     return effect(() => {
-        oldValue = newValue;
-        newValue = fn();
-
-        if (options?.scheduler) {
-            options?.scheduler(() => clb(newValue, oldValue));
+        const newValue = fn();
+        
+        if (options?.immediate) {
+            notify(newValue)
         } else {
-            clb(newValue, oldValue)
+            sheduler(() => {
+                notify(newValue);
+            })
         }
-    }, {
-        scheduler: options?.scheduler,
     }).dispose;
 }
 
@@ -162,38 +189,17 @@ export type Effect = {
     dispose: () => void;
 }
 
-export interface EffectOptions {
+export interface EffectOptions extends ReactiveEffectOptions {
     scheduler?: Scheduler;
+}
+
+export interface WatchOptions {
+    immediate?: boolean;
+    flush: 'sync' | 'post',
 }
 
 export const isReactive = (value: any) => {
     return vendorIsReactive(value);
-}
-
-export const createTickScheduler = () => {
-
-    let jobs = new Set<() => void>();
-
-    let isRunning = false;
-
-    return (job: () => void) => {
-        if (!jobs.has(job)) {
-            jobs.add(job);
-        }
-
-        if (!isRunning) {
-            isRunning = true;
-
-            Promise.resolve().then(() => {
-                for (const jobtorun of jobs) {
-                    jobtorun();
-                }
-
-                jobs = new Set();
-                isRunning = false;
-            })
-        }
-    }
 }
 
 export const createImmediateScheduler = (immediate: boolean = true) => {

@@ -9,6 +9,7 @@ import { ImperativeHandle } from './ImperativeHandle';
 import { ContextApi } from './ContextApi';
 import { Watch } from './Watch';
 import { Computed } from './Computed';
+import { WatchOptions } from './WatchOptions';
 
 const Example = (props) => {
     return (
@@ -48,6 +49,9 @@ export default () => {
             </Example>
             <Example title="computed usage">
                 <Computed />
+            </Example>
+            <Example title="watch options">
+                <WatchOptions />
             </Example>
         </div>
     );

@@ -1,6 +1,7 @@
-import { computed, effect, isReactive, reactive, Calculated, readonly, createTickScheduler } from '@re-active/core';
+import { computed, effect, isReactive, reactive, Calculated, readonly } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction } from 'react';
-import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
+import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
+import { tickScheduler } from './schedulers';
 
 export type Renderer = () => JSX.Element;
 export type ReactiveComponent<P = {}> = (props: P) => Renderer;
@@ -22,7 +23,7 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 
 	// convert props to a reactive object
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const reactiveProps = useMemo(() => reactive({...props}), []) as P;
+	const reactiveProps = useMemo(() => reactive({ ...props }), []) as P;
 	// keep the old props object for future comparison
 	const prevProps = useRef<P>(props);
 
@@ -66,10 +67,26 @@ const setup = (setupFunction: Function): Renderer => {
 interface ComponentState {
 	computedRender: Calculated<JSX.Element>;
 	lifecycles: LifeCycle;
+	componentHandle: ComponentHandle;
 	dispose: () => void;
 }
 
-const scheduler = createTickScheduler();
+const createComponentHandle = (): ComponentHandle => {
+	let listeners: Callback[] = [];	
+
+	function onUpdated(clb: Callback) {
+		listeners.push(clb);
+	}
+
+	return {
+		willRender: false,
+		onUpdated,
+		notify() {
+			listeners.forEach(p => p());
+			listeners = [];
+		}
+	}
+}
 
 // React.ForwardRefExoticComponent < React.PropsWithoutRef<P> & React.RefAttributes < H >>
 
@@ -84,8 +101,14 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 		let componentState = useRef<ComponentState>();
 
 		if (!componentState.current) {
+			// schduler to re render component
+			const scheduler = tickScheduler();
+
 			// empty object to be filled with lifecycles
 			beginRegisterLifecyces();
+
+			// shared object with registered watchers or lifecycles
+			const componentHandle = setCurrentComponentHandle(createComponentHandle())!;
 
 			// one time call for the 'reactive component' retrieving the render function which will be called for future renders
 			// in this phase we get the lifecycle calls to be referenced in lifecycle phases
@@ -95,6 +118,8 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// keep the ref of the lifecycle obj
 			const lifecycles = endRegisterLifecycles();
 
+			setCurrentComponentHandle(null);
+
 			// release the lifecycle handle to be used by other components
 			// currentLifecycleHandle = null;
 
@@ -102,10 +127,12 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			const computedRender = computed(() => renderer());
 
 			const renderEffect = effect(() => {
-				forceUpdate();
+				componentHandle.willRender = true;
+
+				// re-render react component with tick scheduler
+				scheduler(forceUpdate);
+
 				return computedRender.value;
-			}, {
-				scheduler,
 			});
 
 			const dispose = () => {
@@ -117,6 +144,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				computedRender,
 				lifecycles,
 				dispose,
+				componentHandle,
 			};
 		} else {
 			const { context, imperativeHandler } = componentState.current.lifecycles;
@@ -130,11 +158,16 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			}
 		}
 
-		const { computedRender, lifecycles, dispose } = componentState.current;
+		const { computedRender, lifecycles, dispose, componentHandle } = componentState.current;
 
 		// call onUpdated
 		useEffect(() => {
 			lifecycles.onUpdated.forEach(p => p());
+			componentHandle.willRender = false;
+
+			// notify listeners that component is updated
+			// i.e watch with flus:'post' option
+			componentHandle.notify();
 		});
 
 		// call onMounted

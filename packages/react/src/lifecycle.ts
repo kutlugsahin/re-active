@@ -1,6 +1,6 @@
 import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject, Ref} from 'react';
 
-type Callback = () => void;
+export type Callback = () => void;
 
 export interface LifeCycle {
     onMounted: Callback[];
@@ -10,12 +10,21 @@ export interface LifeCycle {
     imperativeHandler: any;
 }
 
+export interface ComponentHandle {
+    willRender: boolean;
+    onUpdated: (clb: Callback) => void;
+    notify: () => void;
+}
+
 
 let currentLifecycleHandle: LifeCycle | null = null;
-let _isInSetupPhase = false;
+let currentComponentHandle: ComponentHandle | null = null;
+
+export const setCurrentComponentHandle = (handle: ComponentHandle | null) => {
+    return currentComponentHandle = handle;
+}
 
 export const beginRegisterLifecyces = () => {
-    _isInSetupPhase = true;
     currentLifecycleHandle = {
         onMounted: [],
         onUnmounted: [],
@@ -26,7 +35,6 @@ export const beginRegisterLifecyces = () => {
 }
 
 export const endRegisterLifecycles = () => {
-    _isInSetupPhase = false;
     return currentLifecycleHandle!;
 }
 
@@ -52,4 +60,6 @@ export function imperativeHandle<H, T>(ref: Ref<H>, handler: T) {
     return reactUseImperativeHandle(ref, currentLifecycleHandle!.imperativeHandler);
 }
 
-export const isInSetupPhase = () => _isInSetupPhase;
+export const getComponentHandle = () => {
+    return currentComponentHandle;
+}
