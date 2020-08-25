@@ -72,18 +72,24 @@ interface ComponentState {
 }
 
 const createComponentHandle = (): ComponentHandle => {
-	let listeners: Callback[] = [];	
+	let listeners = new Set<Callback>();
 
 	function onUpdated(clb: Callback) {
-		listeners.push(clb);
+		listeners.add(clb);
+
+		return () => {
+			listeners.delete(clb);
+		}
 	}
 
 	return {
 		willRender: false,
 		onUpdated,
 		notify() {
-			listeners.forEach(p => p());
-			listeners = [];
+			for (const clb of listeners) {
+				clb();
+			}
+			listeners.clear();
 		}
 	}
 }

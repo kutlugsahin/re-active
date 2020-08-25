@@ -12,7 +12,7 @@ export interface LifeCycle {
 
 export interface ComponentHandle {
     willRender: boolean;
-    onUpdated: (clb: Callback) => void;
+    onUpdated: (clb: Callback) => () => void;
     notify: () => void;
 }
 

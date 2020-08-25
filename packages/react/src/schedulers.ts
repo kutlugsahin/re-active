@@ -44,11 +44,14 @@ export const onMountScheduler = () => {
 export const onUpdatedScheduler = (): Scheduler => {
     const componentHandle = getComponentHandle();
     let isRunning = false;
-    let _job: Callback;
+    let _job: Callback | null = null;
+    let unsubscribe: Callback | undefined;
 
     function notify() {
         isRunning = false;
-        _job();
+        _job?.();
+        _job = null;
+        unsubscribe?.();
     }
 
     return (job) => {
@@ -58,9 +61,7 @@ export const onUpdatedScheduler = (): Scheduler => {
                 isRunning = true;
                 queueMicroTask(() => {
                     if (componentHandle.willRender) {
-                        componentHandle.onUpdated(() => {
-                            notify();
-                        })
+                        unsubscribe = componentHandle.onUpdated(notify);
                     } else {
                         notify();
                     }
