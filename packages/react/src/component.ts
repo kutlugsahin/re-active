@@ -1,4 +1,4 @@
-import { computed, effect, isReactive, reactive, Calculated, readonly } from '@re-active/core';
+import { computed, coreEffect, reactive, readonly, Computed } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
@@ -65,7 +65,7 @@ const setup = (setupFunction: Function): Renderer => {
 }
 
 interface ComponentState {
-	computedRender: Calculated<JSX.Element>;
+	computedRender: Computed<JSX.Element>;
 	lifecycles: LifeCycle;
 	componentHandle: ComponentHandle;
 	dispose: () => void;
@@ -133,7 +133,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				}
 			}
 
-			const renderEffect = effect(() => {
+			const renderEffect = coreEffect(() => {
 				componentHandle.willRender = true;
 
 				// re-render react component with tick scheduler
@@ -170,11 +170,11 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 		// call onUpdated
 		useEffect(() => {
 			lifecycles.onUpdated.forEach(p => p());
-			componentHandle.willRender = false;
-
 			// notify listeners that component is updated
 			// i.e watch with flus:'post' option
 			componentHandle.notify();
+
+			componentHandle.willRender = false;
 		});
 
 		// call onMounted

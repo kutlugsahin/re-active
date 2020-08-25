@@ -1,29 +1,22 @@
 import { Scheduler, queueMicroTask } from '@re-active/core';
 import { Callback, getComponentHandle, onMounted } from './lifecycle';
 
+// combine shedulers so that they run one after another (not concurrent)
 export function combineSchedulers(schedulers: Scheduler[]): Scheduler {
-    let _job: () => void;
+    
+    function combine(clb: Callback, schedulerArr: Scheduler[]) {
+        const [current, ...rest] = schedulerArr;
 
-    let callbacks = schedulers.map(() => false);
-
-    function callSheduler(index: number) {
-        schedulers[index](() => {
-            callbacks[index] = true;
-            checkFire();
-        })
-    }
-
-    function checkFire() {
-        if (callbacks.every(p => p)) {
-            _job?.();
-            callbacks = schedulers.map(() => false)
+        if (current) {
+            current(() => {
+                combine(clb, rest);
+            })
+        } else {
+            clb();
         }
     }
 
-    return (job) => {
-        _job = job;
-        schedulers.forEach((p, index) => callSheduler(index));
-    }
+    return (clb: Callback) => combine(clb, schedulers);
 }
 
 export const onMountScheduler = () => {
@@ -52,7 +45,7 @@ export const onUpdatedScheduler = (): Scheduler => {
     const componentHandle = getComponentHandle();
     let isRunning = false;
     let _job: Callback;
-    
+
     function notify() {
         isRunning = false;
         _job();

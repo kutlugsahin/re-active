@@ -1,8 +1,8 @@
-import { Calculated, computed } from '@re-active/core';
+import { Computed, computed } from '@re-active/core';
 import { getGlobalStore } from './createStore';
 
 export type Selector<S = any> = (s: S) => any;
-export const selector = <T extends Selector>(fn: T): Calculated<ReturnType<T>> => {
+export const selector = <T extends Selector>(fn: T): Computed<ReturnType<T>> => {
     return computed(() => fn(getGlobalStore()));
 }
 

@@ -1,4 +1,4 @@
-import { reactive, WatchOptions, watch } from '@re-active/core'
+import { reactive, watch, WatchOptions } from '@re-active/core'
 
 export type State = { [key: string]: any };
 

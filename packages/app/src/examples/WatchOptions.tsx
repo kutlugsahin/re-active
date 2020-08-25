@@ -45,9 +45,9 @@ export const WatchOptions = createComponent(() => {
         // console.log('asdas', count.value)
     }
 
-    watch(() => click.value, (val) => {
-        console.log('click value:', val);
-    })
+    // watch(() => click.value, (val) => {
+    //     console.log('click value:', val);
+    // })
 
     return () => (
         <div>

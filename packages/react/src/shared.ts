@@ -1,4 +1,4 @@
-import { Computed, computed as coreComputed, computedFn, effect, Scheduler } from '@re-active/core';
+import { Computed, computed as coreComputed, Scheduler, watch as coreWatch, coreEffect } from '@re-active/core';
 import { getComponentHandle, onUnmounted } from "./lifecycle";
 import { combineSchedulers, onUpdatedScheduler, tickScheduler } from './schedulers';
 
@@ -25,52 +25,45 @@ export interface WatchOptions {
 	immediate?: boolean
 }
 
-function createWatchScheduler<T>(flush: Flush, clb: (newValue: T, oldValue: T) => void) {
-	let oldValue: T;
-	let scheduler: Scheduler;
-
+function createFlushScheduler(flush: Flush): Scheduler {
 	switch (flush) {
 		case 'sync':
-			scheduler = p => p();
-			break;
+			return p => p();
 		case 'pre':
-			scheduler = tickScheduler();
-			break;
+			return tickScheduler();
 		case 'post':
-			scheduler = combineSchedulers([tickScheduler(), onUpdatedScheduler()]);
-			break;
+			return combineSchedulers([tickScheduler(), onUpdatedScheduler()]);
 		default:
-			scheduler = p => p();
-	}
-
-	return (newValue: T) => {
-		scheduler(() => {
-			clb(newValue, oldValue);
-			oldValue = newValue;
-		})
+			return p => p();
 	}
 }
 
 const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue: ReturnType<T>) => void>(fn: T, clb: R, options?: WatchOptions) => {
-	const scheduler = createWatchScheduler(options?.flush || 'post', clb);
-	let shouldRun = false;
-	let watchEffect = effect(() => {
-		const newValue = fn();
-		if (options?.immediate) {
-			shouldRun = true;
-		}
-
-		if (shouldRun) {
-			scheduler(newValue);
-		} else {
-			shouldRun = true;
-		}
-	})
+	let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
+	let dispose = coreWatch(fn, clb, { scheduler });
 
 	if (getComponentHandle()) {
 		onUnmounted(() => {
-			watchEffect.dispose();
-			watchEffect = undefined!;
+			dispose();
+			scheduler = null!;
+			dispose = null!
+		})
+	}
+}
+
+export interface EffectOptions {
+	flush?: Flush;
+}
+
+const effect = <T extends () => any>(fn: T, options?: EffectOptions) => {
+	let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
+	let eff = coreEffect(fn, { scheduler });
+
+	if (getComponentHandle()) {
+		onUnmounted(() => {
+			eff.dispose();
+			scheduler = null!;
+			eff = null!
 		})
 	}
 }
@@ -78,5 +71,5 @@ const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue
 export {
 	watch,
 	computed,
-	computedFn,
+	effect,
 };
