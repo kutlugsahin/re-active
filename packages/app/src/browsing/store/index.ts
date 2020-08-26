@@ -31,11 +31,8 @@ createStore<Store>({
     }
 });
 
-watchActions(async (actionName, params, result) => {
+watchActions(async (actionName, params) => {
     console.log(`action ${actionName} is called`);
-    const returnValue = await result;
-    console.log(`action ${actionName} returned ${returnValue}`);
-    return result;
 })
 
 // ================ SELECTORS ===========================
