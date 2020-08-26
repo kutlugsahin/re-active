@@ -1,4 +1,4 @@
-import { getGlobalStore } from './createStore';
+import { getActionWatcher, getGlobalStore } from './createStore';
 import { generatorFlow } from './flow';
 import { Action, Actionize, Actions, Callable, Dictionary, OmitStateParameter } from './types';
 
@@ -44,8 +44,16 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 
 	const proxyFn = new Proxy(actionized, {
 		apply(target, ctx, params) {
-			console.log(`${proxyFn.displayName || actionized.displayName} called with params: `, ...params)
-			Reflect.apply(target, ctx, params);
+			const result = Reflect.apply(target, ctx, params);
+
+			const actionWatcher = getActionWatcher();
+
+			if (actionWatcher) {
+				const actionName: string = proxyFn.displayName || actionized.displayName;
+				actionWatcher(actionName, params, result);
+			} 
+
+			return result;
 		}
 	})
 

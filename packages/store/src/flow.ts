@@ -81,6 +81,7 @@ export function generatorFlow<T extends (...p: any[]) => Generator>(fn: T) {
                     currentIteration = iterator.next(true)
                 }
             }
+            return currentIteration.value;
         }
 
         const result = run() as CancelablePromise<GeneratorReturn<T>>;

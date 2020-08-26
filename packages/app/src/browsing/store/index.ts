@@ -1,5 +1,5 @@
-import { createStore, createSelectors, createActions, watchStore, takeLatest, action, ActionGenerator, isCancelled, debounce } from '@re-active/store';
-import { Dictionary, Item, Node, fetchItems, nodes, makeTreeNode, RowItem } from './utils';
+import { createActions, createSelectors, createStore, takeLatest, watchStore, watchActions } from '@re-active/store';
+import { Dictionary, fetchItems, Item, makeTreeNode, Node, nodes, RowItem } from './utils';
 
 interface Store {
     items: Dictionary<Item>;
@@ -29,6 +29,13 @@ createStore<Store>({
         rows: [],
         selectedRow: null,
     }
+});
+
+watchActions(async (actionName, params, result) => {
+    console.log(`action ${actionName} is called`);
+    const returnValue = await result;
+    console.log(`action ${actionName} returned ${returnValue}`);
+    return result;
 })
 
 // ================ SELECTORS ===========================
@@ -55,6 +62,7 @@ const actionMap = {
                 const newItems: Item[] = yield fetchItems(node);
                 newItems.forEach(p => state.items[p.id] = p);
                 node.children = newItems.map(p => makeTreeNode(p, node));
+                return newItems;
             }
         } finally {
             node.loading = false;
@@ -74,7 +82,7 @@ const actionMap = {
     },
     async expandTreeNode(state: Store, node: Node) {
         node.expanded = !node.expanded;
-        await actions.loadChildren(node);
+        return await actions.loadChildren(node);
     },
     selectTableItem(state: Store, item: RowItem) {
         state.table.selectedRow = item;
@@ -105,7 +113,6 @@ export const actions = createActions({
     ...actionMap,
     selectTreeNode: takeLatest(actionMap.selectTreeNode),
 });
-
 
 // ================ WATCHERS ===========================
 watchStore((state: Store) => state.selectedTreeNode, (newNode, oldNode) => {
