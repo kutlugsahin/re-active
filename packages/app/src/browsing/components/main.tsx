@@ -1,4 +1,4 @@
-import { createComponent } from '@re-active/react';
+import { createComponent, onRendered, reactive } from '@re-active/react';
 import React from 'react';
 import { actions, values } from '../store';
 import { RowItem } from '../store/utils';
@@ -58,10 +58,21 @@ interface RowProps {
 }
 
 export const Row = createComponent((props: RowProps) => {
+
+    let row: HTMLTableRowElement;
+
+    onRendered(() => {
+        row.classList.add('flash');
+        setTimeout(() => {
+            row?.classList.remove('flash');
+        }, 500);
+    })
+
     return () => {
         const { name, id, col1, col2, col3 } = props.item.data;
         return (
             <tr
+                ref={e => row = e}
                 id={`row-${id}`}
                 className={props.item.selected ? 'row selected' : 'row'}
                 onClick={() => actions.selectTableItem(props.item)}

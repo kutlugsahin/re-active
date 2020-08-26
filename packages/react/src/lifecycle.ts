@@ -6,6 +6,7 @@ export interface LifeCycle {
     onMounted: Callback[];
     onUnmounted: Callback[];
     onUpdated: Callback[];
+    onRendered: Callback[];
     context: React.Context<any>[];
     imperativeHandler: any;
 }
@@ -29,6 +30,7 @@ export const beginRegisterLifecyces = () => {
         onMounted: [],
         onUnmounted: [],
         onUpdated: [],
+        onRendered: [],
         context: [],
         imperativeHandler: null,
     }
@@ -48,6 +50,10 @@ export function onUnmounted(callback: () => void) {
 
 export function onUpdated(callback: () => void) {
     currentLifecycleHandle!.onUpdated.push(callback);
+}
+
+export function onRendered(callback: () => void) {
+    currentLifecycleHandle!.onRendered.push(callback);
 }
 
 export function useContext<T>(context: React.Context<T>) {

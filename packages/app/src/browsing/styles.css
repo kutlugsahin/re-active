@@ -175,7 +175,8 @@
 
 .table tbody tr {
     cursor: pointer;
-    transition: background-color .2s ease;
+    transition: background-color .2s ease, outline-color .2s ease;
+    outline: 2px solid transparent;
 }
 
 .table tbody tr:nth-child(even){
@@ -188,6 +189,10 @@
 
 .table tbody tr.selected {
     background-color: var(--selected-color);
+}
+
+.table tr.flash {
+    outline: 2px solid red;
 }
 
 .detailpanel h3 {

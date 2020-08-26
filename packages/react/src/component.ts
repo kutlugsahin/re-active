@@ -180,6 +180,10 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// i.e watch with flus:'post' option
 			componentHandle.notify();
 
+			if (componentHandle.willRender) {
+				lifecycles.onRendered.forEach(p => p());
+			}
+
 			componentHandle.willRender = false;
 		});
 

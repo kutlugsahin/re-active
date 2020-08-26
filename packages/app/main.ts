@@ -4,5 +4,5 @@ import { App } from './src/demo/App';
 import { List } from './src/vue-reactivity';
 import { App as Browser } from './src/browsing';
 import Example from './src/examples';
-ReactDom.render(React.createElement(Example), document.getElementById('app'));
+ReactDom.render(React.createElement(Browser), document.getElementById('app'));
 

@@ -1,6 +1,6 @@
 export { createComponent, config } from './component';
 export { computed, watch, effect } from './shared';
-export { onMounted, onUnmounted, onUpdated, useContext, imperativeHandle } from './lifecycle';
+export { onMounted, onUnmounted, onUpdated, useContext, onRendered, imperativeHandle } from './lifecycle';
 export { isReactive, readonly, toBox, toBoxes, reactive, isBox } from '@re-active/core';
 
 export type { Computed, Reactive, Box, ShallowReactive, Scheduler, UnBox } from '@re-active/core';
