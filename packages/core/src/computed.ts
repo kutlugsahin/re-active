@@ -1,7 +1,8 @@
 import { computed as vendorComputed, stop } from "@vue/reactivity";
+import { Box } from './reactive';
 import { watch } from './watch';
 
-export type Computed<T> = {
+export interface Computed<T> extends Box<T> {
     value: T,
     watch: (listener: (olVal: T, newVal: T) => void) => () => void
     isActive: boolean
@@ -13,11 +14,14 @@ type Compute<F extends () => any> = Computed<ReturnType<F>>;
 export const computed = <T extends () => any>(fn: T): Compute<T> => {
     const cmp = vendorComputed(fn);
 
+    const { effect, value, ...rest } = cmp;
+
     return {
+        ...rest,
         get value() {
             return cmp.value;
         },
-        watch: (clb) => watch(() => cmp.value, clb),
+        watch: (clb) => watch<() => any>(() => cmp.value, clb),
         get isActive() {
             return cmp.effect.active
         },

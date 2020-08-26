@@ -1,6 +1,6 @@
 import { isReactive as vendorIsReactive, reactive as vendorReactive, readonly as vendorReadonly, Ref, ref as vendorRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, shallowRef as vendorShallowRef, toRefs, UnwrapRef } from "@vue/reactivity";
 
-const REF_MARKER = '__v_isRef';
+export const REF_MARKER = '__v_isRef';
 
 type ReactiveObject<T> = T extends Ref ? T : UnwrapRef<T>;
 

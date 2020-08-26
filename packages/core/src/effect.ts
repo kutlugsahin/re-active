@@ -1,4 +1,4 @@
-import { effect as vendorEffect, ReactiveEffectOptions, stop } from "@vue/reactivity";
+import { DebuggerEvent, effect as vendorEffect, ReactiveEffectOptions, stop } from "@vue/reactivity";
 
 export type Scheduler = (run: () => void) => any;
 
@@ -9,8 +9,12 @@ export type Effect = {
     dispose: Disposer;
 }
 
+export type ReactivityEvent = DebuggerEvent;
+
 export interface CoreEffectOptions extends ReactiveEffectOptions {
     scheduler?: Scheduler;
+    onTrack?: (event: ReactivityEvent) => void;
+    onTrigger?: (event: ReactivityEvent) => void;
 }
 
 export const coreEffect = (fn: () => any, options?: CoreEffectOptions): Effect => {

@@ -1,6 +1,7 @@
-import { getActionWatcher, getGlobalStore } from './createStore';
+import { getGlobalStore } from './createStore';
 import { generatorFlow } from './flow';
 import { Action, Actionize, Actions, Callable, Dictionary, OmitStateParameter } from './types';
+import { getActionWatcher } from './watch';
 
 const isAction = Symbol('isAction');
 

@@ -1,22 +1,52 @@
-import { coreEffect, Scheduler } from './effect';
-import { tickScheduler } from './utils';
+import { Computed } from './computed';
+import { coreEffect, Disposer, ReactivityEvent, Scheduler } from './effect';
+import { Box, isBox, isReactive } from './reactive';
+import { tickScheduler, traverse } from './utils';
 
-export interface WatchOptions {
+export interface CoreWatchOptions {
     immediate?: boolean;
     flush?: 'sync' | 'post',
     scheduler?: Scheduler;
+    onTrack?: (event: ReactivityEvent) => void;
+    onTrigger?: (event: ReactivityEvent) => void;
+    onStop?: () => void;
+    deep?: boolean;
 }
 
-export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, oldValue: ReturnType<T>) => void>(fn: T, clb: R, options?: WatchOptions) => {
-    let oldValue: ReturnType<T>;
-    let shouldRun = false;
-    const scheduler: Scheduler = options?.scheduler || (options?.flush === 'sync' ? p => p() : tickScheduler());
+function traverseAndReturn(source: any) {
+    traverse(source, new Set());
+    return source;
+}
+
+export type WatchSource = (() => any) | Box<any> | Computed<any> | object;
+
+export type WatchCallback<T extends WatchSource> =
+    T extends () => infer R ? (newValue: R, oldValue: R) => void :
+    T extends (...p : any[]) => infer R ? (newValue: R, oldValue: R) => void :
+    T extends Box<infer R> ? (newValue: R, oldValue: R) => void :
+    T extends object ? (newValue: T, oldValue: T) => void : never;
+
+export function watch<T extends WatchSource>(source: T, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer {
+    let oldValue: any;
+    let shouldRun = options?.immediate || false;
+    const scheduler: Scheduler | undefined = options?.scheduler || (options?.flush === 'sync' ? undefined : tickScheduler());
+
+    let effectBody: () => any;
+
+    if (typeof source === 'function') {
+        effectBody = source as () => any;
+    } else if (isBox(source)) {
+        if (options?.deep) {
+            effectBody = () => traverseAndReturn(source);
+        } else {
+            effectBody = () => (source as unknown as Box<any>).value;
+        }
+    } else if (isReactive(source)) {
+        effectBody = () => traverseAndReturn(source);
+    }
 
     return coreEffect(() => {
-        const newValue = fn();
-        if (options?.immediate) {
-            shouldRun = true;
-        }
+        const newValue = effectBody();
 
         if (shouldRun) {
             clb(newValue, oldValue);
@@ -26,5 +56,8 @@ export const watch = <T extends () => any, R extends (newValue: ReturnType<T>, o
         }
     }, {
         scheduler,
+        onTrack: options?.onTrack,
+        onTrigger: options?.onTrigger,
+        onStop: options?.onStop
     }).dispose;
 }

@@ -1,4 +1,5 @@
-import { createActions, createSelectors, createStore, takeLatest, watchStore, watchActions } from '@re-active/store';
+import { reactive, watch } from '@re-active/react';
+import { createActions, createSelectors, createStore, takeLatest, watchStore, watchActions, selector } from '@re-active/store';
 import { Dictionary, fetchItems, Item, makeTreeNode, Node, nodes, RowItem } from './utils';
 
 interface Store {

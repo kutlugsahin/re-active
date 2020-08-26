@@ -11,7 +11,7 @@ export const Main = createComponent(() => {
                     <button onClick={actions.gotoParentFolder}>←</button>
                     <button onClick={actions.browseCurrentTableItem}>↴</button>
                 </div>
-                <Table />
+                <Table/>
             </div>
         )
     }
