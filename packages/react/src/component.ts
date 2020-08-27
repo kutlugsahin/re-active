@@ -208,7 +208,8 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 	return ReactiveComponent as FunctionComponent<ReactiveProps<P>>;
 }
 
-createComponent.withHandle = <P = {}, H = {}>(reactiveComponent: ReactiveComponentWithHandle<P, H>):
-	React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>> => {
-	return forwardRef(createComponent<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, P>);
+createComponent.withHandle = <P = {}, H = {}>(reactiveComponent: ReactiveComponentWithHandle<P, H>) => {
+	const component = createComponent<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, ReactiveProps<P>>;
+	return forwardRef(component);
 }
+

@@ -1,5 +1,5 @@
-import React from "react";
 import { createComponent, reactive } from "@re-active/react";
+import React from "react";
 
 const Label = createComponent((props: any) => {
   return () => <label>{props.text}</label>;
@@ -20,16 +20,15 @@ const Input = createComponent((props: InputProps) => {
 
 export const Props = createComponent((props) => {
   const text = reactive('');
-  const other = reactive('');
 
   function onChange(txt) {
-      text.value.length > 5 ? other.value = txt : text.value = txt;
+    text.value = txt;
   }
 
   return () => (
     <div>
       <Input
-        value={text.value.length > 5 ? other : text}
+        value={text}
         onChange={onChange}
       />
       <Label text={text} />
