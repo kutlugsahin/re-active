@@ -10,8 +10,6 @@ export interface TodoItem {
 
 type Filter = 'all' | 'active' | 'completed';
 
-
-
 interface StoreState {
 	todos: TodoItem[];
 	filter: Filter;
@@ -51,7 +49,7 @@ export const actions = createActions({
 		state.filter = filter;
 	},
 	createTodo(state: StoreState, text: string) {
-		state.todos.push({
+		state.todos.unshift({
 			text,
 			dateCreated: Date.now(),
 			isCompleted: false,
