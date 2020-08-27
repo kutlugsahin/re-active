@@ -1,11 +1,11 @@
-import { computed, coreEffect, reactive, readonly, Computed } from '@re-active/core';
+import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
 
 export type Renderer = () => JSX.Element;
-export type ReactiveComponent<P = {}> = (props: P) => Renderer;
-export type ReactiveComponentWithHandle<P, H> = (props: P, ref: Ref<H>) => Renderer;
+export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
+export type ReactiveComponentWithHandle<P, H> = (props: Reactive<P>, ref: Ref<H>) => Renderer;
 
 export interface ReactiveConfig {
 	readonlyProps: boolean;
@@ -19,11 +19,11 @@ export function config(cfg: ReactiveConfig) {
 	Object.assign(_config, cfg);
 }
 
-const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
+const useReactiveProps = <P extends { [key: string]: any }>(props: P) => {
 
 	// convert props to a reactive object
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const reactiveProps = useMemo(() => reactive({ ...props }), []) as P;
+	const reactiveProps = useMemo(() => reactive({ ...props }), []);
 	// keep the old props object for future comparison
 	const prevProps = useRef<P>(props);
 
@@ -33,7 +33,7 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 
 		for (const key in props) {
 			if (prev[key] !== props[key]) {
-				reactiveProps[key] = props[key];
+				(reactiveProps[key] as any) = props[key];
 			}
 		}
 
@@ -47,7 +47,7 @@ const useReactiveProps = <P extends { [key: string]: any }>(props: P): P => {
 	});
 
 	if (_config.readonlyProps) {
-		return useMemo(() => readonly(reactiveProps), []) as P;
+		return useMemo(() => readonly(reactiveProps), []);
 	}
 
 	// now we return a reactive props object which will also react to parent renders
@@ -94,10 +94,10 @@ const createComponentHandle = (): ComponentHandle => {
 	}
 }
 
-
+export type ReactiveProps<P extends {[key: string]: any}> = { [key in keyof P]: P[key] | Box<P[key]> }
 
 // reactive react component implementation
-export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<P> {
+export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<ReactiveProps<P>> {
 	
 	// creating a functional component
 	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
@@ -205,7 +205,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 	(ReactiveComponent as any).displayName = reactiveComponent.name || undefined;
 
-	return ReactiveComponent;
+	return ReactiveComponent as FunctionComponent<ReactiveProps<P>>;
 }
 
 createComponent.withHandle = <P = {}, H = {}>(reactiveComponent: ReactiveComponentWithHandle<P, H>):

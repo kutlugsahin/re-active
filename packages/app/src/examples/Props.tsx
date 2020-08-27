@@ -5,7 +5,12 @@ const Label = createComponent((props: any) => {
   return () => <label>{props.text}</label>;
 });
 
-const Input = createComponent((props: any) => {
+interface InputProps {
+  value: string;
+  onChange: (text: string) => void;
+}
+
+const Input = createComponent((props: InputProps) => {
   const onChange = (e) => {
     props.onChange(e.target.value);
   };
@@ -14,17 +19,20 @@ const Input = createComponent((props: any) => {
 });
 
 export const Props = createComponent((props) => {
-  const state = reactive({
-    inputText: ""
-  });
+  const text = reactive('');
+  const other = reactive('');
+
+  function onChange(txt) {
+      text.value.length > 5 ? other.value = txt : text.value = txt;
+  }
 
   return () => (
     <div>
       <Input
-        value={state.inputText}
-        onChange={(text) => (state.inputText = text)}
+        value={text.value.length > 5 ? other : text}
+        onChange={onChange}
       />
-      <Label text={state.inputText} />
+      <Label text={text} />
     </div>
   );
 });
