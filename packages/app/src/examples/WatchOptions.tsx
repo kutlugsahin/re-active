@@ -19,7 +19,7 @@ export const WatchOptions = createComponent(() => {
         // console.log('on---updated');
     })
 
-    watch(() => count.value, (val) => {
+    watch(count, (val) => {
         // console.log('count updated');
         if (span) {
             span.innerText = 'Flush: pre ==> current value:' + val + ', ' + 'current html:' + button?.innerHTML;
@@ -29,7 +29,7 @@ export const WatchOptions = createComponent(() => {
         immediate: true,
     })
 
-    watch(() => count.value, (val) => {
+    watch(count, (val) => {
         // console.log('count updated');
         if (span) {
             span2.innerText = 'Flush: post ==> current value:' + val + ', ' + 'current html:' + button?.innerHTML;

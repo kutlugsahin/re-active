@@ -1,0 +1,18 @@
+{
+	"private": true,
+	"name": "test",
+	"version": "1.0.0",
+	"devDependencies": {
+		"@types/jest": "^26.0.10",
+		"jest": "26.4.2",
+		"ts-jest": "^26.3.0",
+		"@types/enzyme": "3.10.5",
+		"@types/enzyme-adapter-react-16": "1.0.6",
+		"enzyme": "3.11.0",
+		"enzyme-adapter-react-16": "1.15.4",
+		"enzyme-to-json": "3.5.0"
+	},
+	"scripts": {
+		"test": "jest"
+	}
+}

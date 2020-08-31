@@ -4,7 +4,8 @@
     "packages/core",
     "packages/store",
     "packages/react",
-    "packages/app"
+    "packages/app",
+    "packages/test"
   ],
   "scripts": {
     "build": "node build.js build",
@@ -13,7 +14,8 @@
     "demo:redux": "cd ./packages/app&&yarn start:redux",
     "demo:prod:redux": "cd ./packages/app&&yarn build&&yarn prod:redux",
     "publish:lib": "node build.js publish core",
-    "inc": "node build.js inc"
+    "inc": "node build.js inc",
+    "test": "cd ./packages/test && yarn test"
   },
   "author": {
     "email": "kutlugsahin@gmail.com",
