@@ -134,7 +134,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			const computedRender = computed(renderer);
 
 			function update() {
-				if (didMount) {
+				if (didMount.current) {
 					// call onBeforeRender data is updated but dom is not
 					lifecycles.onBeforeRender.forEach(p => p());
 
@@ -205,7 +205,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 				lifecycles.onUnmounted.forEach(p => p());
 			};
 
-		}, [dispose, lifecycles]);
+		}, []);
 
 		// return the cached render
 		return computedRender.value;
