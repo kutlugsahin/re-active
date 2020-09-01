@@ -3,6 +3,7 @@ import { createComponent } from "@re-active/react";
 import { shallow } from 'enzyme';
 import React from 'react'
 
+
 const Comp = createComponent(() => {
 
 

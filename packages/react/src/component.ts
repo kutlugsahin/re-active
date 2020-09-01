@@ -131,7 +131,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// currentLifecycleHandle = null;
 
 			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
-			const computedRender = computed(() => renderer());
+			const computedRender = computed(renderer);
 
 			function update() {
 				if (didMount) {

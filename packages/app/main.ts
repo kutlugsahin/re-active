@@ -3,5 +3,5 @@ import ReactDom from 'react-dom';
 import { App } from './src/todo-app/App';
 import { App as Browser } from './src/browsing';
 import Example from './src/examples';
-ReactDom.render(React.createElement(Browser), document.getElementById('app'));
+ReactDom.render(React.createElement(Example), document.getElementById('app'));
 
