@@ -1,5 +1,5 @@
 import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box } from '@re-active/core';
-import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback, useLayoutEffect } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
 
@@ -135,6 +135,9 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 			function update() {
 				if (didMount) {
+					// call onBeforeRender data is updated but dom is not
+					lifecycles.onBeforeRender.forEach(p => p());
+
 					forceUpdate();
 				}
 			}
@@ -172,6 +175,11 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 		}
 
 		const { computedRender, lifecycles, dispose, componentHandle } = componentState.current;
+
+		// call onBeforePaint when dom is updated but before actually painted
+		useLayoutEffect(() => {
+			lifecycles.onBeforePaint.forEach(p => p());
+		})
 
 		// call onUpdated
 		useEffect(() => {

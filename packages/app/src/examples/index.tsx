@@ -10,6 +10,7 @@ import { ContextApi } from './ContextApi';
 import { Watch } from './Watch';
 import { Computed } from './Computed';
 import { WatchOptions } from './WatchOptions';
+import { Reactivity } from './Reactivity';
 
 const Example = (props) => {
     return (
@@ -52,6 +53,9 @@ export default () => {
             </Example>
             <Example title="watch options">
                 <WatchOptions />
+            </Example>
+            <Example title="Reactivity">
+                <Reactivity />
             </Example>
         </div>
     );

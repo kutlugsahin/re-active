@@ -7,6 +7,8 @@ export interface LifeCycle {
     onUnmounted: Callback[];
     onUpdated: Callback[];
     onRendered: Callback[];
+    onBeforeRender: Callback[];
+    onBeforePaint: Callback[];
     context: React.Context<any>[];
     imperativeHandler: any;
 }
@@ -39,6 +41,8 @@ export const beginRegisterLifecyces = () => {
         onUpdated: [],
         onRendered: [],
         context: [],
+        onBeforePaint: [],
+        onBeforeRender: [],
         imperativeHandler: null,
     }
 }
@@ -63,6 +67,14 @@ export function onUpdated(callback: () => void) {
 
 export function onRendered(callback: () => void) {
     getCurrentLifeCycleHandle()?.onRendered.push(callback);
+}
+
+export function onBeforeRender(callback: () => void) {
+    getCurrentLifeCycleHandle()?.onBeforeRender.push(callback);
+}
+
+export function onBeforePaint(callback: () => void) {
+    getCurrentLifeCycleHandle()?.onBeforePaint.push(callback);
 }
 
 export function useContext<T>(context: React.Context<T>) {
