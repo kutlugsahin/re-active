@@ -14,18 +14,17 @@ export const Lifecycle = createComponent(() => {
 });
 
 function timer() {
-  let interval;
 
   const seconds = reactive(0);
 
   onMounted(() => {
-    interval = setInterval(() => {
+    const interval = setInterval(() => {
       seconds.value++;
     }, 1000);
-  });
 
-  onUnmounted(() => {
-    clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    }
   });
 
   return seconds;

@@ -1,10 +1,11 @@
 import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject, Ref} from 'react';
-import { reactive, Box } from '@re-active/core';
+import { reactive, Box, Disposer } from '@re-active/core';
 
 export type Callback = () => void;
+export type MountedCallback = () => (void | Disposer);
 
 export interface LifeCycle {
-    onMounted: Callback[];
+    onMounted: MountedCallback[];
     onUnmounted: Callback[];
     onUpdated: Callback[];
     onRendered: Callback[];
@@ -16,8 +17,8 @@ export interface LifeCycle {
 
 export interface ComponentHandle {
     willRender: boolean;
-    onUpdated: (clb: Callback) => () => void;
-    notify: () => void;
+    onUpdated: (clb: Callback) => Callback;
+    notify: Callback;
 }
 
 function getCurrentLifeCycleHandle() {
@@ -54,27 +55,27 @@ export const endRegisterLifecycles = () => {
     return lifecycles!;
 }
 
-export function onMounted(callback: () => void) {
+export function onMounted(callback: MountedCallback) {
     getCurrentLifeCycleHandle()?.onMounted.push(callback);
 }
 
-export function onUnmounted(callback: () => void) {
+export function onUnmounted(callback: Callback) {
     getCurrentLifeCycleHandle()?.onUnmounted.push(callback);
 }
 
-export function onUpdated(callback: () => void) {
+export function onUpdated(callback: Callback) {
     getCurrentLifeCycleHandle()?.onUpdated.push(callback);
 }
 
-export function onRendered(callback: () => void) {
+export function onRendered(callback: Callback) {
     getCurrentLifeCycleHandle()?.onRendered.push(callback);
 }
 
-export function onBeforeRender(callback: () => void) {
+export function onBeforeRender(callback: Callback) {
     getCurrentLifeCycleHandle()?.onBeforeRender.push(callback);
 }
 
-export function onBeforePaint(callback: () => void) {
+export function onBeforePaint(callback: Callback) {
     getCurrentLifeCycleHandle()?.onBeforePaint.push(callback);
 }
 
