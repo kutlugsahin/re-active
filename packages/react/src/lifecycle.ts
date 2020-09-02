@@ -1,4 +1,5 @@
 import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject, Ref} from 'react';
+import { reactive, Box } from '@re-active/core';
 
 export type Callback = () => void;
 
@@ -9,7 +10,7 @@ export interface LifeCycle {
     onRendered: Callback[];
     onBeforeRender: Callback[];
     onBeforePaint: Callback[];
-    context: React.Context<any>[];
+    context: Map<React.Context<any>, Box<any>>;
     imperativeHandler: any;
 }
 
@@ -40,7 +41,7 @@ export const beginRegisterLifecyces = () => {
         onUnmounted: [],
         onUpdated: [],
         onRendered: [],
-        context: [],
+        context: new Map(),
         onBeforePaint: [],
         onBeforeRender: [],
         imperativeHandler: null,
@@ -78,8 +79,10 @@ export function onBeforePaint(callback: () => void) {
 }
 
 export function useContext<T>(context: React.Context<T>) {
-    getCurrentLifeCycleHandle()?.context.push(context);
-    return reactUseContext(context);
+    const contextValue = reactUseContext(context);
+    const reactiveValue = reactive.shallowBox(contextValue)
+    getCurrentLifeCycleHandle()?.context.set(context, reactiveValue);
+    return reactiveValue;
 }
 
 export function imperativeHandle<H, T>(ref: Ref<H>, handler: T) {

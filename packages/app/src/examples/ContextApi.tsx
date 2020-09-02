@@ -5,13 +5,13 @@ import {
   useContext,
 } from "@re-active/react";
 
-const Context = React.createContext(null!);
+const Context = React.createContext<{text: string}>(null!);
 
 const Label = createComponent(() => {
 
   const context = useContext(Context);
 
-  return () => <label>{context.text}</label>;
+  return () => <label>{context.value.text}</label>;
 });
 
 export const ContextApi = createComponent(() => {

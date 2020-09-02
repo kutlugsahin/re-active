@@ -1,4 +1,4 @@
-import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box } from '@re-active/core';
+import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box, isBox } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback, useLayoutEffect } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
@@ -165,8 +165,9 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 		} else {
 			const { context, imperativeHandler } = componentState.current.lifecycles;
 			// call useContext to match hook call order
-			for (const ctx of context) {
-				useContext(ctx);
+			for (const [ ctx, boxedValue ] of context) {
+				const value = useContext(ctx);
+				boxedValue.value = isBox(value) ? value.value : value;
 			}
 
 			if (imperativeHandler) {
