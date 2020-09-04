@@ -1,9 +1,9 @@
 import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box, isBox } from '@re-active/core';
-import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback, useLayoutEffect } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback, useLayoutEffect, ReactElement } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
 
-export type Renderer = () => JSX.Element;
+export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
 export type ReactiveComponentWithHandle<P, H> = (props: Reactive<P>, ref: Ref<H>) => Renderer;
 
@@ -65,7 +65,7 @@ const setup = (setupFunction: Function): Renderer => {
 }
 
 interface ComponentState {
-	computedRender: Computed<JSX.Element>;
+	computedRender: Computed<ReactElement<any, any> | null>;
 	lifecycles: LifeCycle;
 	componentHandle: ComponentHandle;
 	dispose: () => void;

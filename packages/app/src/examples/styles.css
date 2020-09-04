@@ -11,3 +11,11 @@
   border: 1px solid #ccc;
   padding: 10px;
 }
+
+.selected {
+  outline: 1px solid red;
+}
+
+.flash {
+  outline: 2px solid blue;
+}

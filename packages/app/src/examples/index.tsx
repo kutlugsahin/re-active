@@ -12,6 +12,7 @@ import { Computed } from './Computed';
 import { WatchOptions } from './WatchOptions';
 import { Reactivity } from './Reactivity';
 import { WithReactComponents } from './WithReactComponents';
+import { Interop } from './Interop';
 
 const Example = (props) => {
     return (
@@ -60,6 +61,9 @@ export default () => {
             </Example>
             <Example title="With React Components">
                 <WithReactComponents />
+            </Example>
+            <Example title="Interoperability">
+                <Interop />
             </Example>
         </div>
     );
