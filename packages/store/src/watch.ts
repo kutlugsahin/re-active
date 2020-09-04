@@ -32,8 +32,3 @@ export const effectStore = <T extends (s: any) => any>(fn: T, options?: EffectSt
         scheduler,
     }).dispose;
 }
-
-
-effectStore(() => { }, {
-    
-})

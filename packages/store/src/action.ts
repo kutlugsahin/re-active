@@ -61,7 +61,7 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 	return proxyFn as Actionize<T>;
 }
 
-export const createActions = <S, T extends Dictionary<Action | Object>>(actions: T): Actions<T> => {
+export const createActions = <T extends Dictionary<Action | Object>>(actions: T): Actions<T> => {
 
 	function makeActionObject(actionMap: T, parentDisplayName: string = '') {		
 		const result: any = {};
