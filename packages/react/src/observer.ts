@@ -14,8 +14,7 @@ export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		const willInvalidate = useRef(false);
 		const componentState = useRef<ComponentState<P> | null>(null);
 
-
-
+		// first time setup computed render and effect
 		if (!componentState.current) {
 			const computedRender = computed(() => {
 				const componentProps = componentState.current?.props || props;
@@ -24,6 +23,7 @@ export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 			coreEffect(() => {
 				if (componentState.current) {
+					// reactive deoendency changed set flag
 					willInvalidate.current = true;
 					setState({});
 				}
@@ -37,15 +37,19 @@ export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 				props,
 			}
 		} else {
+			// update prop ref to be used in the computed function
 			componentState.current.props = props;
 
+			// skip component render since reactive dep update. 
 			if (!willInvalidate.current) {
+				// update not because reacive prop change so render component directly
 				return component(props, ref);
 			} else {
 				willInvalidate.current = false;
 			}
 		}
 
-		return componentState.current.computedRender.value
+		// reactive dept has changed, willInvalidate was true -> computed function will run
+		return componentState.current.computedRender.value;
 	}))
 }

@@ -1,5 +1,5 @@
 import { observer, reactive } from '@re-active/react';
-import React, { useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, Ref, useImperativeHandle, useRef, useState } from 'react';
 
 const count = reactive(0);
 
@@ -7,7 +7,7 @@ interface CounterProps {
 	data: number;
 }
 
-export const Counter = observer((props: CounterProps, ref) => {
+export const Counter = observer((props: CounterProps, ref: Ref<{alert: any}>) => {
 	const [clicks, setClicks] = useState(0);
 
 	useImperativeHandle(ref, () => ({
@@ -30,7 +30,7 @@ export const Counter = observer((props: CounterProps, ref) => {
 
 
 export const ObserverComp = observer(() => {
-	const counteRef = useRef<{ alert: any }>();
+	const counteRef = useRef(null);
 
 	const [data, setData] = useState(0);
 
