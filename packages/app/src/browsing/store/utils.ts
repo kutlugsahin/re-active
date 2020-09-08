@@ -31,7 +31,7 @@ export const nodes: Node<Item>[] = Array(nodeGenerationCount).fill(null).map((_,
         })
     };
 
-    node.children.forEach(p => p.parent = node);
+    // node.children.forEach(p => p.parent = node);
 
     return node;
 })

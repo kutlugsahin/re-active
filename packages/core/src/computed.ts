@@ -5,7 +5,7 @@ import { watch } from './watch';
 type WatcherCallback<T> = (olVal: T, newVal: T) => void;
 
 export interface Computed<T> extends Box<T> {
-    watch: WatcherCallback<T>;
+    watch: (clb: WatcherCallback<T>) => void;
     isActive: boolean;
     dispose: () => void;
 }
@@ -28,7 +28,7 @@ export function computed<T>(fnOrGetterSetter: any): any {
 
     const computed = {
         ...rest,
-        watch: (clb: WatcherCallback<T>) => watch<() => T>(() => cmp.value, clb),
+        watch: (clb: WatcherCallback<T>) => watch(() => cmp.value, clb),
         get isActive() {
             return cmp.effect.active
         },

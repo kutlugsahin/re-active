@@ -9,10 +9,12 @@ const packagejsonpath = path.resolve(__dirname, '../');
 let browser;
 let page;
 
-const isRedux = process.argv[2] === 'redux';
+const demo = process.argv[2] === 'redux' ? 'redux' : process.argv[2] === 'mobx' ? 'mobx' : '';
+const outputTrace = demo === 'redux' ? 'trace-redux.json' : demo === 'mobx' ? 'trace-mobx.json' : 'trace.json';
+const screenshotPath = demo === 'redux' ? 'final-redux.jpg' : demo === 'mobx' ? 'final-mobx.jpg' : 'final.jpg';
 
 function runServer() {
-    execSync(`cd ${packagejsonpath}&&yarn build${isRedux ? ':redux' : ''}`);
+    execSync(`cd ${packagejsonpath}&&yarn build${demo ? ':'+demo : ''}`);
     return exec(`cd ${packagejsonpath}&&http-server public`);
 }
 
@@ -36,7 +38,7 @@ async function runTest() {
 
     await page.waitFor('#node-0');
 
-    await page.tracing.start({ path: path.resolve(__dirname, 'dist', process.argv[2] === 'redux' ? 'trace-redux.json' : 'trace.json'), screenshots: true });
+    await page.tracing.start({ path: path.resolve(__dirname, 'dist', outputTrace), screenshots: true });
 
     (await find(`#node-0 .caret`)).click();
 
@@ -56,7 +58,7 @@ async function runTest() {
         fs.mkdirSync(distFolder);
     }    
 
-    await page.screenshot({ path: path.resolve(__dirname, 'dist', isRedux ? 'final-redux.jpg' : 'final.jpg') });
+    await page.screenshot({ path: path.resolve(__dirname, 'dist', screenshotPath) });
 
     await page.tracing.stop();
 };
