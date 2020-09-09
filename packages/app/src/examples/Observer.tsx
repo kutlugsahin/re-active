@@ -1,5 +1,7 @@
-import { observer, reactive } from '@re-active/react';
-import React, { forwardRef, Ref, useImperativeHandle, useRef, useState } from 'react';
+import { observer, observerClass, reactive } from '@re-active/react';
+import React, { Component, forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { observable } from 'mobx';
+import { observer as mobxObserver } from "mobx-react";
 
 const count = reactive(0);
 
@@ -7,7 +9,7 @@ interface CounterProps {
 	data: number;
 }
 
-export const Counter = observer((props: CounterProps, ref: Ref<{alert: any}>) => {
+export const Counter = observer((props: CounterProps, ref) => {
 	const [clicks, setClicks] = useState(0);
 
 	useImperativeHandle(ref, () => ({
@@ -18,8 +20,8 @@ export const Counter = observer((props: CounterProps, ref: Ref<{alert: any}>) =>
 
 	return (
 		<div>
-			<button onClick={() => setClicks(clicks + 1)}>{clicks}</button>
-			<button onClick={() => count.value++}>{count.value}</button>
+			<button onClick={() => { setClicks(p => p + 1); setClicks(p => p + 1); }}>{clicks}</button>
+			<button onClick={() => { count.value++; count.value++}}>{count.value}</button>
 			<div>
 				Data: {props.data}
 			</div>
@@ -43,6 +45,52 @@ export const ObserverComp = observer(() => {
 			<Counter ref={counteRef} data={data} />
 			<button onClick={alert}>Alert</button>
 			<button onClick={() => setData(data + 1)}>Inc</button>
+			<ObserverClassComp/>
 		</div>
 	);
 })
+
+export const ObserverClassComp = observerClass(class extends Component {
+	state = {
+		click: 0
+	}
+
+	render() {
+		return (
+			<div>
+				<div>{count.value}</div>
+				<div>{this.state.click}</div>
+				<button onClick={() => count.value++}>Inc</button>
+				<button onClick={() => this.setState({click: this.state.click + 1})}>Inc</button>
+			</div>
+		)
+	}
+})
+
+
+const MobxComp = mobxObserver((props: any) => {
+	const [state, setState] = useState(0);
+	console.log('renders');
+
+	useEffect(() => {
+		setState(props.data.x);
+	}, [props.data.x]);
+
+	return (
+		<div>{state}</div>
+	)
+});
+
+export const MobxParent = () => {
+	const [data, setData] = useState({x:0});
+	const [x, setX] = useState(0);
+
+	return (
+		<div>
+			<div>{data.x}</div>
+			<MobxComp data={data} />
+			<button onClick={() => { data.x++; setData(data)}}>AA</button>
+			<button onClick={() => setX(x + 1)}>AA</button>
+		</div>
+	)
+}

@@ -1,5 +1,5 @@
 import { Computed, computed, coreEffect, reactive } from '@re-active/core';
-import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback } from 'react';
+import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass } from 'react';
 import { tickScheduler } from './schedulers';
 
 interface ComponentState<P> {
@@ -23,7 +23,7 @@ export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 			coreEffect(() => {
 				if (componentState.current) {
-					// reactive deoendency changed set flag
+					// reactive dependency changed set flag
 					willInvalidate.current = true;
 					setState({});
 				}
@@ -44,12 +44,52 @@ export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 			if (!willInvalidate.current) {
 				// update not because reacive prop change so render component directly
 				return component(props, ref);
-			} else {
-				willInvalidate.current = false;
 			}
+
+			willInvalidate.current = false;
 		}
 
 		// reactive dept has changed, willInvalidate was true -> computed function will run
 		return componentState.current.computedRender.value;
 	}))
+}
+
+export const observerClass = <P, S>(component: ComponentClass<P, S>) => {
+	return class extends component {
+		computedRender: Computed<any> | null = null;
+		mounted = false;
+		willInvalidate = false;
+		constructor(props: P, context?: any) {
+			super(props, context);
+		}
+
+		componentDidMount() {
+			this.mounted = true;
+			super.componentDidMount?.();
+		}
+
+		render() {
+			if (!this.computedRender) {
+				this.computedRender = computed(() => super.render());
+
+				coreEffect(() => {
+					this.willInvalidate = true;
+					if (this.mounted) {
+						this.forceUpdate();
+					}
+
+					return this.computedRender?.value;
+				}, {
+					scheduler: tickScheduler()
+				})
+			}
+
+			if (this.willInvalidate) {
+				this.willInvalidate = false;
+				return this.computedRender.value;
+			} else {
+				return super.render();
+			}
+		}
+	}
 }

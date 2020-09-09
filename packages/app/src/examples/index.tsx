@@ -13,7 +13,7 @@ import { WatchOptions } from './WatchOptions';
 import { Reactivity } from './Reactivity';
 import { WithReactComponents } from './WithReactComponents';
 import { Interop } from './Interop';
-import { ObserverComp } from './Observer';
+import { MobxParent, ObserverComp } from './Observer';
 
 const Example = (props) => {
     return (
