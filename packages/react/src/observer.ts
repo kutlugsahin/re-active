@@ -58,46 +58,43 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 const observerClass = <P>(component: ComponentClass<P>): typeof component => {
 	class ObserverClass extends component {
-		observerClassFields: {
-			computedRender: Computed<any> | null;
-			mounted: boolean;
-			willInvalidate: boolean
-		};
+		private computedRender: Computed<any> | null;
+		private mounted: boolean;
+		private willInvalidate: boolean
+
 		constructor(props: P, context?: any) {
 			super(props, context);
-			this.observerClassFields = {
-				computedRender: null,
-				mounted: false,
-				willInvalidate: false
-			}
+			this.computedRender = null;
+			this.mounted = false;
+			this.willInvalidate = false;
 		}
 
 		componentDidMount() {
-			this.observerClassFields.mounted = true;
+			this.mounted = true;
 			if (super.componentDidMount) {
 				super.componentDidMount();
 			}
 		}
 
 		render() {
-			if (!this.observerClassFields.computedRender) {
-				this.observerClassFields.computedRender = computed(() => super.render());
+			if (!this.computedRender) {
+				this.computedRender = computed(() => super.render());
 
 				coreEffect(() => {
-					this.observerClassFields.willInvalidate = true;
-					if (this.observerClassFields.mounted) {
+					this.willInvalidate = true;
+					if (this.mounted) {
 						this.forceUpdate();
 					}
 
-					return this.observerClassFields.computedRender?.value;
+					return this.computedRender?.value;
 				}, {
 					scheduler: tickScheduler()
 				})
 			}
 
-			if (this.observerClassFields.willInvalidate) {
-				this.observerClassFields.willInvalidate = false;
-				return this.observerClassFields.computedRender.value;
+			if (this.willInvalidate) {
+				this.willInvalidate = false;
+				return this.computedRender.value;
 			} else {
 				return super.render();
 			}
@@ -114,9 +111,15 @@ const observerClass = <P>(component: ComponentClass<P>): typeof component => {
 export function observer<P, T extends ComponentClass<P>>(component: T): T;
 export function observer<P, H>(component: ForwardRefRenderFunction<H, P>): ObserverFunctionalComponent<P, H>;
 export function observer(component: any): any {
+	let resultingComponent;
+
 	if (component.prototype instanceof Component) {
-		return observerClass(component);
+		resultingComponent = observerClass(component);
+	} else {
+		resultingComponent = observerFunction(component);
 	}
 
-	return observerFunction(component);
+	resultingComponent.displayName = component.displayName || component.nane || 'ObserverComponent';
+
+	return resultingComponent;
 }
