@@ -56,7 +56,7 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 	}))
 }
 
-function bindObserverClass(instance: any, base: any) {
+function bindObserverClass(instance: any) {
 	let computedRender: Computed<ReactNode> | null = null;
 	let mounted = false;
 	let willInvalidate = false;
@@ -64,7 +64,7 @@ function bindObserverClass(instance: any, base: any) {
 	const renderer = instance.render.bind(instance);
 	const baseMount = instance.componentDidMount?.bind(instance);
 
-	const baseRender = () => {
+	instance.render = () => {
 		if (!computedRender) {
 			computedRender = computed(renderer);
 
@@ -88,58 +88,17 @@ function bindObserverClass(instance: any, base: any) {
 		}
 	}
 
-	instance.render = baseRender;
-
 	instance.componentDidMount = () => {
 		mounted = true;
-		if (baseMount) {
-			baseMount();
-		}
+		baseMount?.();
 	}
 }
 
 const observerClass = <P>(component: ComponentClass<P>): typeof component => {
 	class ObserverClass extends component {
-		private computedRender: Computed<any> | null;
-		private mounted: boolean;
-		private willInvalidate: boolean
-
 		constructor(props: P, context?: any) {
 			super(props, context);
-			this.computedRender = null;
-			this.mounted = false;
-			this.willInvalidate = false;
-		}
-
-		componentDidMount() {
-			this.mounted = true;
-			if (super.componentDidMount) {
-				super.componentDidMount();
-			}
-		}
-
-		render() {
-			if (!this.computedRender) {
-				this.computedRender = computed(() => super.render());
-
-				coreEffect(() => {
-					this.willInvalidate = true;
-					if (this.mounted) {
-						this.forceUpdate();
-					}
-
-					return this.computedRender?.value;
-				}, {
-					scheduler: tickScheduler()
-				})
-			}
-
-			if (this.willInvalidate) {
-				this.willInvalidate = false;
-				return this.computedRender.value;
-			} else {
-				return super.render();
-			}
+			bindObserverClass(this);
 		}
 	}
 
@@ -169,6 +128,6 @@ export function observer(component: any): any {
 export class ObserverComponent<P = {}, S = {}> extends PureComponent<P, S> {
 	constructor(props: P) {
 		super(props);
-		bindObserverClass(this, this);
+		bindObserverClass(this);
 	}
 }

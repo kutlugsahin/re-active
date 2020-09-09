@@ -13,7 +13,7 @@ import { WatchOptions } from './WatchOptions';
 import { Reactivity } from './Reactivity';
 import { WithReactComponents } from './WithReactComponents';
 import { Interop } from './Interop';
-import { MobxParent, ObserverComp, Counter, ObserverClassComp } from './Observer';
+import { MobxParent, ObserverComp, Counter, ObserverClassComp, ObserverClassComp2 } from './Observer';
 
 const Example = (props) => {
     return (
@@ -67,6 +67,7 @@ export default () => {
                 <Interop />
             </Example>
             <Example title="make reactive">
+                <ObserverClassComp2 />
                 <ObserverClassComp />
             </Example>
         </div>

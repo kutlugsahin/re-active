@@ -52,7 +52,7 @@ export const ObserverComp = observer(() => {
 	);
 })
 
-export class ObserverClassComp extends ObserverComponent<any, any> {
+export class ObserverClassComp extends ObserverComponent {
 	state = {
 		click: 0
 	}
@@ -70,6 +70,25 @@ export class ObserverClassComp extends ObserverComponent<any, any> {
 		)
 	}
 };
+
+export const ObserverClassComp2 = observer(class extends Component {
+	state = {
+		click: 0
+	}
+
+	deneme() { }
+
+	render() {
+		return (
+			<div>
+				<div>{count.value}</div>
+				<div>{this.state.click}</div>
+				<button onClick={() => count.value++}>Inc</button>
+				<button onClick={() => this.setState({ click: this.state.click + 1 })}>Inc</button>
+			</div>
+		)
+	}
+});
 
 
 const MobxComp = mobxObserver((props: any) => {
