@@ -1,5 +1,5 @@
 import { Computed, computed, coreEffect, reactive } from '@re-active/core';
-import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass } from 'react';
+import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component } from 'react';
 import { tickScheduler } from './schedulers';
 
 interface ComponentState<P> {
@@ -7,7 +7,7 @@ interface ComponentState<P> {
 	props: P
 }
 
-export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
+const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 	return memo(forwardRef((props: PropsWithChildren<P>, ref: Ref<H>) => {
 		const [_, setState] = useState({});
@@ -54,42 +54,67 @@ export const observer = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 	}))
 }
 
-export const observerClass = <P, S>(component: ComponentClass<P, S>) => {
-	return class extends component {
-		computedRender: Computed<any> | null = null;
-		mounted = false;
-		willInvalidate = false;
+const observerClass = <P>(component: ComponentClass<P>): typeof component => {
+	class ObserverClass extends component {
+		observerClassFields: {
+			computedRender: Computed<any> | null;
+			mounted: boolean;
+			willInvalidate: boolean
+		};
 		constructor(props: P, context?: any) {
 			super(props, context);
+			this.observerClassFields = {
+				computedRender: null,
+				mounted: false,
+				willInvalidate: false
+			}
 		}
 
 		componentDidMount() {
-			this.mounted = true;
-			super.componentDidMount?.();
+			this.observerClassFields.mounted = true;
+			if (super.componentDidMount) {
+				super.componentDidMount();
+			}
 		}
 
 		render() {
-			if (!this.computedRender) {
-				this.computedRender = computed(() => super.render());
+			if (!this.observerClassFields.computedRender) {
+				this.observerClassFields.computedRender = computed(() => super.render());
 
 				coreEffect(() => {
-					this.willInvalidate = true;
-					if (this.mounted) {
+					this.observerClassFields.willInvalidate = true;
+					if (this.observerClassFields.mounted) {
 						this.forceUpdate();
 					}
 
-					return this.computedRender?.value;
+					return this.observerClassFields.computedRender?.value;
 				}, {
 					scheduler: tickScheduler()
 				})
 			}
 
-			if (this.willInvalidate) {
-				this.willInvalidate = false;
-				return this.computedRender.value;
+			if (this.observerClassFields.willInvalidate) {
+				this.observerClassFields.willInvalidate = false;
+				return this.observerClassFields.computedRender.value;
 			} else {
 				return super.render();
 			}
 		}
 	}
+
+	if (component.prototype instanceof PureComponent) {
+		return ObserverClass;
+	}
+
+	return memo(ObserverClass) as unknown as typeof component;
+}
+
+export function observer<P>(component: ComponentClass<P>): typeof component;
+export function observer<P, H>(component: ForwardRefRenderFunction<H, P>): ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
+export function observer(component: any): any {
+	if (component.prototype instanceof Component) {
+		return observerClass(component);
+	}
+
+	return observerFunction(component);
 }

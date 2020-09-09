@@ -1,5 +1,5 @@
-import { observer, observerClass, reactive } from '@re-active/react';
-import React, { Component, forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { observer, reactive } from '@re-active/react';
+import React, { Component, forwardRef, PureComponent, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { observable } from 'mobx';
 import { observer as mobxObserver } from "mobx-react";
 
@@ -40,20 +40,24 @@ export const ObserverComp = observer(() => {
 		counteRef.current.alert();
 	}
 
+	const ref = useRef(null);
+
 	return (
 		<div>
 			<Counter ref={counteRef} data={data} />
 			<button onClick={alert}>Alert</button>
 			<button onClick={() => setData(data + 1)}>Inc</button>
-			<ObserverClassComp/>
+			<ObserverClassComp ref={ref}/>
 		</div>
 	);
 })
 
-export const ObserverClassComp = observerClass(class extends Component {
+class ObservedComponent extends Component {
 	state = {
 		click: 0
 	}
+
+	deneme(){}
 
 	render() {
 		return (
@@ -61,11 +65,13 @@ export const ObserverClassComp = observerClass(class extends Component {
 				<div>{count.value}</div>
 				<div>{this.state.click}</div>
 				<button onClick={() => count.value++}>Inc</button>
-				<button onClick={() => this.setState({click: this.state.click + 1})}>Inc</button>
+				<button onClick={() => this.setState({ click: this.state.click + 1 })}>Inc</button>
 			</div>
 		)
 	}
-})
+}
+
+export const ObserverClassComp = observer(ObservedComponent);
 
 
 const MobxComp = mobxObserver((props: any) => {
