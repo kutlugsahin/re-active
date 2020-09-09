@@ -1,5 +1,5 @@
 import { Computed, computed, coreEffect, reactive } from '@re-active/core';
-import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component } from 'react';
+import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component, ReactNode } from 'react';
 import { tickScheduler } from './schedulers';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
@@ -54,6 +54,48 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		// reactive dept has changed, willInvalidate was true -> computed function will run
 		return componentState.current.computedRender.value;
 	}))
+}
+
+function bindObserverClass(instance: any, base: any) {
+	let computedRender: Computed<ReactNode> | null = null;
+	let mounted = false;
+	let willInvalidate = false;
+
+	const renderer = instance.render.bind(instance);
+	const baseMount = instance.componentDidMount?.bind(instance);
+
+	const baseRender = () => {
+		if (!computedRender) {
+			computedRender = computed(renderer);
+
+			coreEffect(() => {
+				willInvalidate = true;
+				if (mounted) {
+					instance.forceUpdate();
+				}
+
+				return computedRender?.value;
+			}, {
+				scheduler: tickScheduler()
+			})
+		}
+
+		if (willInvalidate) {
+			willInvalidate = false;
+			return computedRender.value;
+		} else {
+			return renderer();
+		}
+	}
+
+	instance.render = baseRender;
+
+	instance.componentDidMount = () => {
+		mounted = true;
+		if (baseMount) {
+			baseMount();
+		}
+	}
 }
 
 const observerClass = <P>(component: ComponentClass<P>): typeof component => {
@@ -122,4 +164,11 @@ export function observer(component: any): any {
 	resultingComponent.displayName = component.displayName || component.nane || 'ObserverComponent';
 
 	return resultingComponent;
+}
+
+export class ObserverComponent<P = {}, S = {}> extends PureComponent<P, S> {
+	constructor(props: P) {
+		super(props);
+		bindObserverClass(this, this);
+	}
 }

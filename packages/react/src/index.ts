@@ -1,5 +1,6 @@
 export { createComponent, config } from './component';
-export { observer } from './observer';
+export { observer, ObserverComponent } from './observer';
+export type { ObserverFunctionalComponent } from './observer';
 export * from './observerHooks';
 export { computed, watch, effect } from './shared';
 export { onMounted, onUnmounted, onUpdated, useContext, onRendered, onBeforePaint, onBeforeRender, imperativeHandle } from './lifecycle';

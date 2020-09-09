@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { reactive, readonly } from '@re-active/core';
 import { Computed, ComputedGetterSetter, ReadonlyComputed, computed } from '@re-active/core';
 import { effect, watch } from './shared';
@@ -12,8 +12,22 @@ export const useReadonly = <T>(val: T) => useMemo(() => readonly<T>(val), []);
 export function useComputed<T>(getterSetter: ComputedGetterSetter<T>): Computed<T>;
 export function useComputed<T>(getter: () => T): ReadonlyComputed<T>;
 export function useComputed(getterSetter: any): any {
-    return useMemo(() => computed(getterSetter), []);
+    const computed: any = useMemo(() => computed(getterSetter), []);
+
+    useEffect(() => {
+        computed.dispose();
+    }, []);
+    
+    return computed;
 }
 
-export const useWatch: typeof watch = (...p: Parameters<typeof watch>) => useMemo(() => watch(...p), []);
-export const useReactiveEffect: typeof effect = (...p: Parameters<typeof effect>) => useMemo(() => effect(...p), []);
+export const useWatch: (...p: Parameters<typeof watch>) => void = (...p: Parameters<typeof watch>) => {
+    const dispose = useMemo(() => watch(...p), []);
+
+    useEffect(() => dispose, []);
+};
+export const useReactiveEffect: (...p: Parameters<typeof effect>) => void = (...p: Parameters<typeof effect>) => {
+    const dispose = useMemo(() => effect(...p), []);
+
+    useEffect(() => dispose, []);
+};

@@ -1,4 +1,4 @@
-import { observer, reactive } from '@re-active/react';
+import { observer, reactive, ObserverComponent } from '@re-active/react';
 import React, { Component, forwardRef, PureComponent, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { observable } from 'mobx';
 import { observer as mobxObserver } from "mobx-react";
@@ -52,12 +52,12 @@ export const ObserverComp = observer(() => {
 	);
 })
 
-class ObservedComponent extends Component {
+export class ObserverClassComp extends ObserverComponent<any, any> {
 	state = {
 		click: 0
 	}
 
-	deneme(){}
+	deneme() { }
 
 	render() {
 		return (
@@ -69,9 +69,7 @@ class ObservedComponent extends Component {
 			</div>
 		)
 	}
-}
-
-export const ObserverClassComp = observer(ObservedComponent);
+};
 
 
 const MobxComp = mobxObserver((props: any) => {
