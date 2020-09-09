@@ -2,6 +2,8 @@ import { Computed, computed, coreEffect, reactive } from '@re-active/core';
 import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component } from 'react';
 import { tickScheduler } from './schedulers';
 
+export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
+
 interface ComponentState<P> {
 	computedRender: Computed<React.ReactElement<any, any> | null>;
 	props: P
@@ -109,8 +111,8 @@ const observerClass = <P>(component: ComponentClass<P>): typeof component => {
 	return memo(ObserverClass) as unknown as typeof component;
 }
 
-export function observer<P>(component: ComponentClass<P>): typeof component;
-export function observer<P, H>(component: ForwardRefRenderFunction<H, P>): ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
+export function observer<P, T extends ComponentClass<P>>(component: T): T;
+export function observer<P, H>(component: ForwardRefRenderFunction<H, P>): ObserverFunctionalComponent<P, H>;
 export function observer(component: any): any {
 	if (component.prototype instanceof Component) {
 		return observerClass(component);

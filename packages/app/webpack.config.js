@@ -1,7 +1,12 @@
 const path = require("path");
 
 module.exports = (env) => {
-    const entry = env && env.demo === 'redux' ? './main-redux.ts' : env && env.demo === 'mobx' ? './main-mobx.ts' : './main.ts';
+    let entry = './main.ts';
+
+    if (env && env.demo) {
+        entry = `./main-${env.demo}`;
+    }
+
     console.log(entry);
     return {
         mode: 'development',
