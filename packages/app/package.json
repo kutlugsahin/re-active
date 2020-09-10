@@ -16,9 +16,11 @@
     "prod": "yarn build&&http-server public",
     "prod:redux": "yarn build:redux&&http-server public",
     "prod:mobx": "yarn build:mobx&&http-server public",
+    "prod:obsrver": "yarn build:observer&&http-server public",
     "perf": "node ./performance/index.js",
     "perf:redux": "node ./performance/index.js redux",
-    "perf:mobx": "node ./performance/index.js mobx"
+    "perf:mobx": "node ./performance/index.js mobx",
+    "perf:observer": "node ./performance/index.js observer"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
