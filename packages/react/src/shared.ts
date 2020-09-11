@@ -1,4 +1,4 @@
-import { Computed, computed as coreComputed, Scheduler, watch as coreWatch, coreEffect, Disposer, WatchSource, WatchCallback, CoreEffectOptions } from '@re-active/core';
+import { Computed, computed as coreComputed, Scheduler, watch as coreWatch, coreEffect, Disposer, WatchSource, WatchCallback, CoreEffectOptions, Box } from '@re-active/core';
 import { getComponentHandle, onUnmounted } from "./lifecycle";
 import { combineSchedulers, onUpdatedScheduler, tickScheduler } from './schedulers';
 
@@ -10,13 +10,11 @@ const disposeEffectOnUnmount = (dispose: () => void) => {
 	}
 }
 
-const computed = <T extends () => any>(fn: T): Computed<T> => {
+export const computed = <T extends () => any>(fn: T): Computed<T> => {
 	const cmp = coreComputed(fn);
 	disposeEffectOnUnmount(cmp.dispose);
 	return cmp;
 }
-
-
 
 export type Flush = 'pre' | 'post' | 'sync';
 
@@ -38,9 +36,13 @@ function createFlushScheduler(flush: Flush): Scheduler {
 	}
 }
 
-const watch = <T extends WatchSource>(fn: T, clb: WatchCallback<T>, options?: WatchOptions): Disposer => {
+export function watch<T>(source: Box<T>, clb: WatchCallback<T>, options?: WatchOptions): Disposer;
+export function watch<T>(source: () => T, clb: WatchCallback<T>, options?: WatchOptions): Disposer;
+export function watch<T>(source: Computed<T>, clb: WatchCallback<T>, options?: WatchOptions): Disposer;
+export function watch<T extends object>(source: T, clb: WatchCallback<T>, options?: WatchOptions): Disposer;
+export function watch<T extends WatchSource>(source: T, clb: WatchCallback<any>, options?: WatchOptions): Disposer {
 	let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
-	let dispose = coreWatch(fn, clb, { ...options, scheduler, flush: undefined });
+	let dispose = coreWatch(source, clb, { ...options, scheduler, flush: undefined });
 
 	if (getComponentHandle()) {
 		onUnmounted(() => {
@@ -57,7 +59,7 @@ export interface EffectOptions extends Omit<CoreEffectOptions, 'scheduler'> {
 	flush?: Flush;
 }
 
-const effect = <T extends () => any>(fn: T, options?: EffectOptions): Disposer => {
+export const effect = <T extends () => any>(fn: T, options?: EffectOptions): Disposer => {
 	let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
 	let eff = coreEffect(fn, { ...options, scheduler });
 
@@ -71,9 +73,3 @@ const effect = <T extends () => any>(fn: T, options?: EffectOptions): Disposer =
 
 	return eff.dispose
 }
-
-export {
-	watch,
-	computed,
-	effect,
-};

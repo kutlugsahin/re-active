@@ -1,5 +1,4 @@
-import { reactive, watch } from '@re-active/react';
-import { createActions, createSelectors, createStore, takeLatest, watchStore, watchActions, selector } from '@re-active/store';
+import { createActions, createSelectors, createStore, takeLatest, watchActions, watchStore } from '@re-active/store';
 import { Dictionary, fetchItems, Item, makeTreeNode, Node, nodes, RowItem } from './utils';
 
 interface Store {
@@ -32,8 +31,10 @@ createStore<Store>({
     }
 });
 
-watchActions(async (actionName, params) => {
+watchActions(async (actionName, params, result) => {
     console.log(`action ${actionName} is called`);
+
+    console.log(`${actionName} returned: ${await result}`);
 })
 
 // ================ SELECTORS ===========================
@@ -122,4 +123,3 @@ watchStore((state: Store) => state.table.selectedRow, (newItem, oldItem) => {
     if (oldItem) oldItem.selected = false;
     if (newItem) newItem.selected = true;
 })
-

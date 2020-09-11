@@ -20,13 +20,13 @@ function traverseAndReturn(source: any) {
 
 export type WatchSource = (() => any) | Box<any> | Computed<any> | object;
 
-export type WatchCallback<T extends WatchSource> =
-    T extends () => infer R ? (newValue: R, oldValue: R) => void :
-    T extends (...p : any[]) => infer R ? (newValue: R, oldValue: R) => void :
-    T extends Box<infer R> ? (newValue: R, oldValue: R) => void :
-    T extends object ? (newValue: T, oldValue: T) => void : never;
+export type WatchCallback<T> = (newValue: T, oldValue: T) => void;
 
-export function watch<T extends WatchSource>(source: T, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer {
+export function watch<T>(source: Box<T>, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer;
+export function watch<T>(source: () => T, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer;
+export function watch<T>(source: Computed<T>, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer;
+export function watch<T extends object>(source: T, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer;
+export function watch<T extends WatchSource>(source: T, clb: WatchCallback<any>, options?: CoreWatchOptions): Disposer {
     let oldValue: any;
     let shouldRun = options?.immediate || false;
     const scheduler: Scheduler | undefined = options?.scheduler || (options?.flush === 'sync' ? undefined : tickScheduler());
@@ -42,7 +42,12 @@ export function watch<T extends WatchSource>(source: T, clb: WatchCallback<T>, o
             effectBody = () => (source as unknown as Box<any>).value;
         }
     } else if (isReactive(source)) {
-        effectBody = () => traverseAndReturn(source);
+        if (options?.deep) {
+            effectBody = () => traverseAndReturn(source);
+        } else {
+            // watching first level fields
+            effectBody = () => ({ ...source });
+        }
     }
 
     return coreEffect(() => {
