@@ -4,7 +4,7 @@ export type { Computed, ComputedGetterSetter, ReadonlyComputed } from './compute
 export { coreEffect } from './effect';
 export type { CoreEffectOptions, Scheduler, ReactivityEvent, Disposer } from './effect';
 
-export { isBox, isReactive, reactive, readonly, toBox, toBoxes } from './reactive';
+export { isBox, isReactive, reactive, readonly, toBox, toBoxes, isProxy, isReadonly, markRaw, toRaw } from './reactive';
 export type { Box, Reactive, ShallowReactive, ToBoxes, UnBox } from './reactive';
 
 export { traverse, queueMicroTask, tickScheduler } from './utils';

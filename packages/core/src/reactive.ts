@@ -1,4 +1,4 @@
-import { isReactive as vendorIsReactive, reactive as vendorReactive, readonly as vendorReadonly, Ref, ref as vendorRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, shallowRef as vendorShallowRef, toRefs, UnwrapRef } from "@vue/reactivity";
+import { isReactive as vendorIsReactive, reactive as vendorReactive, readonly as vendorReadonly, Ref, ref as vendorRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, shallowRef as vendorShallowRef, toRefs, UnwrapRef, isProxy, isReadonly, isRef, toRaw, markRaw } from "@vue/reactivity";
 
 export const REF_MARKER = '__v_isRef';
 
@@ -105,3 +105,11 @@ export const isBox = <T>(obj: Box<T> | unknown) => obj && typeof obj === 'object
 export const isReactive = (value: any) => {
     return vendorIsReactive(value);
 }
+
+export {
+    isProxy,
+    isReadonly,
+    toRaw,
+    markRaw
+}
+
