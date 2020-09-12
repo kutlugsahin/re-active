@@ -5,8 +5,8 @@ import React from 'react';
 
 export const WatchOptions = createComponent(() => {
 
-    const count = reactive.box(0);
-    const click = reactive.box(0);
+    const count = reactive(0);
+    const click = reactive(0);
     let button: HTMLButtonElement;
     let span: HTMLSpanElement;
     let span2: HTMLSpanElement;

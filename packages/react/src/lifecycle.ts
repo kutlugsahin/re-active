@@ -1,5 +1,5 @@
 import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject, Ref} from 'react';
-import { reactive, Box, Disposer } from '@re-active/core';
+import { reactive, Box, Disposer, box } from '@re-active/core';
 
 export type Callback = () => void;
 export type MountedCallback = () => (void | Disposer);
@@ -81,7 +81,7 @@ export function onBeforePaint(callback: Callback) {
 
 export function useContext<T>(context: React.Context<T>) {
     const contextValue = reactUseContext(context);
-    const reactiveValue = reactive.shallowBox(contextValue)
+    const reactiveValue = box.shallow(contextValue)
     getCurrentLifeCycleHandle()?.context.set(context, reactiveValue);
     return reactiveValue;
 }

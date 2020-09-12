@@ -25,7 +25,7 @@ const User = createComponent((props: any) => {
 });
 
 export const Watch = createComponent((props: any) => {
-  const userId = reactive.box(0);
+  const userId = reactive(0);
 
   return () => (
     <div>

@@ -1,4 +1,4 @@
-import { isReactive as vendorIsReactive, reactive as vendorReactive, readonly as vendorReadonly, Ref, ref as vendorRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, shallowRef as vendorShallowRef, toRefs, UnwrapRef, isProxy, isReadonly, isRef, toRaw, markRaw } from "@vue/reactivity";
+import { isReactive as vendorIsReactive, reactive as vendorReactive, readonly as vendorReadonly, Ref, ref as vendorRef, shallowReactive as vendorShallowReactive, shallowReadonly as vendorShallowReadonly, shallowRef as vendorShallowRef, toRefs, UnwrapRef, isProxy, isReadonly, toRaw, markRaw, pauseTracking, enableTracking, customRef } from "@vue/reactivity";
 
 export const REF_MARKER = '__v_isRef';
 
@@ -10,14 +10,6 @@ export type UnBox<T> = UnwrapRef<T>;
 export type Reactive<T> = T extends object ? ReactiveObject<T> : Box<UnBox<T>>;
 export type ShallowReactive<T> = T extends object ? T : T extends Box ? T : Box<T>;
 
-const ref = <T>(val: T): Box<UnBox<T>> => {
-    return vendorRef<T>(val);
-}
-
-const shallowRef = <T>(val: T): T extends Box ? T : Box<T> => {
-    return vendorShallowRef<T>(val);
-}
-
 export const reactive = <T>(val: T): Reactive<T> => {
     const type = typeof val;
 
@@ -27,7 +19,7 @@ export const reactive = <T>(val: T): Reactive<T> => {
         case 'string':
         case 'function':
         case 'boolean': {
-            return ref(val) as Reactive<T>
+            return vendorRef(val) as Reactive<T>
         }
         default:
             return vendorReactive(val as any) as Reactive<T>;
@@ -43,18 +35,18 @@ reactive.shallow = <T>(val: T): ShallowReactive<T> => {
         case 'string':
         case 'function':
         case 'boolean': {
-            return shallowRef(val) as ShallowReactive<T>
+            return vendorShallowRef(val) as ShallowReactive<T>
         }
         default:
             return vendorShallowReactive(val as any) as ShallowReactive<T>;
     }
 }
 
-reactive.box = <T>(val: T): Box<UnBox<T>> => {
-    return ref(val);
+export const box = <T>(val: T): Box<UnBox<T>> => {
+    return vendorRef(val);
 }
 
-reactive.shallowBox = <T>(val: T): T extends Box<any> ? T : Box<T> => {
+box.shallow = <T>(val: T): T extends Box<any> ? T : Box<T> => {
     return vendorShallowRef(val);
 }
 
@@ -104,6 +96,24 @@ export const isBox = <T>(obj: Box<T> | unknown) => obj && typeof obj === 'object
 
 export const isReactive = (value: any) => {
     return vendorIsReactive(value);
+}
+
+export const untracked = <T>(fn: () => T) => {
+    try {
+        pauseTracking();
+        return fn();
+    } finally {
+        enableTracking();
+    }
+}
+
+type CustomBoxFactory<T> = (track: () => void, trigger: () => void) => {
+    get: () => T;
+    set: (value: T) => void;
+};
+
+export const customBox = <T>(boxCreator: CustomBoxFactory<T>): Box<T> => {
+    return customRef(boxCreator);
 }
 
 export {

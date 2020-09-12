@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent, reactive } from '@re-active/react';
+import { box, createComponent, reactive } from '@re-active/react';
 
 
 export const Reactivity = createComponent(() => {
@@ -10,7 +10,7 @@ export const Reactivity = createComponent(() => {
 		}
 	});
 
-	const shallowBox = reactive.shallowBox({
+	const shallowBox = box.shallow({
 		nonReactive: 0,
 	});
 
