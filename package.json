@@ -13,7 +13,7 @@
     "demo:prod": "cd ./packages/app&&yarn build&&yarn prod",
     "demo:redux": "cd ./packages/app&&yarn start:redux",
     "demo:prod:redux": "cd ./packages/app&&yarn build&&yarn prod:redux",
-    "publish:lib": "node build.js publish core",
+    "publish:all": "node build.js publish core",
     "inc": "node build.js inc",
     "test": "cd ./packages/test && yarn test"
   },
