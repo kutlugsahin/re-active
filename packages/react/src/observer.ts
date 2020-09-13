@@ -1,11 +1,12 @@
-import { Computed, computed, coreEffect, reactive } from '@re-active/core';
-import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component, ReactNode } from 'react';
+import { Computed, computed, coreEffect, reactive, Effect } from '@re-active/core';
+import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component, ReactNode, ReactElement } from 'react';
 import { tickScheduler } from './schedulers';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
 
 interface ComponentState<P> {
 	computedRender: Computed<React.ReactElement<any, any> | null>;
+	renderEffect: Effect;
 	props: P
 }
 
@@ -16,6 +17,14 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		const willInvalidate = useRef(false);
 		const componentState = useRef<ComponentState<P> | null>(null);
 
+		useEffect(() => {
+			return () => {
+				componentState.current?.computedRender.dispose();
+				componentState.current?.renderEffect.dispose();
+				componentState.current = null;
+			}
+		 }, []);
+
 		// first time setup computed render and effect
 		if (!componentState.current) {
 			const computedRender = computed(() => {
@@ -23,7 +32,7 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 				return component(componentProps, ref)
 			});
 
-			coreEffect(() => {
+			const renderEffect = coreEffect(() => {
 				if (componentState.current) {
 					// reactive dependency changed set flag
 					willInvalidate.current = true;
@@ -36,6 +45,7 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 			componentState.current = {
 				computedRender,
+				renderEffect,
 				props,
 			}
 		} else {
@@ -58,17 +68,19 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 function bindObserverClass(instance: any) {
 	let computedRender: Computed<ReactNode> | null = null;
+	let renderEffect: Effect | null;
 	let mounted = false;
 	let willInvalidate = false;
 
 	const renderer = instance.render.bind(instance);
 	const baseMount = instance.componentDidMount?.bind(instance);
+	const baseUnmount = instance.componentWillUnmount?.bind(instance);
 
 	instance.render = () => {
 		if (!computedRender) {
 			computedRender = computed(renderer);
 
-			coreEffect(() => {
+			renderEffect = coreEffect(() => {
 				willInvalidate = true;
 				if (mounted) {
 					instance.forceUpdate();
@@ -91,6 +103,15 @@ function bindObserverClass(instance: any) {
 	instance.componentDidMount = () => {
 		mounted = true;
 		baseMount?.();
+	}
+
+	instance.componentWillUnmount = () => {
+		mounted = false;
+		baseUnmount?.();
+		computedRender?.dispose();
+		computedRender = null;
+		renderEffect?.dispose();
+		renderEffect = null;
 	}
 }
 
@@ -131,3 +152,11 @@ export class ObserverComponent<P = {}, S = {}> extends PureComponent<P, S> {
 		bindObserverClass(this);
 	}
 }
+
+export interface ObserverProps {
+	children: () => ReactElement;
+}
+
+export const Observer: FC<ObserverProps> = observer((props: ObserverProps) => {
+	return props.children();
+})

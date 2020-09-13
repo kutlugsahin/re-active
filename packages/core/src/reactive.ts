@@ -2,13 +2,25 @@ import { isReactive as vendorIsReactive, reactive as vendorReactive, readonly as
 
 export const REF_MARKER = '__v_isRef';
 
-type ReactiveObject<T> = T extends Ref ? T : UnwrapRef<T>;
+type ReactiveObject<T> = T extends Ref ? T : UnBox<T>;
 
 export type Box<T = any> = Ref<T>;
 export type UnBox<T> = UnwrapRef<T>;
 
-export type Reactive<T> = T extends object ? ReactiveObject<T> : Box<UnBox<T>>;
-export type ShallowReactive<T> = T extends object ? T : T extends Box ? T : Box<T>;
+export type Reactive<T> =
+    T extends null ? Box<any> :
+    T extends undefined ? Box <any> :
+    T extends Function ? Box<T> :
+    T extends object ? ReactiveObject<T> :
+    Box<UnBox<T>>;
+
+export type ShallowReactive<T> =
+    T extends null ? Box<any> :
+    T extends undefined ? Box<any> :
+    T extends Function ? Box<T> :
+    T extends object ? T :
+    T extends Box ? T :
+    Box<T>;
 
 export const reactive = <T>(val: T): Reactive<T> => {
     const type = typeof val;
@@ -122,4 +134,3 @@ export {
     toRaw,
     markRaw
 }
-

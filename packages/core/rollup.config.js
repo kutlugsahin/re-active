@@ -11,7 +11,7 @@ const name = 'ReactorCore';
 
 export default {
     input: './src/index.ts',
-
+    external: ['@vue/reactivity'],
     plugins: [
         // Allows node_modules resolution
         resolve({ extensions }),
@@ -33,5 +33,8 @@ export default {
         file: pkg.umd,
         format: 'umd',
         name,
+        globals: {
+            'VueReactivity': '@vue/reactivity',
+        },
     }],
 };

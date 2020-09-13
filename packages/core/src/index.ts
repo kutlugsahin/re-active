@@ -2,7 +2,7 @@ export { computed } from './computed';
 export type { Computed, ComputedGetterSetter, ReadonlyComputed } from './computed';
 
 export { coreEffect } from './effect';
-export type { CoreEffectOptions, Scheduler, ReactivityEvent, Disposer } from './effect';
+export type { CoreEffectOptions, Scheduler, ReactivityEvent, Disposer, Effect } from './effect';
 
 export {
     reactive,

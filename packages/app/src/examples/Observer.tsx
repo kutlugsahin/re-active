@@ -1,4 +1,4 @@
-import { observer, reactive, ObserverComponent } from '@re-active/react';
+import { observer, reactive, ObserverComponent, Observer, box } from '@re-active/react';
 import React, { Component, forwardRef, PureComponent, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { observable } from 'mobx';
 import { observer as mobxObserver } from "mobx-react";
@@ -57,8 +57,6 @@ export class ObserverClassComp extends ObserverComponent {
 		click: 0
 	}
 
-	deneme() { }
-
 	render() {
 		return (
 			<div>
@@ -76,20 +74,50 @@ export const ObserverClassComp2 = observer(class extends Component {
 		click: 0
 	}
 
-	deneme() { }
-
 	render() {
+		console.log('obs comp 2 render')
 		return (
 			<div>
-				<div>{count.value}</div>
+				<Observer>
+					{() => (
+						<div>{count.value}</div>
+					)}
+				</Observer>
 				<div>{this.state.click}</div>
 				<button onClick={() => count.value++}>Inc</button>
 				<button onClick={() => this.setState({ click: this.state.click + 1 })}>Inc</button>
+				
 			</div>
 		)
 	}
 });
 
+export class Counter2 extends ObserverComponent {
+	count = reactive(0);
+
+	increment = () => {
+		this.count.value++;
+	};
+
+	ads = box(null);
+
+	render() {
+
+		this.ads.value
+		// When increment button pressed. this component won't render
+		// Because the reactive value is used by the inner Observer component
+		// Only Observer will render again
+		console.log('Counter Rendered');
+		return (
+			<div>
+				<Observer>
+					{() => <span>{this.count.value}</span>}
+				</Observer>
+				<button onClick={this.increment}>increment</button>
+			</div>
+		)
+	}
+} 
 
 const MobxComp = mobxObserver((props: any) => {
 	const [state, setState] = useState(0);
