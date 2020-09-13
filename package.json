@@ -23,7 +23,7 @@
   },
   "homepage": "https://kutlugsahin.gitbook.io/re-active/",
   "description": "React redefined with reactivity",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  }
+  "keywords": [
+    "react", "reactive"
+  ]
 }
