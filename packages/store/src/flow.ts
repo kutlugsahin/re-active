@@ -1,10 +1,5 @@
-import { OmitStateParameter, CancelablePromise, GeneratorReturn, GeneratorAction, Callback, AbortPromise, Action, Actionize } from './types';
-import { getGlobalStore } from './createStore';
-import { Signal } from './types';
-import { action } from '.';
 import { callable } from './action';
-
-
+import { AbortPromise, Action, Callback, CancelablePromise, GeneratorAction, GeneratorReturn, Signal } from './types';
 
 function abortPromise<T>(abortResult?: T): AbortPromise<T> {
     let resolve: () => void;
