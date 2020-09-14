@@ -1,6 +1,7 @@
-import { Computed, computed, coreEffect, reactive, Effect, Disposer } from '@re-active/core';
-import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component, ReactNode, ReactElement } from 'react';
+import { Computed, coreEffect, Disposer, Effect } from '@re-active/core';
+import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 import { tickScheduler } from './schedulers';
+import { computedRender as computed } from './shared';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
 

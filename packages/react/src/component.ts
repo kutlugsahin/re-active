@@ -1,7 +1,8 @@
-import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box, isBox, Disposer } from '@re-active/core';
-import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback, useLayoutEffect, ReactElement } from 'react';
+import { Box, Computed, coreEffect, Disposer, isBox, reactive, Reactive, readonly } from '@re-active/core';
+import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
+import { computedRender as computed } from './shared';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;

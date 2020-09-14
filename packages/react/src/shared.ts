@@ -10,7 +10,7 @@ const disposeEffectOnUnmount = (dispose: () => void) => {
 	}
 }
 
-export const computed = <T extends () => any>(fn: T): Computed<T> => {
+export const computed = <T>(fn: () => T): Computed<T> => {
 	const cmp = coreComputed(fn);
 	disposeEffectOnUnmount(cmp.dispose);
 	return cmp;
@@ -72,4 +72,17 @@ export const effect = <T extends () => any>(fn: T, options?: EffectOptions): Dis
 	}
 
 	return eff.dispose
+}
+
+export const computedRender = <T>(fn: () => T): Computed<T> => {
+	if (typeof window === 'undefined') {
+		return {
+			value: fn(),
+			dispose: () => { },
+		} as Computed<T>;
+	} else {
+		const cmp = coreComputed(fn);
+		disposeEffectOnUnmount(cmp.dispose);
+		return cmp;
+	}
 }

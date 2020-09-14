@@ -1,5 +1,5 @@
-import { useContext as reactUseContext, useRef as reactUseRef, useImperativeHandle as reactUseImperativeHandle, RefObject, MutableRefObject, Ref} from 'react';
-import { reactive, Box, Disposer, box } from '@re-active/core';
+import { Box, box, Disposer } from '@re-active/core';
+import { Ref, useContext as reactUseContext, useImperativeHandle as reactUseImperativeHandle } from 'react';
 
 export type Callback = () => void;
 export type MountedCallback = () => (void | Disposer);
