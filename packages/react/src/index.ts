@@ -2,7 +2,7 @@ export { createComponent, config } from './component';
 export { observer, ObserverComponent, Observer } from './observer';
 export type { ObserverFunctionalComponent } from './observer';
 export * from './observerHooks';
-export { computed, watch, effect } from './shared';
+export { computed, watch, effect, renderStatic } from './shared';
 export {
     onMounted,
     onUnmounted,

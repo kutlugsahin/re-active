@@ -1,33 +1,14 @@
-import { Computed, coreEffect, Disposer, Effect } from '@re-active/core';
+import { Computed, Disposer } from '@re-active/core';
 import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useRef, useState } from 'react';
-import { tickScheduler } from './schedulers';
-import { computedRender as computed } from './shared';
+import { computedRender as computed, renderEffect } from './shared';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
 
 interface ComponentState<P> {
 	computedRender: Computed<React.ReactElement<any, any> | null>;
+	renderEffectDisposer: Disposer;
 	props: P,
 	willInvalidate: boolean;
-}
-
-function setupRenderEffect<P>(componentState: ComponentState<P>, setState: (s: any) => void): Disposer {
-	let mounted = false;
-
-	const renderEffect = coreEffect(() => {
-		if (mounted) {
-			// reactive dependency changed set flag
-			componentState.willInvalidate = true;
-			setState({});
-		}
-		return componentState.computedRender.value;
-	}, {
-		scheduler: tickScheduler()
-	})
-
-	mounted = true;
-
-	return renderEffect.dispose;
 }
 
 const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
@@ -37,11 +18,9 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		const componentState = useRef<ComponentState<P> | null>(null);
 
 		useEffect(() => {
-			const renderEffectDisposer = setupRenderEffect(componentState.current!, setState);
-
 			return () => {
 				componentState.current?.computedRender.dispose();
-				renderEffectDisposer();
+				componentState.current?.renderEffectDisposer();
 				componentState.current = null;
 			}
 		 }, []);
@@ -53,10 +32,16 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 				return component(componentProps, ref)
 			});
 
+			const renderEffectDisposer = renderEffect(computedRender, () => {
+				componentState.current!.willInvalidate = true;
+				setState({});
+			})
+
 			componentState.current = {
 				computedRender,
+				renderEffectDisposer,
 				props,
-				willInvalidate: false,
+				willInvalidate: true,
 			}
 		} else {
 			// update prop ref to be used in the computed function
@@ -78,9 +63,8 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 function bindObserverClass(instance: any) {
 	let computedRender: Computed<ReactNode> | null = null;
-	let renderEffect: Effect | null;
-	let mounted = false;
-	let willInvalidate = false;
+	let renderEffectDisposer: Disposer;
+	let willInvalidate = true;
 
 	const renderer = instance.render.bind(instance);
 	const baseMount = instance.componentDidMount?.bind(instance);
@@ -89,6 +73,11 @@ function bindObserverClass(instance: any) {
 	instance.render = () => {
 		if (!computedRender) {
 			computedRender = computed(renderer);
+
+			renderEffectDisposer = renderEffect(computedRender, () => {
+				willInvalidate = true;
+				instance.forceUpdate();
+			})
 		}
 
 		if (willInvalidate) {
@@ -100,28 +89,14 @@ function bindObserverClass(instance: any) {
 	}
 
 	instance.componentDidMount = () => {
-		renderEffect = coreEffect(() => {
-			if (mounted) {
-				willInvalidate = true;
-				instance.forceUpdate();
-			}
-
-			return computedRender?.value;
-		}, {
-			scheduler: tickScheduler()
-		})
-
-		mounted = true;
 		baseMount?.();
 	}
 
 	instance.componentWillUnmount = () => {
-		mounted = false;
 		baseUnmount?.();
 		computedRender?.dispose();
 		computedRender = null;
-		renderEffect?.dispose();
-		renderEffect = null;
+		renderEffectDisposer();
 	}
 }
 

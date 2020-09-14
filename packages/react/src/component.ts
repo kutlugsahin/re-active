@@ -1,8 +1,7 @@
-import { Box, Computed, coreEffect, Disposer, isBox, reactive, Reactive, readonly } from '@re-active/core';
+import { Box, Computed, isBox, reactive, Reactive, readonly } from '@re-active/core';
 import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
-import { tickScheduler } from './schedulers';
-import { computedRender as computed } from './shared';
+import { computedRender as computed, renderEffect } from './shared';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
@@ -84,7 +83,7 @@ const createComponentHandle = (): ComponentHandle => {
 	}
 
 	return {
-		willRender: false,
+		willRender: true,
 		onUpdated,
 		notify() {
 			for (const clb of listeners) {
@@ -93,34 +92,6 @@ const createComponentHandle = (): ComponentHandle => {
 			listeners.clear();
 		}
 	}
-}
-
-
-function setupEffect(componentState: ComponentState, forceUpdate: () => void): Disposer {
-	// schduler to re render component
-	const scheduler = tickScheduler();
-
-	let mounted = false;
-
-	function update() {
-		// call onBeforeRender data is updated but dom is not
-		componentState.lifecycles.onBeforeRender.forEach(p => p());
-		forceUpdate();
-	}
-
-	const renderEffect = coreEffect(() => {
-		if (mounted) {
-			componentState.componentHandle.willRender = true;
-			// re-render react component with tick scheduler
-			update();
-		}
-
-		return componentState.computedRender.value;
-	}, { scheduler });
-
-	mounted = true;
-
-	return renderEffect.dispose;
 }
 
 export type ReactiveProps<P extends { [key: string]: any }> = { [key in keyof P]: P[key] | Box<P[key]> }
@@ -159,8 +130,21 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
 			const computedRender = computed(renderer);
 
+			function update() {
+				// call onBeforeRender data is updated but dom is not
+				lifecycles.onBeforeRender.forEach(p => p());
+				forceUpdate();
+			}
+
+			const renderEffectDispose = renderEffect(computedRender, () => {
+				componentHandle.willRender = true;
+				// re-render react component with tick scheduler
+				update();
+			});
+
 			const dispose = () => {
 				computedRender.dispose();
+				renderEffectDispose();
 			}
 
 			componentState.current = {
@@ -189,6 +173,26 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			lifecycles.onBeforePaint.forEach(p => p());
 		})
 
+		// call onMounted
+		useEffect(() => {
+			// const disposeEffect = setupEffect(componentState.current!, forceUpdate);
+
+			const disposers = lifecycles.onMounted.map(p => p());
+			return () => {
+				// call on mount disposers
+				disposers.forEach(p => {
+					if (typeof p === 'function') {
+						p();
+					}
+				});
+				dispose();
+				// disposeEffect();
+				// call onUnmounted
+				lifecycles.onUnmounted.forEach(p => p());
+			};
+
+		}, []);
+
 		// call onUpdated
 		useEffect(() => {
 			lifecycles.onUpdated.forEach(p => p());
@@ -202,26 +206,6 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 			componentHandle.willRender = false;
 		});
-
-		// call onMounted
-		useEffect(() => {
-			const disposeEffect = setupEffect(componentState.current!, forceUpdate);
-
-			const disposers = lifecycles.onMounted.map(p => p());
-			return () => {
-				// call on mount disposers
-				disposers.forEach(p => {
-					if (typeof p === 'function') {
-						p();
-					}
-				});
-				dispose();
-				disposeEffect();
-				// call onUnmounted
-				lifecycles.onUnmounted.forEach(p => p());
-			};
-
-		}, []);
 
 		// return the cached render
 		return computedRender.value;
