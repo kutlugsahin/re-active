@@ -1,4 +1,4 @@
-import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box, isBox } from '@re-active/core';
+import { computed, coreEffect, reactive, readonly, Computed, Reactive, Box, isBox, Disposer } from '@re-active/core';
 import { FunctionComponent, useEffect, useMemo, useRef, useState, useContext, forwardRef, useImperativeHandle, Ref, ForwardRefRenderFunction, useCallback, useLayoutEffect, ReactElement } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
 import { tickScheduler } from './schedulers';
@@ -94,6 +94,34 @@ const createComponentHandle = (): ComponentHandle => {
 	}
 }
 
+
+function setupEffect(componentState: ComponentState, forceUpdate: () => void): Disposer {
+	// schduler to re render component
+	const scheduler = tickScheduler();
+
+	let mounted = false;
+
+	function update() {
+		// call onBeforeRender data is updated but dom is not
+		componentState.lifecycles.onBeforeRender.forEach(p => p());
+		forceUpdate();
+	}
+
+	const renderEffect = coreEffect(() => {
+		if (mounted) {
+			componentState.componentHandle.willRender = true;
+			// re-render react component with tick scheduler
+			update();
+		}
+
+		return componentState.computedRender.value;
+	}, { scheduler });
+
+	mounted = true;
+
+	return renderEffect.dispose;
+}
+
 export type ReactiveProps<P extends { [key: string]: any }> = { [key in keyof P]: P[key] | Box<P[key]> }
 
 // reactive react component implementation
@@ -103,13 +131,10 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
-		const didMount = useRef(false);
 
 		let componentState = useRef<ComponentState>();
 
 		if (!componentState.current) {
-			// schduler to re render component
-			const scheduler = tickScheduler();
 
 			// empty object to be filled with lifecycles
 			beginRegisterLifecyces();
@@ -133,26 +158,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
 			const computedRender = computed(renderer);
 
-			function update() {
-				if (didMount.current) {
-					// call onBeforeRender data is updated but dom is not
-					lifecycles.onBeforeRender.forEach(p => p());
-
-					forceUpdate();
-				}
-			}
-
-			const renderEffect = coreEffect(() => {
-				componentHandle.willRender = true;
-
-				// re-render react component with tick scheduler
-				update();
-
-				return computedRender.value;
-			}, { scheduler });
-
 			const dispose = () => {
-				renderEffect.dispose()
 				computedRender.dispose();
 			}
 
@@ -198,7 +204,8 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 		// call onMounted
 		useEffect(() => {
-			didMount.current = true;
+			const disposeEffect = setupEffect(componentState.current!, forceUpdate);
+
 			const disposers = lifecycles.onMounted.map(p => p());
 			return () => {
 				// call on mount disposers
@@ -208,6 +215,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 					}
 				});
 				dispose();
+				disposeEffect();
 				// call onUnmounted
 				lifecycles.onUnmounted.forEach(p => p());
 			};

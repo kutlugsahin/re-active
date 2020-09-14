@@ -1,4 +1,4 @@
-import { Computed, computed, coreEffect, reactive, Effect } from '@re-active/core';
+import { Computed, computed, coreEffect, reactive, Effect, Disposer } from '@re-active/core';
 import { FC, useRef, createElement, memo, PropsWithChildren, useState, useEffect, useMemo, ForwardRefExoticComponent, forwardRef, Ref, ForwardRefRenderFunction, useCallback, ClassicComponent, PureComponent, ComponentType, ComponentClass, Component, ReactNode, ReactElement } from 'react';
 import { tickScheduler } from './schedulers';
 
@@ -6,21 +6,41 @@ export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.
 
 interface ComponentState<P> {
 	computedRender: Computed<React.ReactElement<any, any> | null>;
-	renderEffect: Effect;
-	props: P
+	props: P,
+	willInvalidate: boolean;
+}
+
+function setupRenderEffect<P>(componentState: ComponentState<P>, setState: (s: any) => void): Disposer {
+	let mounted = false;
+
+	const renderEffect = coreEffect(() => {
+		if (mounted) {
+			// reactive dependency changed set flag
+			componentState.willInvalidate = true;
+			setState({});
+		}
+		return componentState.computedRender.value;
+	}, {
+		scheduler: tickScheduler()
+	})
+
+	mounted = true;
+
+	return renderEffect.dispose;
 }
 
 const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 	return memo(forwardRef((props: PropsWithChildren<P>, ref: Ref<H>) => {
 		const [_, setState] = useState({});
-		const willInvalidate = useRef(false);
 		const componentState = useRef<ComponentState<P> | null>(null);
 
 		useEffect(() => {
+			const renderEffectDisposer = setupRenderEffect(componentState.current!, setState);
+
 			return () => {
 				componentState.current?.computedRender.dispose();
-				componentState.current?.renderEffect.dispose();
+				renderEffectDisposer();
 				componentState.current = null;
 			}
 		 }, []);
@@ -32,33 +52,22 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 				return component(componentProps, ref)
 			});
 
-			const renderEffect = coreEffect(() => {
-				if (componentState.current) {
-					// reactive dependency changed set flag
-					willInvalidate.current = true;
-					setState({});
-				}
-				return computedRender.value;
-			}, {
-				scheduler: tickScheduler()
-			})
-
 			componentState.current = {
 				computedRender,
-				renderEffect,
 				props,
+				willInvalidate: false,
 			}
 		} else {
 			// update prop ref to be used in the computed function
 			componentState.current.props = props;
 
 			// skip component render since reactive dep update. 
-			if (!willInvalidate.current) {
+			if (!componentState.current.willInvalidate) {
 				// update not because reacive prop change so render component directly
 				return component(props, ref);
 			}
 
-			willInvalidate.current = false;
+			componentState.current.willInvalidate = false;
 		}
 
 		// reactive dept has changed, willInvalidate was true -> computed function will run
@@ -79,17 +88,6 @@ function bindObserverClass(instance: any) {
 	instance.render = () => {
 		if (!computedRender) {
 			computedRender = computed(renderer);
-
-			renderEffect = coreEffect(() => {
-				willInvalidate = true;
-				if (mounted) {
-					instance.forceUpdate();
-				}
-
-				return computedRender?.value;
-			}, {
-				scheduler: tickScheduler()
-			})
 		}
 
 		if (willInvalidate) {
@@ -101,6 +99,17 @@ function bindObserverClass(instance: any) {
 	}
 
 	instance.componentDidMount = () => {
+		renderEffect = coreEffect(() => {
+			if (mounted) {
+				willInvalidate = true;
+				instance.forceUpdate();
+			}
+
+			return computedRender?.value;
+		}, {
+			scheduler: tickScheduler()
+		})
+
 		mounted = true;
 		baseMount?.();
 	}
