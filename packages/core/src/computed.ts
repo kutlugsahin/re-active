@@ -24,11 +24,11 @@ export function computed<T>(fn: () => T): ReadonlyComputed<T>;
 export function computed<T>(fnOrGetterSetter: any): any {
     const cmp = vendorComputed(fnOrGetterSetter) as WritableComputedRef<T>;
 
-    const { effect, value, ...rest } = cmp;
+    const { effect, ...rest } = cmp;
 
     const computed = {
         ...rest,
-        watch: (clb: WatcherCallback<T>) => watch(() => cmp.value, clb),
+        watch: (clb: WatcherCallback<T>) => watch(cmp, clb),
         get isActive() {
             return cmp.effect.active
         },
