@@ -6,8 +6,8 @@ type WatcherCallback<T> = (olVal: T, newVal: T) => void;
 
 export interface Computed<T> extends Box<T> {
     watch: (clb: WatcherCallback<T>) => void;
-    isActive: boolean;
     dispose: () => void;
+    invalidate: () => void;
 }
 
 export interface ReadonlyComputed<T> extends Computed<T> {
@@ -22,28 +22,35 @@ export interface ComputedGetterSetter<T> {
 export function computed<T>(getterSetter: ComputedGetterSetter<T>): Computed<T>;
 export function computed<T>(fn: () => T): ReadonlyComputed<T>;
 export function computed<T>(fnOrGetterSetter: any): any {
-    const cmp = vendorComputed(fnOrGetterSetter) as WritableComputedRef<T>;
+    const computed: any = {};
 
-    const { effect, ...rest } = cmp;
-
-    const computed = {
-        ...rest,
-        watch: (clb: WatcherCallback<T>) => watch(cmp, clb),
-        get isActive() {
-            return cmp.effect.active
-        },
-        dispose: () => stop(cmp.effect)
+    function invalidate() {
+        computed.dispose?.();
+        populateComputed(vendorComputed(fnOrGetterSetter));
     }
 
-    const valueAttributes = typeof fnOrGetterSetter === 'function' ?
-        {
-            get() { return cmp.value },
-        } : {
-            get() { return cmp.value },
-            set(val: T) { cmp.value = val; }
-        }
+    function populateComputed(computedRef: WritableComputedRef<T>) {
+        const { effect, ...rest } = computedRef;
 
-    Reflect.defineProperty(computed, 'value', valueAttributes)
+        Object.assign(computed, {
+            ...rest,
+            watch: (clb: WatcherCallback<T>) => watch(computedRef, clb),
+            dispose: () => stop(computedRef.effect),
+            invalidate,
+        });
+
+        const valueAttributes = typeof fnOrGetterSetter === 'function' ?
+            {
+                get() { return computedRef.value },
+            } : {
+                get() { return computedRef.value },
+                set(val: T) { computedRef.value = val; }
+            }
+
+        Reflect.defineProperty(computed, 'value', valueAttributes)
+    }
+
+    populateComputed(vendorComputed(fnOrGetterSetter));
 
     return computed;
 }

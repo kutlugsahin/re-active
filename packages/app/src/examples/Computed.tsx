@@ -25,7 +25,8 @@ console.log(totalPrice.value);
 const PriceCalculator = createComponent(() => {
   const state = reactive({
     amount: 0,
-    price: 10
+    price: 10,
+    clicks: 0,
   });
 
   const totalPrice = computed(() => {
@@ -51,6 +52,7 @@ const PriceCalculator = createComponent(() => {
         />
       </div>
       Total Price: {totalPrice.value}
+      <button onClick={() => state.clicks++}>{state.clicks}</button>
     </div>
   );
 });

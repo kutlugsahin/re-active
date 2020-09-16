@@ -41,7 +41,7 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 				computedRender,
 				renderEffectDisposer,
 				props,
-				willInvalidate: true,
+				willInvalidate: false,
 			}
 		} else {
 			// update prop ref to be used in the computed function

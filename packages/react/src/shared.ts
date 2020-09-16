@@ -1,5 +1,5 @@
-import { Computed, computed as coreComputed, Scheduler, watch as coreWatch, coreEffect, Disposer, WatchSource, WatchCallback, CoreEffectOptions, Box } from '@re-active/core';
-import { ReactElement, ReactNode } from 'react';
+import { Computed, computed as coreComputed, Scheduler, watch as coreWatch, coreEffect, Disposer, WatchSource, WatchCallback, CoreEffectOptions, Box, isBox, ComputedGetterSetter, ReadonlyComputed } from '@re-active/core';
+import React, { ReactElement, ReactNode } from 'react';
 import { getComponentHandle, onUnmounted } from "./lifecycle";
 import { combineSchedulers, onUpdatedScheduler, tickScheduler } from './schedulers';
 
@@ -13,10 +13,19 @@ const disposeEffectOnUnmount = (dispose: () => void) => {
 	}
 }
 
-export const computed = <T>(fn: () => T): Computed<T> => {
-	const cmp = coreComputed(fn);
-	disposeEffectOnUnmount(cmp.dispose);
-	return cmp;
+export function computed<T>(getterSetter: ComputedGetterSetter<T>): Computed<T>;
+export function computed<T>(fn: () => T): ReadonlyComputed<T>;
+export function computed<T>(fnOrGetterSetter: any): any {
+	if (_isStaticRendering) {
+		return {
+			value: typeof fnOrGetterSetter === 'function' ? fnOrGetterSetter() : fnOrGetterSetter.get(),
+			dispose: () => { },
+		} as Computed<T>;
+	} else {
+		const cmp = coreComputed(fnOrGetterSetter);
+		disposeEffectOnUnmount(cmp.dispose);
+		return cmp;
+	}
 }
 
 export type Flush = 'pre' | 'post' | 'sync';
@@ -45,7 +54,17 @@ export function watch<T>(source: Computed<T>, clb: WatchCallback<T>, options?: W
 export function watch<T extends object>(source: T, clb: WatchCallback<T>, options?: WatchOptions): Disposer;
 export function watch<T extends WatchSource>(source: T, clb: WatchCallback<any>, options?: WatchOptions): Disposer {
 	if (_isStaticRendering) {
-		return () => {}
+		if (options?.immediate) {
+			if (typeof source === 'function') {
+				clb((source as () => any)(), undefined);
+			} else if (isBox(source)) {
+				clb((source as Box<T>).value, undefined);
+			} else {
+				clb(source as object, undefined);
+			}
+		}
+
+		return () => { }
 	} else {
 		let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
 		let dispose = coreWatch(source, clb, { ...options, scheduler, flush: undefined });
@@ -100,22 +119,26 @@ export const computedRender = <T>(fn: () => T): Computed<T> => {
 }
 
 export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => void) => {
-	// schduler to re render component
-	const scheduler = tickScheduler();
+	if (_isStaticRendering) {
+		return () => { };
+	} else {
+		// schduler to re render component
+		const scheduler = tickScheduler();
 
-	let mounted = false;
+		let mounted = false;
 
-	const renderEffect = coreEffect(() => {
-		if (mounted) {
-			clb();
-		}
-		
-		return computed.value;
-	}, { scheduler });
-	
-	mounted = true;
+		const renderEffect = coreEffect(() => {
+			if (mounted) {
+				clb();
+			}
 
-	return renderEffect.dispose;
+			return computed.value;
+		}, { scheduler });
+
+		mounted = true;
+
+		return renderEffect.dispose;
+	}
 }
 
 export const isStaticRendering = () => {
@@ -123,5 +146,9 @@ export const isStaticRendering = () => {
 }
 
 export const renderStatic = (isStatic: boolean) => {
+	// dirty hack to disable warning for static rendering
+	// useLayoutEffect does nothing on the server, because its effect cannot be encoded into the server renderer's output format. This will lead to a mismatch between the initial, non-hydrated UI and the intended UI. To avoid this, useLayoutEffect should only be used in components that render exclusively on the client. See https://fb.me/react-uselayouteffect-ssr for common fixes.
+	React.useLayoutEffect = React.useEffect;
+
 	_isStaticRendering = isStatic;
 }

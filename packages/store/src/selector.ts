@@ -1,9 +1,19 @@
 import { Computed, computed } from '@re-active/core';
-import { getGlobalStore } from './createStore';
+import { getGlobalStore, addResetListener } from './createStore';
+
+const selectorComputedMap = new Set<Computed<any>>();
+
+addResetListener(() => {
+    for (const computedValues of selectorComputedMap) {
+        computedValues.invalidate();
+    }
+})
 
 export type Selector<S = any> = (s: S) => any;
 export const selector = <T extends Selector>(fn: T): Computed<ReturnType<T>> => {
-    return computed(() => fn(getGlobalStore()));
+    const result = computed(() => fn(getGlobalStore()));
+    selectorComputedMap.add(result);
+    return result;
 }
 
 type ComputedSelectorMap<S, T extends Selectors<S>> = {

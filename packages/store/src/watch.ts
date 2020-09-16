@@ -1,5 +1,13 @@
-import { coreEffect, CoreEffectOptions, CoreWatchOptions, Disposer, Scheduler, tickScheduler, watch, WatchCallback, WatchSource } from '@re-active/core';
-import { getGlobalStore, State } from './createStore';
+import { Callback, coreEffect, CoreEffectOptions, CoreWatchOptions, Disposer, Scheduler, tickScheduler, watch, WatchCallback, WatchSource } from '@re-active/core';
+import { getGlobalStore, State, addResetListener } from './createStore';
+
+const effectSet = new Set<Callback>();
+
+addResetListener(() => {
+    for (const invalidate of effectSet) {
+        invalidate();        
+    }
+})
 
 let _actionWatcher: ActionWatcher;
 
@@ -22,14 +30,34 @@ interface EffectStoreOptions extends Omit<CoreEffectOptions, 'scheduler' | 'lazy
 }
 
 
+const withInvalidation = (getDisposer: () => Disposer): Disposer => {
+    let disposer = getDisposer();
+
+    function invalidate() {
+        disposer();
+        disposer = getDisposer();
+    }
+
+    effectSet.add(invalidate);
+
+    return () => {
+        effectSet.delete(invalidate);
+        disposer();
+    }
+}
+
 export function watchStore<T>(getter: (state: State) => T, callback: WatchCallback<T>, options?: WatchStoreOptions): Disposer {
-    return watch(() => getter(getGlobalStore()), callback, options);
+    const createWatcher = () => watch(() => getter(getGlobalStore()), callback, options);
+
+    return withInvalidation(createWatcher);
 }
 
 export const effectStore = (fn: (state: State) => any, options?: EffectStoreOptions): Disposer => {
     const scheduler: Scheduler | undefined = options?.flush === 'sync' ? undefined : tickScheduler();
-    return coreEffect(() => fn(getGlobalStore), {
+    const createEffect = () => coreEffect(() => fn(getGlobalStore), {
         ...options,
         scheduler,
     }).dispose;
+
+    return withInvalidation(createEffect);
 }
