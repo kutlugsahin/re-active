@@ -1,26 +1,55 @@
-import { box, Box, Callback, Reactive, reactive } from '@re-active/core';
+import { types } from '@babel/core';
+import { Reactive, reactive } from '@re-active/core';
+import { buildActions } from './action';
+import { buildSelectors } from './selector';
+import { Store, StoreDefinition } from './types';
+import { buildEffects, watchStore } from './watch';
 
-const resetListeners = new Set<Callback>();
 
-export type State = { [key: string]: any };
+export const createStore = <T extends StoreDefinition>(storeDefinition: T): Store<T> => {
+	const reactiveState: Reactive<T> = reactive(storeDefinition.state);
 
-let _store: Reactive<State>;
-
-export const createStore = <S extends State>(state: S) => {
-	if (_store) {
-		_store = reactive(state);
-
-		for (const listener of resetListeners) {
-			listener();
-		}
-	} else {
-		_store = reactive(state);
+	const store: Store<T> = {
+		state: reactiveState,
+		selectors: buildSelectors(storeDefinition.selectors, () => store),
+		actions: buildActions(storeDefinition.actions, () => store),
 	}
-};
 
-export const getGlobalStore = () => _store;
+	const effects = buildEffects(storeDefinition.effects, () => store);
+
+	function dispose() {
+		
+	}
+
+	return store;
+} 
+
+const a = createStore({
+	state: {
+		name: '',
+	},
+	actions: {
+		loadUsers(x: typeof a, id: number) {
+			a.actions.fetchItem('asda');
+		},
+		*fetchItem(store, name: string) {
+			yield 5;
+			return 'sdfsdf';
+		}
+	},
+	selectors: {
+		user({ actions }) {
+			
+			return 'state.name'
+		}
+	}
+})
+
+export type SS = typeof a;
 
 
-export const addResetListener = (clb: Callback) => {
-	resetListeners.add(clb);
+function f() {
+		
 }
+
+f.bind({ a: 1 });

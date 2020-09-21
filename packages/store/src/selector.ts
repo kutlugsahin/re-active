@@ -1,43 +1,27 @@
 import { Computed, computed } from '@re-active/core';
-import { getGlobalStore, addResetListener } from './createStore';
+import { Selector, Store, SelectorMap, Selectors } from './types';
 
-const selectorComputedMap = new Set<Computed<any>>();
-
-addResetListener(() => {
-    for (const computedValues of selectorComputedMap) {
-        computedValues.invalidate();
-    }
-})
-
-export type Selector<S = any> = (s: S) => any;
-export const selector = <T extends Selector>(fn: T): Computed<ReturnType<T>> => {
-    const result = computed(() => fn(getGlobalStore()));
-    selectorComputedMap.add(result);
+export const selector = <T extends Selector, TStore extends Store>(fn: T, getStore: () => TStore): Computed<ReturnType<T>> => {
+    const result = computed(() => fn(getStore()));
     return result;
 }
 
-type ComputedSelectorMap<S, T extends Selectors<S>> = {
-    [key in keyof T]: ReturnType<T[key]>
-}
+export function buildSelectors<T extends SelectorMap>(selectorMap: T, getStore: () => Store): Selectors<T> {
+    return Object.keys(selectorMap).reduce((acc: any, key) => {
+        const entry = selectorMap[key];
 
-type Selectors<S> = { [key: string]: Selector<S> };
+        if (typeof entry === 'function') {
+            const computedSelector = selector(entry as Selector, getStore);
 
-
-export const createSelectors = <S, T extends Selectors<S>>(selectors: T): ComputedSelectorMap<S, T> => {
-
-    const result = {};
-
-    for (const key in selectors) {
-        if (Object.prototype.hasOwnProperty.call(selectors, key)) {
-            const selectorResult = selector(selectors[key]);
-
-            Object.defineProperty(result, key, {
+            Reflect.defineProperty(acc, key, {
                 get() {
-                    return selectorResult.value;
-                },
-            });
+                    return computedSelector.value;
+                }
+            })
+        } else {
+            acc[key] = buildSelectors(entry, getStore);
         }
-    }
 
-    return result as ComputedSelectorMap<S, T>;
+        return acc;
+    }, {} as Selectors<T>)
 }

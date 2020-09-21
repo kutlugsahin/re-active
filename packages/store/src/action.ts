@@ -1,7 +1,5 @@
-import { getGlobalStore } from './createStore';
 import { generatorFlow } from './flow';
-import { Action, Actionize, Actions, Callable, Dictionary, OmitStateParameter } from './types';
-import { getActionWatcher } from './watch';
+import { Action, Actionize, OmitStateParameter, Dictionary, Actions, Callable } from './types';
 
 const isAction = Symbol('isAction');
 
@@ -32,14 +30,14 @@ export const callable = <T extends Action>(fn: T): Callable<T> => {
 	return actionized as Callable<T>;
 }
 
-export const action = <T extends Action>(fn: T): Actionize<T> => {
+const action = <T extends Action>(fn: T, getStore: () => any): Actionize<T> => {
 
 	const callableAction = callable(fn);
 
 	let actionized: any = (...params: OmitStateParameter<T>) => {
-		return callableAction(getGlobalStore() as any, ...params);
+		return callableAction(getStore() as any, ...params);
 	}
-	
+
 	actionized[isAction] = true;
 	actionized.displayName = fn.name;
 
@@ -47,12 +45,12 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 		apply(target, ctx, params) {
 			const result = Reflect.apply(target, ctx, params);
 
-			const actionWatcher = getActionWatcher();
+			// const actionWatcher = getActionWatcher();
 
-			if (actionWatcher) {
-				const actionName: string = proxyFn.displayName || actionized.displayName;
-				actionWatcher(actionName, params, result);
-			} 
+			// if (actionWatcher) {
+			// 	const actionName: string = proxyFn.displayName || actionized.displayName;
+			// 	actionWatcher(actionName, params, result);
+			// }
 
 			return result;
 		}
@@ -61,33 +59,17 @@ export const action = <T extends Action>(fn: T): Actionize<T> => {
 	return proxyFn as Actionize<T>;
 }
 
-export const createActions = <T extends Dictionary<Action | Object>>(actions: T): Actions<T> => {
+export function buildActions<T extends Dictionary<Action | Dictionary<any>>>(actions: T, getStore: () => any): Actions<T> {
+	return Object.keys(actions).reduce((acc: any, key) => {
+		const entry = actions[key];
 
-	function makeActionObject(actionMap: T, parentDisplayName: string = '') {		
-		const result: any = {};
-
-		for (const key in actionMap) {
-			if (Object.prototype.hasOwnProperty.call(actionMap, key)) {
-				const actionFn = actionMap[key] as any;
-				const actionName = parentDisplayName ? `${parentDisplayName}.${key}` : key;
-
-				if (actionFn[isAction]) {
-					result[key] = actionFn;
-					result[key].displayName = actionName
-				} else if (typeof actionFn === 'object') {
-					result[key] = makeActionObject(actionFn, actionName)
-				} else {
-					result[key] = action(actionMap[key] as Action);
-					result[key].displayName = actionName;
-				}
-			}
+		if (typeof entry === 'function') {
+			acc[key] = action(entry as Action, getStore);
+		} else {
+			acc[key] = buildActions(entry, getStore);
 		}
 
-		return result;
-	}
+		return acc;
 
-	return makeActionObject(actions) as Actions<T>;
+	}, {} as Actions<T>);
 }
-
-
-

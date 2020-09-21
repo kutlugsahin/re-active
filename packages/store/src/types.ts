@@ -1,3 +1,5 @@
+import { Disposer, Reactive } from '@re-active/core';
+
 export type OmitStateParameter<T extends (state: any, ...params: any[]) => any> = T extends (state: any, ...params: infer P) => any ? P : never;
 
 export type Action = (...params: any[]) => any;
@@ -18,7 +20,7 @@ export type Callable<T extends Action> = T extends GeneratorAction ?
 
 export type Dictionary<T> = { [key: string]: T };
 
-// export type ActionMap<S = any> = { [key: string]: Action<S> }
+export type ActionMap = Dictionary<Action | Dictionary<any>>;
 // export type ActionMapWithoutState<T extends ActionMap> = { [key in keyof T]: FunctionWithoutState<T[key]> }
 
 export type Actions<T extends Dictionary<Action | Object>> = { [key in keyof T]: T[key] extends Action ? Actionize<T[key]> : T[key] extends Dictionary<any> ? Actions<T[key]> : never}
@@ -39,4 +41,27 @@ export type Callback<T> = (param: T) => void
 export type Signal<T> = {
     (param: T): void;
     listen: (clb: Callback<T>) => () => void;
+}
+
+export type Selector<R = any> = (store: Store) => R;
+export type SelectorMap = Dictionary<Selector | Dictionary<any>>;
+export type Selectors<T extends SelectorMap> = { [key in keyof T]: T[key] extends Selector ? ReturnType<T[key]> : T[key] extends Dictionary<any> ? Selectors<T[key]> : never };
+
+
+export type EffectCreator = (store: any) => Disposer;
+export type EffectMap = Dictionary<EffectCreator | Dictionary<any>> | undefined;
+export type Effects<T extends EffectMap> = { [key in keyof T]: T[key] extends EffectCreator ? Disposer : T[key] extends Dictionary<any> ? Effects<T[key]> : never };
+
+export type StoreDefinition = {
+    state: any,
+    selectors: SelectorMap;
+    actions: ActionMap;
+    effects?: EffectMap;
+}
+
+export interface Store<T extends StoreDefinition = any> {
+    state: Reactive<T['state']>;
+    selectors: Selectors<T['selectors']>;
+    actions: Actions<T['actions']>;
+    effects?: Effects<T['effects']>
 }
