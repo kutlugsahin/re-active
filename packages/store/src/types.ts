@@ -43,7 +43,7 @@ export type Signal<T> = {
     listen: (clb: Callback<T>) => () => void;
 }
 
-export type Selector<R = any> = (store: Store) => R;
+export type Selector = (...p: any[]) => any;
 export type SelectorMap = Dictionary<Selector | Dictionary<any>>;
 export type Selectors<T extends SelectorMap> = { [key in keyof T]: T[key] extends Selector ? ReturnType<T[key]> : T[key] extends Dictionary<any> ? Selectors<T[key]> : never };
 

@@ -2,7 +2,7 @@ import { types } from '@babel/core';
 import { Reactive, reactive } from '@re-active/core';
 import { buildActions } from './action';
 import { buildSelectors } from './selector';
-import { Store, StoreDefinition } from './types';
+import { ActionMap, Actions, Dictionary, OmitStateParameter, Store, StoreDefinition } from './types';
 import { buildEffects, watchStore } from './watch';
 
 
@@ -22,34 +22,46 @@ export const createStore = <T extends StoreDefinition>(storeDefinition: T): Stor
 	}
 
 	return store;
-} 
+}
+
+const state = {
+	name: '',
+};
+
 
 const a = createStore({
-	state: {
-		name: '',
-	},
+	state,
 	actions: {
-		loadUsers(x: typeof a, id: number) {
-			a.actions.fetchItem('asda');
+		loadUsers(ss, id: number) {
+			const { selectors } = ss as SS;			
 		},
-		*fetchItem(store, name: string) {
+		*fetchItem({ }, name: string) {
 			yield 5;
 			return 'sdfsdf';
 		}
 	},
 	selectors: {
-		user({ actions }) {
-			
+		user() {
 			return 'state.name'
 		}
 	}
-})
+});
 
-export type SS = typeof a;
+type SS = typeof a;
 
+type FunctionMap = { [key: string]: (...p: any[]) => any };
 
-function f() {
-		
+type Enhance<T extends FunctionMap> = {
+	[key in keyof T]: T[key] extends (...p: any[]) => any ? (...p: OmitStateParameter<T[key]>) => ReturnType<T[key]> : never;
 }
 
-f.bind({ a: 1 });
+function rr<T extends FunctionMap>(asd: T): Enhance<T> {
+	return null!;
+}
+
+const x = rr({
+	f(state) {
+		return 5;
+	}
+})
+
