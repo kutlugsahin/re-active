@@ -1,4 +1,4 @@
-import { Computed, computed } from '@re-active/core';
+import { Computed, computed, ReadonlyComputed } from '@re-active/core';
 import { getGlobalStore, addResetListener, isRenderStatic } from './createStore';
 
 const selectorComputedMap = new Set<Computed<any>>();
@@ -10,7 +10,7 @@ addResetListener(() => {
 })
 
 export type Selector<S = any> = (s: S) => any;
-export const selector = <T extends Selector>(fn: T): Computed<ReturnType<T>> => {
+export const selector = <T extends Selector>(fn: T): ReadonlyComputed<ReturnType<T>> => {
     if (isRenderStatic()) {
         return {
             get value() {

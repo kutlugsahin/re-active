@@ -48,9 +48,11 @@ export function computed<T>(fnOrGetterSetter: any): any {
         const valueAttributes = typeof fnOrGetterSetter === 'function' ?
             {
                 get() { return computedRef.value },
+                configurable: true,
             } : {
                 get() { return computedRef.value },
-                set(val: T) { computedRef.value = val; }
+                set(val: T) { computedRef.value = val; },
+                configurable: true
             }
 
         Reflect.defineProperty(computed, 'value', valueAttributes)
