@@ -1,5 +1,5 @@
 import { Callback, coreEffect, CoreEffectOptions, CoreWatchOptions, Disposer, Scheduler, tickScheduler, watch, WatchCallback, WatchSource } from '@re-active/core';
-import { getGlobalStore, State, addResetListener } from './createStore';
+import { getGlobalStore, State, addResetListener, isRenderStatic } from './createStore';
 
 const effectSet = new Set<Callback>();
 
@@ -47,17 +47,28 @@ const withInvalidation = (getDisposer: () => Disposer): Disposer => {
 }
 
 export function watchStore<T>(getter: (state: State) => T, callback: WatchCallback<T>, options?: WatchStoreOptions): Disposer {
-    const createWatcher = () => watch(() => getter(getGlobalStore()), callback, options);
-
-    return withInvalidation(createWatcher);
+    if (isRenderStatic()) {
+        if (options?.immediate) {
+            callback(getter(getGlobalStore()), undefined!);
+        }
+        return () => { };
+    } else {
+        const createWatcher = () => watch(() => getter(getGlobalStore()), callback, options);
+        return withInvalidation(createWatcher);
+    }
 }
 
 export const effectStore = (fn: (state: State) => any, options?: EffectStoreOptions): Disposer => {
-    const scheduler: Scheduler | undefined = options?.flush === 'sync' ? undefined : tickScheduler();
-    const createEffect = () => coreEffect(() => fn(getGlobalStore), {
-        ...options,
-        scheduler,
-    }).dispose;
+    if (isRenderStatic()) {
+        fn(getGlobalStore());
+        return () => { };
+    } else {
+        const scheduler: Scheduler | undefined = options?.flush === 'sync' ? undefined : tickScheduler();
+        const createEffect = () => coreEffect(() => fn(getGlobalStore), {
+            ...options,
+            scheduler,
+        }).dispose;
 
-    return withInvalidation(createEffect);
+        return withInvalidation(createEffect);
+    }
 }

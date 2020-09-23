@@ -1,4 +1,4 @@
-import { createActions, createSelectors, createStore, takeLatest, watchActions, watchStore } from '@re-active/store';
+import { createActions, createSelectors, createStore, watchActions, watchStore } from '@re-active/store';
 import { Dictionary, fetchItems, Item, makeTreeNode, Node, nodes, RowItem } from './utils';
 
 interface Store {
@@ -110,7 +110,6 @@ const actionMap = {
 
 export const actions = createActions({
     ...actionMap,
-    selectTreeNode: takeLatest(actionMap.selectTreeNode),
 });
 
 // ================ WATCHERS ===========================

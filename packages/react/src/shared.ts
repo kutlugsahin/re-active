@@ -1,9 +1,9 @@
-import { Computed, computed as coreComputed, Scheduler, watch as coreWatch, coreEffect, Disposer, WatchSource, WatchCallback, CoreEffectOptions, Box, isBox, ComputedGetterSetter, ReadonlyComputed } from '@re-active/core';
-import React, { ReactElement, ReactNode } from 'react';
+import { Box, Computed, computed as coreComputed, ComputedGetterSetter, coreEffect, CoreEffectOptions, Disposer, isBox, ReadonlyComputed, Scheduler, watch as coreWatch, WatchCallback, WatchSource } from '@re-active/core';
+import React, { ReactNode } from 'react';
 import { getComponentHandle, onUnmounted } from "./lifecycle";
 import { combineSchedulers, onUpdatedScheduler, tickScheduler } from './schedulers';
 
-let _isStaticRendering = false;
+let _isStaticRendering = typeof window === 'undefined';
 
 const disposeEffectOnUnmount = (dispose: () => void) => {
 	if (getComponentHandle()) {
@@ -108,7 +108,9 @@ export const effect = <T extends () => any>(fn: T, options?: EffectOptions): Dis
 export const computedRender = <T>(fn: () => T): Computed<T> => {
 	if (_isStaticRendering) {
 		return {
-			value: fn(),
+			get value() {
+				return fn();
+			},
 			dispose: () => { },
 		} as Computed<T>;
 	} else {

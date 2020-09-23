@@ -30,7 +30,13 @@ export function computed<T>(fnOrGetterSetter: any): any {
     }
 
     function populateComputed(computedRef: WritableComputedRef<T>) {
-        const { effect, ...rest } = computedRef;
+
+        const rest = Reflect.ownKeys(computedRef).reduce((acc: any, key) => {
+            if (key !== 'value' && key !== 'effect') {
+                acc[key] = Reflect.get(computedRef, key);
+            }
+            return acc;
+         }, {});
 
         Object.assign(computed, {
             ...rest,

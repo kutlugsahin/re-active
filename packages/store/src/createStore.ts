@@ -1,4 +1,6 @@
-import { box, Box, Callback, Reactive, reactive } from '@re-active/core';
+import { Callback, markRaw, Reactive, reactive } from '@re-active/core';
+
+let _isRenderStatic = typeof window === 'undefined';
 
 const resetListeners = new Set<Callback>();
 
@@ -6,17 +8,34 @@ export type State = { [key: string]: any };
 
 let _store: Reactive<State>;
 
+function releaseListeners() {
+	for (const listener of resetListeners) {
+		listener();
+	}
+}
+
+function createReativeState(state: any) {
+	if (_isRenderStatic) {
+		return markRaw(state);
+	}
+
+	return reactive(state);
+}
+
 export const createStore = <S extends State>(state: S) => {
 	if (_store) {
-		_store = reactive(state);
+		_store = createReativeState(state);
 
-		for (const listener of resetListeners) {
-			listener();
-		}
+		releaseListeners();
 	} else {
-		_store = reactive(state);
+		_store = createReativeState(state);
 	}
 };
+
+export const disposeStore = () => {
+	releaseListeners();
+	_store = null!;
+}
 
 export const getGlobalStore = () => _store;
 
@@ -24,3 +43,9 @@ export const getGlobalStore = () => _store;
 export const addResetListener = (clb: Callback) => {
 	resetListeners.add(clb);
 }
+
+export const renderStatic = (isStatic: boolean) => {
+	_isRenderStatic = isStatic;
+}
+
+export const isRenderStatic = () => _isRenderStatic;
