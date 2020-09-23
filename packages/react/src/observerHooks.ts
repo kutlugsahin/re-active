@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { reactive, readonly } from '@re-active/core';
 import { Computed, ComputedGetterSetter, ReadonlyComputed, box } from '@re-active/core';
-import { effect, watch } from './shared';
+import { effect, watch } from './reactivity';
 
 export const useReactive = <T>(val: T) => useMemo(() => reactive<T>(val), []);
 export const useBox = <T>(val: T) => useMemo(() => box<T>(val), []);

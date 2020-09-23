@@ -1,7 +1,7 @@
 import { Box, Computed, isBox, reactive, Reactive, readonly } from '@re-active/core';
 import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
-import { computedRender as computed, renderEffect } from './shared';
+import { computed, renderEffect } from './reactivity';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;

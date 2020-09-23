@@ -1,6 +1,6 @@
 import { Computed, Disposer } from '@re-active/core';
 import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useRef, useState } from 'react';
-import { computedRender as computed, renderEffect } from './shared';
+import { computed, renderEffect } from './reactivity';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
 

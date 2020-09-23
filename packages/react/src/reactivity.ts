@@ -6,7 +6,7 @@ import { combineSchedulers, onUpdatedScheduler, tickScheduler } from './schedule
 let _isStaticRendering = typeof window === 'undefined';
 
 const disposeEffectOnUnmount = (dispose: () => void) => {
-	if (getComponentHandle()) {
+	if (!_isStaticRendering && getComponentHandle()) {
 		onUnmounted(() => {
 			dispose();
 		});
@@ -18,7 +18,9 @@ export function computed<T>(fn: () => T): ReadonlyComputed<T>;
 export function computed<T>(fnOrGetterSetter: any): any {
 	if (_isStaticRendering) {
 		return {
-			value: typeof fnOrGetterSetter === 'function' ? fnOrGetterSetter() : fnOrGetterSetter.get(),
+			get value() {
+				return typeof fnOrGetterSetter === 'function' ? fnOrGetterSetter() : fnOrGetterSetter.get();
+			},
 			dispose: () => { },
 		} as Computed<T>;
 	} else {
@@ -102,21 +104,6 @@ export const effect = <T extends () => any>(fn: T, options?: EffectOptions): Dis
 		}
 
 		return eff.dispose
-	}
-}
-
-export const computedRender = <T>(fn: () => T): Computed<T> => {
-	if (_isStaticRendering) {
-		return {
-			get value() {
-				return fn();
-			},
-			dispose: () => { },
-		} as Computed<T>;
-	} else {
-		const cmp = coreComputed(fn);
-		disposeEffectOnUnmount(cmp.dispose);
-		return cmp;
 	}
 }
 

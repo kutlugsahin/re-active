@@ -2,10 +2,10 @@ import { computed as vendorComputed, stop, WritableComputedRef } from "@vue/reac
 import { Box } from './reactive';
 import { watch } from './watch';
 
-type WatcherCallback<T> = (olVal: T, newVal: T) => void;
+export type WatchCallback<T> = (newValue: T, oldValue?: T) => void;
 
 export interface Computed<T> extends Box<T> {
-    watch: (clb: WatcherCallback<T>) => void;
+    watch: (clb: WatchCallback<T>) => void;
     dispose: () => void;
     invalidate: () => void;
 }
@@ -40,7 +40,7 @@ export function computed<T>(fnOrGetterSetter: any): any {
 
         Object.assign(computed, {
             ...rest,
-            watch: (clb: WatcherCallback<T>) => watch(computedRef, clb),
+            watch: (clb: WatchCallback<T>) => watch(computedRef, clb),
             dispose: () => stop(computedRef.effect),
             invalidate,
         });

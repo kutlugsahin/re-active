@@ -1,5 +1,5 @@
 export { computed } from './computed';
-export type { Computed, ComputedGetterSetter, ReadonlyComputed } from './computed';
+export type { Computed, ComputedGetterSetter, ReadonlyComputed, WatchCallback } from './computed';
 
 export { coreEffect } from './effect';
 export type { CoreEffectOptions, Scheduler, ReactivityEvent, Disposer, Effect } from './effect';
@@ -26,4 +26,4 @@ export { traverse, queueMicroTask, tickScheduler } from './utils';
 export type { Callback } from './utils';
 
 export { watch } from './watch';
-export type { CoreWatchOptions, WatchCallback, WatchSource } from './watch';
+export type { CoreWatchOptions, WatchSource } from './watch';

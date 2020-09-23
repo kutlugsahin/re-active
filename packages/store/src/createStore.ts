@@ -44,7 +44,7 @@ export const addResetListener = (clb: Callback) => {
 	resetListeners.add(clb);
 }
 
-export const renderStatic = (isStatic: boolean) => {
+export const renderStatic = (isStatic: boolean = true) => {
 	_isRenderStatic = isStatic;
 }
 

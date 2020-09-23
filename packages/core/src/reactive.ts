@@ -58,7 +58,7 @@ export const box = <T>(val: T): Box<UnBox<T>> => {
     return vendorRef(val);
 }
 
-box.shallow = <T>(val: T): T extends Box<any> ? T : Box<T> => {
+box.shallow = <T>(val: T): Box<T> => {
     return vendorShallowRef(val);
 }
 

@@ -1,4 +1,4 @@
-import { Computed } from './computed';
+import { Computed, WatchCallback } from './computed';
 import { coreEffect, Disposer, ReactivityEvent, Scheduler } from './effect';
 import { Box, isBox, isReactive } from './reactive';
 import { tickScheduler, traverse } from './utils';
@@ -19,8 +19,6 @@ function traverseAndReturn(source: any) {
 }
 
 export type WatchSource = (() => any) | Box<any> | Computed<any> | object;
-
-export type WatchCallback<T> = (newValue: T, oldValue: T) => void;
 
 export function watch<T>(source: Box<T>, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer;
 export function watch<T>(source: () => T, clb: WatchCallback<T>, options?: CoreWatchOptions): Disposer;
