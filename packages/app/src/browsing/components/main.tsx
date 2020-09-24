@@ -10,6 +10,7 @@ export const Main = createComponent(() => {
                 <div className="actions">
                     <button onClick={actions.gotoParentFolder}>←</button>
                     <button onClick={actions.browseCurrentTableItem}>↴</button>
+                    <span><button onClick={actions.resetState}>Reset State</button></span>
                 </div>
                 <Table/>
             </div>

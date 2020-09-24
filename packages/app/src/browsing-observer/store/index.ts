@@ -1,4 +1,4 @@
-import { createActions, createSelectors, createStore, takeLatest, watchStore, watchActions, selector } from '@re-active/store';
+import { createActions, createSelectors, setStoreState, watchStore, watchActions } from '@re-active/store';
 import { Dictionary, fetchItems, Item, makeTreeNode, Node, nodes, RowItem } from './utils';
 
 interface Store {
@@ -12,7 +12,7 @@ interface Store {
     };
 }
 
-createStore<Store>({
+setStoreState<Store>({
     items: nodes.reduce((acc: Dictionary<Item>, node) => {
         acc[node.id] = node.data;
 
@@ -108,7 +108,6 @@ const actionMap = {
 
 export const actions = createActions({
     ...actionMap,
-    selectTreeNode: takeLatest(actionMap.selectTreeNode),
 });
 
 // ================ WATCHERS ===========================

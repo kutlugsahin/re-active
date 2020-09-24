@@ -7,7 +7,6 @@ export type WatchCallback<T> = (newValue: T, oldValue?: T) => void;
 export interface Computed<T> extends Box<T> {
     watch: (clb: WatchCallback<T>) => void;
     dispose: () => void;
-    invalidate: () => void;
 }
 
 export interface ReadonlyComputed<T> extends Computed<T> {
@@ -24,41 +23,32 @@ export function computed<T>(fn: () => T): ReadonlyComputed<T>;
 export function computed<T>(fnOrGetterSetter: any): any {
     const computed: any = {};
 
-    function invalidate() {
-        computed.dispose?.();
-        populateComputed(vendorComputed(fnOrGetterSetter));
-    }
+    const computedRef = vendorComputed<T>(fnOrGetterSetter) as WritableComputedRef<T>;
 
-    function populateComputed(computedRef: WritableComputedRef<T>) {
+    const rest = Reflect.ownKeys(computedRef).reduce((acc: any, key) => {
+        if (key !== 'value' && key !== 'effect') {
+            acc[key] = Reflect.get(computedRef, key);
+        }
+        return acc;
+    }, {});
 
-        const rest = Reflect.ownKeys(computedRef).reduce((acc: any, key) => {
-            if (key !== 'value' && key !== 'effect') {
-                acc[key] = Reflect.get(computedRef, key);
-            }
-            return acc;
-         }, {});
+    Object.assign(computed, {
+        ...rest,
+        watch: (clb: WatchCallback<T>) => watch(computedRef, clb),
+        dispose: () => stop(computedRef.effect),
+    });
 
-        Object.assign(computed, {
-            ...rest,
-            watch: (clb: WatchCallback<T>) => watch(computedRef, clb),
-            dispose: () => stop(computedRef.effect),
-            invalidate,
-        });
+    const valueAttributes = typeof fnOrGetterSetter === 'function' ?
+        {
+            get() { return computedRef.value },
+            configurable: true,
+        } : {
+            get() { return computedRef.value },
+            set(val: T) { computedRef.value = val; },
+            configurable: true
+        }
 
-        const valueAttributes = typeof fnOrGetterSetter === 'function' ?
-            {
-                get() { return computedRef.value },
-                configurable: true,
-            } : {
-                get() { return computedRef.value },
-                set(val: T) { computedRef.value = val; },
-                configurable: true
-            }
-
-        Reflect.defineProperty(computed, 'value', valueAttributes)
-    }
-
-    populateComputed(vendorComputed(fnOrGetterSetter));
+    Reflect.defineProperty(computed, 'value', valueAttributes)
 
     return computed;
 }

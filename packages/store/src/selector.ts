@@ -1,17 +1,21 @@
 import { Computed, computed, ReadonlyComputed } from '@re-active/core';
-import { getGlobalStore, addResetListener, isRenderStatic } from './createStore';
+import { getGlobalStore, addResetListener, isReactivityDisabled } from './createStore';
 
 const selectorComputedMap = new Set<Computed<any>>();
 
-addResetListener(() => {
-    for (const computedValues of selectorComputedMap) {
-        computedValues.invalidate();
+addResetListener({
+    destroy() {
+        for (const computedValues of selectorComputedMap) {
+            computedValues.dispose();
+        }
+
+        selectorComputedMap.clear();
     }
 })
 
 export type Selector<S = any> = (s: S) => any;
 export const selector = <T extends Selector>(fn: T): ReadonlyComputed<ReturnType<T>> => {
-    if (isRenderStatic()) {
+    if (isReactivityDisabled()) {
         return {
             get value() {
                 return fn(getGlobalStore());

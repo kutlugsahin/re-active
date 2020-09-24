@@ -1,4 +1,4 @@
-import { createStore, createSelectors, createActions } from '@re-active/store';
+import { setStoreState, createSelectors, createActions } from '@re-active/store';
 import { effect, watch } from '@re-active/react';
 
 export interface TodoItem {
@@ -15,7 +15,7 @@ interface StoreState {
 	filter: Filter;
 }
 
-createStore({
+setStoreState({
 	todos: [] as TodoItem[],
 	filter: 'all' as Filter,
 })

@@ -1,4 +1,4 @@
-import { createActions, createSelectors, createStore, watchActions, watchStore } from '@re-active/store';
+import { createActions, createSelectors, setStoreState, watchStore } from '@re-active/store';
 import { Dictionary, fetchItems, Item, makeTreeNode, Node, nodes, RowItem } from './utils';
 
 interface Store {
@@ -12,7 +12,7 @@ interface Store {
     };
 }
 
-createStore<Store>({
+setStoreState<Store>({
     items: nodes.reduce((acc: Dictionary<Item>, node) => {
         acc[node.id] = node.data;
 
@@ -106,6 +106,26 @@ const actionMap = {
     updateItem(state: Store, id: string, path: string, value: any) {
         state.items[id][path] = value;
     },
+    resetState() {
+        setStoreState({
+            items: nodes.slice(0, 10).reduce((acc: Dictionary<Item>, node) => {
+                acc[node.id] = node.data;
+
+                node.children.forEach(p => {
+                    acc[p.id] = p.data
+                });
+
+                return acc;
+            }, {}),
+            tree: nodes.slice(0,10),
+            selectedTreeNode: null,
+            table: {
+                loading: false,
+                rows: [],
+                selectedRow: null,
+            }
+        })
+    }
 };
 
 export const actions = createActions({

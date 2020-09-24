@@ -1,51 +1,50 @@
-import { Callback, markRaw, Reactive, reactive } from '@re-active/core';
+import { box, Box, Callback, isBox, markRaw, reactive } from '@re-active/core';
 
-let _isRenderStatic = typeof window === 'undefined';
+let _isReactivityDisabled = typeof window === 'undefined';
 
-const resetListeners = new Set<Callback>();
+interface Listener { destroy: Callback, onStateUpdate?: Callback };
+
+const stateListeners = new Set<Listener>();
 
 export type State = { [key: string]: any };
 
-let _store: Reactive<State>;
+let _store: Box<State> | { value: State } = box({});
 
-function releaseListeners() {
-	for (const listener of resetListeners) {
-		listener();
-	}
+function destroyListeners() {
+	stateListeners.forEach(p => p.destroy());
 }
 
-function createReativeState(state: any) {
-	if (_isRenderStatic) {
-		return markRaw(state);
-	}
-
-	return reactive(state);
-}
-
-export const createStore = <S extends State>(state: S) => {
-	if (_store) {
-		_store = createReativeState(state);
-
-		releaseListeners();
+export const setStoreState = <S extends State>(state: S) => {
+	if (_isReactivityDisabled) {
+		_store = {
+			value: reactive(markRaw(state))
+		};
 	} else {
-		_store = createReativeState(state);
+		if (_store && isBox(_store)) {
+			_store.value = state;
+			return;
+		} else {
+			_store = box(state);
+		}
 	}
+
+	stateListeners.forEach(p => p.onStateUpdate?.())
 };
 
 export const disposeStore = () => {
-	releaseListeners();
-	_store = null!;
+	destroyListeners();
+	_store.value = {};
 }
 
-export const getGlobalStore = () => _store;
+export const getGlobalStore = () => _store.value;
 
 
-export const addResetListener = (clb: Callback) => {
-	resetListeners.add(clb);
+export const addResetListener = (listener: Listener) => {
+	stateListeners.add(listener);
 }
 
-export const renderStatic = (isStatic: boolean = true) => {
-	_isRenderStatic = isStatic;
+export const disableReactivity = (disable: boolean = true) => {
+	_isReactivityDisabled = disable;
 }
 
-export const isRenderStatic = () => _isRenderStatic;
+export const isReactivityDisabled = () => _isReactivityDisabled;
