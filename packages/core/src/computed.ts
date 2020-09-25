@@ -1,6 +1,5 @@
 import { computed as vendorComputed, stop, WritableComputedRef } from "@vue/reactivity";
 import { Box } from './reactive';
-import { watch } from './watch';
 
 export type WatchCallback<T> = (newValue: T, oldValue?: T) => void;
 
@@ -34,7 +33,6 @@ export function computed<T>(fnOrGetterSetter: any): any {
 
     Object.assign(computed, {
         ...rest,
-        watch: (clb: WatchCallback<T>) => watch(computedRef, clb),
         dispose: () => stop(computedRef.effect),
     });
 

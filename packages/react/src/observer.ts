@@ -1,14 +1,15 @@
 import { Computed, Disposer } from '@re-active/core';
 import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 import { computed, renderEffect } from './reactivity';
+import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
 
 interface ComponentState<P> {
 	computedRender: Computed<React.ReactElement<any, any> | null>;
 	renderEffectDisposer: Disposer;
+	componentHandle: ComponentSchedulerHandle;
 	props: P,
-	willInvalidate: boolean;
 }
 
 const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
@@ -18,6 +19,11 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		const componentState = useRef<ComponentState<P> | null>(null);
 
 		useEffect(() => {
+			if (componentState.current) {
+				componentState.current.componentHandle.componentUpdated();
+				componentState.current.componentHandle.willRender = false;
+			}
+
 			return () => {
 				componentState.current?.computedRender.dispose();
 				componentState.current?.renderEffectDisposer();
@@ -27,33 +33,39 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 
 		// first time setup computed render and effect
 		if (!componentState.current) {
+			// shared object with registered watchers or lifecycles
+			const componentHandle = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.observer))!;
+			componentHandle.willRender = false;
+
 			const computedRender = computed(() => {
 				const componentProps = componentState.current?.props || props;
 				return component(componentProps, ref)
 			});
 
 			const renderEffectDisposer = renderEffect(computedRender, () => {
-				componentState.current!.willInvalidate = true;
+				componentState.current!.componentHandle.willRender = true;
 				setState({});
 			})
+
+			setCurrentComponentSchedulerHandle(null);
 
 			componentState.current = {
 				computedRender,
 				renderEffectDisposer,
 				props,
-				willInvalidate: false,
+				componentHandle,
 			}
 		} else {
 			// update prop ref to be used in the computed function
 			componentState.current.props = props;
 
 			// skip component render since reactive dep update. 
-			if (!componentState.current.willInvalidate) {
+			if (!componentState.current.componentHandle.willRender) {
 				// update not because reacive prop change so render component directly
 				return component(props, ref);
 			}
 
-			componentState.current.willInvalidate = false;
+			componentState.current.componentHandle.willRender = false;
 		}
 
 		// reactive dept has changed, willInvalidate was true -> computed function will run

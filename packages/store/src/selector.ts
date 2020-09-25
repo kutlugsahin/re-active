@@ -1,5 +1,5 @@
 import { Computed, computed, ReadonlyComputed } from '@re-active/core';
-import { getGlobalStore, addResetListener, isReactivityDisabled } from './createStore';
+import { getGlobalStore, addResetListener, isReactivityDisabled, getStateType, StateType } from './createStore';
 
 const selectorComputedMap = new Set<Computed<any>>();
 
@@ -8,24 +8,42 @@ addResetListener({
         for (const computedValues of selectorComputedMap) {
             computedValues.dispose();
         }
-
-        selectorComputedMap.clear();
     }
 })
 
 export type Selector<S = any> = (s: S) => any;
-export const selector = <T extends Selector>(fn: T): ReadonlyComputed<ReturnType<T>> => {
+
+const computedSelector = <T extends Selector>(fn: T): ReadonlyComputed<ReturnType<T>> => {
     if (isReactivityDisabled()) {
         return {
+            '__v_isRef': true,
             get value() {
                 return fn(getGlobalStore());
             },
-        } as Computed<ReturnType<T>>;
+            dispose() { },
+        } as unknown as ReadonlyComputed<ReturnType<T>>;
     } else {
-        const result = computed(() => fn(getGlobalStore()));
-        selectorComputedMap.add(result);
-        return result;
-   }
+        return computed(() => fn(getGlobalStore()));
+    }
+}
+
+export const selector = <T extends Selector>(fn: T): ReadonlyComputed<ReturnType<T>> => {
+    let computedValue = computedSelector(fn);
+
+    const selectorResult: ReadonlyComputed<ReturnType<T>> = {
+        '__v_isRef': true,
+        get value() {
+            return computedValue.value;
+        },
+        dispose() {
+            computedValue?.dispose();
+            computedValue = computedSelector(fn);
+        },
+    } as unknown as ReadonlyComputed<ReturnType<T>>;
+
+    selectorComputedMap.add(selectorResult);
+
+    return selectorResult;
 }
 
 type ComputedSelectorMap<S, T extends Selectors<S>> = {

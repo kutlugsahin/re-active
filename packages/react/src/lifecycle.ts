@@ -15,11 +15,7 @@ export interface LifeCycle {
     imperativeHandler: any;
 }
 
-export interface ComponentHandle {
-    willRender: boolean;
-    onUpdated: (clb: Callback) => Callback;
-    notify: Callback;
-}
+
 
 function getCurrentLifeCycleHandle() {
     if (currentLifecycleHandle) {
@@ -30,11 +26,6 @@ function getCurrentLifeCycleHandle() {
 }
 
 let currentLifecycleHandle: LifeCycle | null = null;
-let currentComponentHandle: ComponentHandle | null = null;
-
-export const setCurrentComponentHandle = (handle: ComponentHandle | null) => {
-    return currentComponentHandle = handle;
-}
 
 export const beginRegisterLifecyces = () => {
     currentLifecycleHandle = {
@@ -92,8 +83,4 @@ export function imperativeHandle<H, T>(ref: Ref<H>, handler: T) {
         lifecyclehandle.imperativeHandler = () => handler;
         return reactUseImperativeHandle(ref, currentLifecycleHandle!.imperativeHandler);
     }
-}
-
-export const getComponentHandle = () => {
-    return currentComponentHandle;
 }

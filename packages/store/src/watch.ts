@@ -1,5 +1,5 @@
 import { Callback, coreEffect, CoreEffectOptions, CoreWatchOptions, Disposer, Scheduler, tickScheduler, watch, WatchCallback, WatchSource } from '@re-active/core';
-import { getGlobalStore, State, addResetListener, isReactivityDisabled } from './createStore';
+import { getGlobalStore, State, addResetListener, isReactivityDisabled, getStateType, StateType } from './createStore';
 
 const disposerSet = new Set<Callback>();
 const stateUpdateListenerSet = new Set<Callback>();
@@ -53,7 +53,7 @@ function waitForStateInit(createEffect: () => Disposer): Disposer {
 
     stateUpdateListenerSet.add(onStateUpdate);
 
-    if (getGlobalStore() !== undefined) {
+    if (getStateType() !== StateType.none) {
         disposer = createEffect();
     }
 

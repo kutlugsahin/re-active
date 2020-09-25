@@ -1,15 +1,18 @@
 import { Box, Computed, computed as coreComputed, ComputedGetterSetter, coreEffect, CoreEffectOptions, Disposer, isBox, ReadonlyComputed, Scheduler, watch as coreWatch, WatchCallback, WatchSource } from '@re-active/core';
 import React, { ReactNode } from 'react';
-import { getComponentHandle, onUnmounted } from "./lifecycle";
-import { combineSchedulers, onUpdatedScheduler, tickScheduler } from './schedulers';
+import { onUnmounted } from "./lifecycle";
+import { combineSchedulers, ComponentType, getComponentSchedulerHandle, onUpdatedScheduler, tickScheduler } from './schedulers';
 
 let _isStaticRendering = typeof window === 'undefined';
 
 const disposeEffectOnUnmount = (dispose: () => void) => {
-	if (!_isStaticRendering && getComponentHandle()) {
-		onUnmounted(() => {
-			dispose();
-		});
+	if (!_isStaticRendering) {
+		const schedulerHandle = getComponentSchedulerHandle();
+		if (schedulerHandle && schedulerHandle.componentType === ComponentType.reactive) {
+			onUnmounted(() => {
+				dispose();
+			});
+		}
 	}
 }
 
@@ -71,13 +74,11 @@ export function watch<T extends WatchSource>(source: T, clb: WatchCallback<any>,
 		let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
 		let dispose = coreWatch(source, clb, { ...options, scheduler, flush: undefined });
 
-		if (getComponentHandle()) {
-			onUnmounted(() => {
-				dispose();
-				scheduler = null!;
-				dispose = null!
-			})
-		}
+		disposeEffectOnUnmount(() => {
+			dispose();
+			scheduler = null!;
+			dispose = null!
+		})
 
 		return dispose;
 	}
@@ -95,7 +96,7 @@ export const effect = <T extends () => any>(fn: T, options?: EffectOptions): Dis
 		let scheduler: Scheduler | undefined = createFlushScheduler(options?.flush || 'post');
 		let eff = coreEffect(fn, { ...options, scheduler });
 
-		if (getComponentHandle()) {
+		if (getComponentSchedulerHandle()) {
 			onUnmounted(() => {
 				eff.dispose();
 				scheduler = null!;

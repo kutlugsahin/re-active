@@ -1,7 +1,8 @@
 import { Box, Computed, isBox, reactive, Reactive, readonly } from '@re-active/core';
 import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { beginRegisterLifecyces, Callback, ComponentHandle, endRegisterLifecycles, LifeCycle, setCurrentComponentHandle } from './lifecycle';
+import { beginRegisterLifecyces, Callback, endRegisterLifecycles, LifeCycle } from './lifecycle';
 import { computed, renderEffect } from './reactivity';
+import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
@@ -67,31 +68,8 @@ const setup = (setupFunction: Function): Renderer => {
 interface ComponentState {
 	computedRender: Computed<ReactElement<any, any> | null>;
 	lifecycles: LifeCycle;
-	componentHandle: ComponentHandle;
+	componentHandle: ComponentSchedulerHandle;
 	dispose: () => void;
-}
-
-const createComponentHandle = (): ComponentHandle => {
-	let listeners = new Set<Callback>();
-
-	function onUpdated(clb: Callback) {
-		listeners.add(clb);
-
-		return () => {
-			listeners.delete(clb);
-		}
-	}
-
-	return {
-		willRender: true,
-		onUpdated,
-		notify() {
-			for (const clb of listeners) {
-				clb();
-			}
-			listeners.clear();
-		}
-	}
 }
 
 export type ReactiveProps<P extends { [key: string]: any }> = { [key in keyof P]: P[key] | Box<P[key]> }
@@ -112,7 +90,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			beginRegisterLifecyces();
 
 			// shared object with registered watchers or lifecycles
-			const componentHandle = setCurrentComponentHandle(createComponentHandle())!;
+			const componentHandle = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.reactive))!;
 
 			// one time call for the 'reactive component' retrieving the render function which will be called for future renders
 			// in this phase we get the lifecycle calls to be referenced in lifecycle phases
@@ -122,7 +100,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			// keep the ref of the lifecycle obj
 			const lifecycles = endRegisterLifecycles();
 
-			setCurrentComponentHandle(null);
+			setCurrentComponentSchedulerHandle(null);
 
 			// release the lifecycle handle to be used by other components
 			// currentLifecycleHandle = null;
@@ -198,7 +176,7 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 			lifecycles.onUpdated.forEach(p => p());
 			// notify listeners that component is updated
 			// i.e watch with flus:'post' option
-			componentHandle.notify();
+			componentHandle.componentUpdated();
 
 			if (componentHandle.willRender) {
 				lifecycles.onRendered.forEach(p => p());

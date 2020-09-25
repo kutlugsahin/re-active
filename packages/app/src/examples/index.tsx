@@ -9,7 +9,7 @@ import { ImperativeHandle } from './ImperativeHandle';
 import { ContextApi } from './ContextApi';
 import { Watch } from './Watch';
 import { Computed } from './Computed';
-import { WatchOptions } from './WatchOptions';
+import { WatchOptions, WatchOptionsObserver } from './WatchOptions';
 import { Reactivity } from './Reactivity';
 import { WithReactComponents } from './WithReactComponents';
 import { Interop } from './Interop';
@@ -56,6 +56,7 @@ export default () => {
             </Example>
             <Example title="watch options">
                 <WatchOptions />
+                <WatchOptionsObserver/>
             </Example>
             <Example title="Reactivity">
                 <Reactivity />
