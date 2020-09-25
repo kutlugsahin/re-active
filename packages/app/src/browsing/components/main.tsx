@@ -62,12 +62,12 @@ export const Row = createComponent((props: RowProps) => {
 
     let row: HTMLTableRowElement;
 
-    onRendered(() => {
-        row.classList.add('flash');
-        setTimeout(() => {
-            row?.classList.remove('flash');
-        }, 500);
-    })
+    // onRendered(() => {
+    //     row.classList.add('flash');
+    //     setTimeout(() => {
+    //         row?.classList.remove('flash');
+    //     }, 500);
+    // })
 
     return () => {
         const { name, id, col1, col2, col3 } = props.item.data;
