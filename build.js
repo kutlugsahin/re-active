@@ -8,6 +8,7 @@ const argsSet = new Set(process.argv);
 
 const packageJson = JSON.parse(package);
 const projectDirs = packageJson.workspaces;
+
 const projectNames = ['core', 'react', 'store'];
 const scopeName = '@re-active';
 

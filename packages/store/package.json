@@ -1,6 +1,6 @@
 {
 	"name": "@re-active/store",
-	"version": "1.0.43",
+	"version": "1.0.44",
 	"description": "Global reactive state management library of @re-active",
 	"keywords": [
 		"react",
@@ -40,6 +40,6 @@
 		"typescript": "4.0.2"
 	},
 	"dependencies": {
-		"@re-active/core": "1.0.45"
+		"@re-active/core": "1.0.46"
 	}
 }
