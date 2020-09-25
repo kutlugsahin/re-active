@@ -1,7 +1,13 @@
 {
 	"name": "@re-active/store",
-	"version": "1.0.41",
-	"description": "",
+	"version": "1.0.42",
+	"description": "Global reactive state management library of @re-active",
+	"keywords": [
+		"react",
+		"reactive, store",
+		"action",
+		"selector"
+	],
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
 	"files": [
@@ -34,6 +40,6 @@
 		"typescript": "4.0.2"
 	},
 	"dependencies": {
-		"@re-active/core": "1.0.43"
+		"@re-active/core": "1.0.44"
 	}
 }

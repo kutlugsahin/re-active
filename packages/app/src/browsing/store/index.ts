@@ -68,13 +68,12 @@ export const actions = createActions({
             node.loading = false;
         }
     },
-    *selectTreeNode(state: Store, node: Node): ActionGenerator<Item[]> {
+    *selectTreeNode(state: Store, node: Node): ActionGenerator {
 
         try {
             state.selectedTreeNode = node;
             state.table.loading = true;
             yield actions.loadChildren(node);
-
             state.table.selectedRow = null;
             state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
         } finally {
@@ -129,8 +128,6 @@ export const actions = createActions({
         })
     }
 });
-
-actions.
 
 // ================ WATCHERS ===========================
 watchStore((state: Store) => state.selectedTreeNode, (newNode, oldNode) => {
