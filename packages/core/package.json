@@ -1,10 +1,14 @@
 {
 	"name": "@re-active/core",
-	"version": "1.0.44",
+	"version": "1.0.45",
 	"main": "dist/cjs/index.js",
 	"module": "dist/es/index.js",
 	"description": "Reactivity provider of @re-active",
-	"keywords": ["react", "reactivity", "core"],
+	"keywords": [
+		"react",
+		"reactivity",
+		"core"
+	],
 	"files": [
 		"dist",
 		"README.md"
