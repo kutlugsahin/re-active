@@ -46,39 +46,3 @@ export const Field = createComponent((props: FieldProps) => {
         )
     }
 });
-
-type Render<T> = (props: T) => JSX.Element;
-type ReactiveC<R, T extends (render: Render<R>, setup: (props: any) => R) => void> = (render: R,) => {
-
-}
-
-
-type ReactComp<P, R> = (render: Render<R>, setup: (props: P) => R) => void;
-
-const defineComponent = <P, R>(setup: (props: P) => R, render: Render<Reactive<R>>) => {
-
-}
-
-
-
-defineComponent(() => {
-
-    const state = reactive({
-        a: 3,
-    });
-
-
-    const clicks = reactive(3);
-
-    return {
-        ...state,
-        clicks,
-    }
-
-
-}, ({ a, clicks }) => {
-
-    return <div></div>
-})
-
-

@@ -115,19 +115,26 @@ export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => vo
 		// schduler to re render component
 		const scheduler = tickScheduler();
 
+		let oldValue: any;
+
 		let mounted = false;
 
-		const renderEffect = coreEffect(() => {
-			if (mounted) {
+		let renderEffect = coreEffect(() => {
+			const newValue = computed.value;
+			if (mounted && newValue !== oldValue) {
 				clb();
 			}
 
-			return computed.value;
+			return oldValue = newValue;
 		}, { scheduler });
 
 		mounted = true;
 
-		return renderEffect.dispose;
+		return () => {
+			renderEffect.dispose();
+			renderEffect = null!;
+			oldValue = null;
+		};
 	}
 }
 

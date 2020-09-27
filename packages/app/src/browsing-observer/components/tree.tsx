@@ -1,5 +1,5 @@
 import { observer } from '@re-active/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Node } from '../../browsing/store/utils';
 
 // =============== TYPES ============================
@@ -58,6 +58,10 @@ export const TreeNode = observer((props: TreeNodeProps) => {
             />
         );
     }
+
+    // useEffect(() => {
+    //     console.log('tree node render ' + props.node.id);
+    // })
 
     const { renderNode, node, onClick } = props;
     const { selected, expanded, children } = props.node;

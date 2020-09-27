@@ -1,22 +1,25 @@
-import { Computed, Disposer } from '@re-active/core';
+import { Computed, Disposer, Reactive } from '@re-active/core';
 import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useRef, useState } from 'react';
+import { ReactiveProps, useReactiveProps } from './reactiveProps';
 import { computed, renderEffect } from './reactivity';
 import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
-export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<H>>;
+export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<ReactiveProps<P>> & React.RefAttributes<H>>;
 
 interface ComponentState<P> {
 	computedRender: Computed<React.ReactElement<any, any> | null>;
 	renderEffectDisposer: Disposer;
 	componentHandle: ComponentSchedulerHandle;
-	props: P,
+	reactiveProps: Reactive<P>,
 }
 
-const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
+const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, Reactive<P>>) => {
 
 	return memo(forwardRef((props: PropsWithChildren<P>, ref: Ref<H>) => {
 		const [_, setState] = useState({});
 		const componentState = useRef<ComponentState<P> | null>(null);
+
+		const reactiveProps = useReactiveProps(props);
 
 		useEffect(() => {
 			if (componentState.current) {
@@ -35,39 +38,38 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		if (!componentState.current) {
 			// shared object with registered watchers or lifecycles
 			const componentHandle = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.observer))!;
-			componentHandle.willRender = false;
+			// componentHandle.willRender = false;
 
 			const computedRender = computed(() => {
-				const componentProps = componentState.current?.props || props;
-				return component(componentProps, ref)
+				const componentProps = componentState.current?.reactiveProps || reactiveProps;
+				return component(componentProps as any, ref)
 			});
+			
+			setCurrentComponentSchedulerHandle(null);
 
 			const renderEffectDisposer = renderEffect(computedRender, () => {
 				componentState.current!.componentHandle.willRender = true;
 				setState({});
-			})
-
-			setCurrentComponentSchedulerHandle(null);
+			});
 
 			componentState.current = {
 				computedRender,
 				renderEffectDisposer,
-				props,
+				reactiveProps,
 				componentHandle,
 			}
 		} else {
 			// update prop ref to be used in the computed function
-			componentState.current.props = props;
+			componentState.current.reactiveProps = reactiveProps;
 
-			// skip component render since reactive dep update. 
-			if (!componentState.current.componentHandle.willRender) {
-				// update not because reacive prop change so render component directly
-				return component(props, ref);
-			}
-
-			componentState.current.componentHandle.willRender = false;
+			// // skip component render since reactive dep update. 
+			// if (!componentState.current.componentHandle.willRender) {
+			// 	// update not because reacive prop change so render component directly
+			// 	return component(props, ref);
+			// }
 		}
-
+		
+		componentState.current.componentHandle.willRender = false;
 		// reactive dept has changed, willInvalidate was true -> computed function will run
 		return componentState.current.computedRender.value;
 	}))
@@ -109,6 +111,7 @@ function bindObserverClass(instance: any) {
 		computedRender?.dispose();
 		computedRender = null;
 		renderEffectDisposer();
+		renderEffectDisposer = null!;
 	}
 }
 
@@ -156,4 +159,4 @@ export interface ObserverProps {
 
 export const Observer: FC<ObserverProps> = observer((props: ObserverProps) => {
 	return props.children();
-})
+}) as FC<ObserverProps>;

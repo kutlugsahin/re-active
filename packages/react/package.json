@@ -1,6 +1,6 @@
 {
 	"name": "@re-active/react",
-	"version": "1.0.44",
+	"version": "1.0.45",
 	"description": "Reactive approach for creating performant react applications",
 	"keywords": [
 		"react",
@@ -44,7 +44,7 @@
 		"react": ">=16.13.1"
 	},
 	"dependencies": {
-		"@re-active/core": "1.0.46"
+		"@re-active/core": "1.0.47"
 	},
 	"peerDependencies": {
 		"react": ">=16.13.1"

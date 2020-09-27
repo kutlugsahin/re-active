@@ -20,9 +20,9 @@ export interface ComputedGetterSetter<T> {
 export function computed<T>(getterSetter: ComputedGetterSetter<T>): Computed<T>;
 export function computed<T>(fn: () => T): ReadonlyComputed<T>;
 export function computed<T>(fnOrGetterSetter: any): any {
-    const computed: any = {};
+    let computed: any = {};
 
-    const computedRef = vendorComputed<T>(fnOrGetterSetter) as WritableComputedRef<T>;
+    let computedRef = vendorComputed<T>(fnOrGetterSetter) as WritableComputedRef<T>;
 
     const rest = Reflect.ownKeys(computedRef).reduce((acc: any, key) => {
         if (key !== 'value' && key !== 'effect') {
@@ -33,7 +33,10 @@ export function computed<T>(fnOrGetterSetter: any): any {
 
     Object.assign(computed, {
         ...rest,
-        dispose: () => stop(computedRef.effect),
+        dispose: () => {
+            stop(computedRef.effect);
+            computedRef = null!;
+        },
     });
 
     const valueAttributes = typeof fnOrGetterSetter === 'function' ?

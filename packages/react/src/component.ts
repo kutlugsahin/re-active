@@ -1,59 +1,13 @@
-import { Box, Computed, isBox, reactive, Reactive, readonly } from '@re-active/core';
-import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { beginRegisterLifecyces, Callback, endRegisterLifecycles, LifeCycle } from './lifecycle';
+import { Computed, isBox, Reactive } from '@re-active/core';
+import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
+import { ReactiveProps, useReactiveProps } from './reactiveProps';
 import { computed, renderEffect } from './reactivity';
 import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
 export type ReactiveComponentWithHandle<P, H> = (props: Reactive<P>, ref: Ref<H>) => Renderer;
-
-export interface ReactiveConfig {
-	readonlyProps: boolean;
-}
-
-let _config: ReactiveConfig = {
-	readonlyProps: false,
-};
-
-export function config(cfg: ReactiveConfig) {
-	Object.assign(_config, cfg);
-}
-
-const useReactiveProps = <P extends { [key: string]: any }>(props: P) => {
-
-	// convert props to a reactive object
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const { current: reactiveProps } = useRef(reactive({ ...props }));
-	// keep the old props object for future comparison
-	const prevProps = useRef<P>(props);
-
-	// update the reactive props when the component is forced to render
-	useEffect(() => {
-		const prev = prevProps.current;
-
-		for (const key in props) {
-			if (prev[key] !== props[key]) {
-				(reactiveProps[key] as any) = props[key];
-			}
-		}
-
-		for (const key in reactiveProps) {
-			if (key in props === false) {
-				reactiveProps[key] = undefined!;
-			}
-		}
-
-		prevProps.current = props;
-	});
-
-	if (_config.readonlyProps) {
-		return useMemo(() => readonly(reactiveProps), []);
-	}
-
-	// now we return a reactive props object which will also react to parent renders
-	return reactiveProps;
-}
 
 // a hack to force component re-render
 const useForceUpdate = () => {
@@ -71,8 +25,6 @@ interface ComponentState {
 	componentHandle: ComponentSchedulerHandle;
 	dispose: () => void;
 }
-
-export type ReactiveProps<P extends { [key: string]: any }> = { [key in keyof P]: P[key] | Box<P[key]> }
 
 // reactive react component implementation
 export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<ReactiveProps<P>> {

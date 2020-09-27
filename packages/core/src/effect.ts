@@ -26,6 +26,7 @@ export const coreEffect = (fn: () => any, options?: CoreEffectOptions): Effect =
         },
         dispose: () => {
             stop(eff);
+            eff = null!;
         },
     }
 }

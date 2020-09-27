@@ -53,28 +53,30 @@ export const values = createSelectors({
 // ================ ACTIONS ===========================
 const actionMap = {
     *loadChildren(state: Store, node: Node) {
-        try {
-            if (node.children.length === 0) {
+        if (node.children.length === 0 && node.loading === false) {
+            try {
                 node.loading = true;
                 const newItems: Item[] = yield fetchItems(node);
                 newItems.forEach(p => state.items[p.id] = p);
                 node.children = newItems.map(p => makeTreeNode(p, node));
                 return newItems;
+            } finally {
+                node.loading = false;
             }
-        } finally {
-            node.loading = false;
         }
     },
     *selectTreeNode(state: Store, node: Node) {
-        try {
-            state.selectedTreeNode = node;
-            state.table.loading = true;
-            yield* actionMap.loadChildren(state, node);
+        if (node !== state.selectedTreeNode) {
+            try {
+                state.selectedTreeNode = node;
+                state.table.loading = true;
+                yield* actionMap.loadChildren(state, node);
 
-            state.table.selectedRow = null;
-            state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
-        } finally {
-            state.table.loading = false;
+                state.table.selectedRow = null;
+                state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
+            } finally {
+                state.table.loading = false;
+            }
         }
     },
     async expandTreeNode(state: Store, node: Node) {
@@ -104,6 +106,26 @@ const actionMap = {
     updateItem(state: Store, id: string, path: string, value: any) {
         state.items[id][path] = value;
     },
+    resetState() {
+        setStoreState({
+            items: nodes.slice(0, 10).reduce((acc: Dictionary<Item>, node) => {
+                acc[node.id] = node.data;
+
+                node.children.forEach(p => {
+                    acc[p.id] = p.data
+                });
+
+                return acc;
+            }, {}),
+            tree: nodes.slice(0,10),
+            selectedTreeNode: null,
+            table: {
+                loading: false,
+                rows: [],
+                selectedRow: null,
+            }
+        })
+    }
 };
 
 export const actions = createActions({

@@ -37,7 +37,8 @@ export const selectedTreeNode = computed(() => state.selectedTreeNode);
 export const tableState = computed(() => state.table);
 export const editingItem = computed(() => state.table.selectedRow?.data || state.selectedTreeNode?.data);
 
-export const loadChildren = flow(function*(node: Node) {
+export const loadChildren = flow(function* (node: Node) {
+	console.log('load children')
 	try {
 		if (node.children.length === 0) {
 			node.loading = true;
@@ -96,6 +97,28 @@ export const gotoParentFolder = action(() => {
 		selectTreeNode(currentTreeNode.parent);
 	}
 });
+
+export const setState = action(() => {
+	Object.assign(state, {
+		items: nodes.slice(0, 10).reduce((acc: Dictionary<Item>, node) => {
+			acc[node.id] = node.data;
+
+			node.children.forEach(p => {
+				acc[p.id] = p.data
+			});
+
+			return acc;
+		}, {}),
+		// items: {},
+		tree: nodes.slice(0,10),
+		selectedTreeNode: null,
+		table: {
+			loading: false,
+			rows: [],
+			selectedRow: null,
+		}
+	})
+})
 
 export const updateItem = action((id: string, path: string, value: any) => {
 	editingItem.get()[path] = value;

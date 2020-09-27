@@ -65,6 +65,7 @@ export async function fetchItems(node: Node<Item>) {
         }, fetchTimeout);
     })
 }
+const emptyChild = [];
 
 export function makeTreeNode(item: Item, parent?: Node): Node<Item> {
     return {
@@ -73,7 +74,7 @@ export function makeTreeNode(item: Item, parent?: Node): Node<Item> {
         id: item.id,
         loading: false,
         selected: false,
-        children: [],
+        children: emptyChild,
         parent
     }
 }

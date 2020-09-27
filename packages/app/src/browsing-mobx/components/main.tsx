@@ -1,5 +1,5 @@
 import React from 'react';
-import { browseCurrentTableItem, browseTableItem, gotoParentFolder, selectTableItem, tableState } from '../store';
+import { browseCurrentTableItem, browseTableItem, gotoParentFolder, selectTableItem, setState, tableState } from '../store';
 import { RowItem } from '../../browsing/store/utils';
 import { observer } from "mobx-react";
 export const Main = observer(() => {
@@ -8,6 +8,7 @@ export const Main = observer(() => {
                 <div className="actions">
                     <button onClick={gotoParentFolder}>←</button>
                     <button onClick={browseCurrentTableItem}>↴</button>
+                    <button onClick={setState}>reset</button>
                 </div>
                 <Table />
             </div>

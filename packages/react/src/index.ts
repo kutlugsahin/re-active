@@ -1,4 +1,4 @@
-export { createComponent, config } from './component';
+export { createComponent } from './component';
 export { observer, ObserverComponent, Observer } from './observer';
 export type { ObserverFunctionalComponent } from './observer';
 export * from './observerHooks';

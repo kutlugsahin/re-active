@@ -9,6 +9,7 @@ export const Main = observer(() => {
                 <div className="actions">
                     <button onClick={actions.gotoParentFolder}>←</button>
                     <button onClick={actions.browseCurrentTableItem}>↴</button>
+                    <button onClick={actions.resetState}>reset</button>
                 </div>
                 <Table />
             </div>

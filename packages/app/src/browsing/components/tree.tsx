@@ -1,5 +1,5 @@
 import React from 'react';
-import { createComponent } from '@re-active/react';
+import { createComponent, onRendered } from '@re-active/react';
 import { Node } from '../store/utils';
 // =============== TYPES ============================
 export interface TreeProps<T> {
@@ -59,6 +59,10 @@ export const TreeNode = createComponent((props: TreeNodeProps) => {
             />
         );
     }
+
+    onRendered(() => {
+        console.log('tree node rendred', props.node.id);
+    })
 
     return () => {
         const { renderNode, node, onClick } = props;
