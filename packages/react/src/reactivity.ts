@@ -117,7 +117,7 @@ export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => vo
 
 		let mounted = false;
 
-		let renderEffect = coreEffect(() => {
+		let _renderEffect = coreEffect(() => {
 			const newValue = computed.value;
 			if (mounted && newValue !== oldValue) {
 				clb();
@@ -129,8 +129,10 @@ export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => vo
 		mounted = true;
 
 		return () => {
-			renderEffect.dispose();
-			renderEffect = null!;
+			if (_renderEffect) {
+				_renderEffect.dispose();
+				_renderEffect = null!;
+			}
 			oldValue = null;
 		};
 	}
