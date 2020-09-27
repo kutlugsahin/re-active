@@ -9,9 +9,7 @@ const disposeEffectOnUnmount = (dispose: () => void) => {
 	if (!_isStaticRendering) {
 		const schedulerHandle = getComponentSchedulerHandle();
 		if (schedulerHandle && schedulerHandle.componentType === ComponentType.reactive) {
-			onUnmounted(() => {
-				dispose();
-			});
+			onUnmounted(dispose);
 		}
 	}
 }

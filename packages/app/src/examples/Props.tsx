@@ -1,4 +1,4 @@
-import { createComponent, reactive } from "@re-active/react";
+import { createComponent, observer, reactive } from "@re-active/react";
 import React from "react";
 
 const Label = createComponent((props: any) => {
@@ -18,11 +18,28 @@ const Input = createComponent((props: InputProps) => {
   return () => <input type="text" value={props.value} onChange={onChange} />;
 });
 
+const ObserverProps = observer((props: {clicks: number, unused: number, onClick: () => void}) => {
+
+  return (
+    <div>
+      {props.clicks}
+      <button onClick={props.onClick}>Click Count ++</button>
+    </div>
+  )
+})
+
 export const Props = createComponent((props) => {
   const text = reactive('');
+  const click = reactive(0);
+  const unused = reactive(0);
 
   function onChange(txt) {
     text.value = txt;
+  }
+
+  function onClick() {
+    click.value++;
+    unused.value++;
   }
 
   return () => (
@@ -32,6 +49,9 @@ export const Props = createComponent((props) => {
         onChange={onChange}
       />
       <Label text={text} />
+      <div>
+        <ObserverProps clicks={click} onClick={onClick} unused={unused} />
+      </div>
     </div>
   );
 });

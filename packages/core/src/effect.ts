@@ -25,8 +25,10 @@ export const coreEffect = (fn: () => any, options?: CoreEffectOptions): Effect =
             return eff.active;
         },
         dispose: () => {
-            stop(eff);
-            eff = null!;
+            if (eff) {
+                stop(eff);
+                eff = null!;
+            }
         },
     }
 }

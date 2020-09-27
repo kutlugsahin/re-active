@@ -34,8 +34,10 @@ export function computed<T>(fnOrGetterSetter: any): any {
     Object.assign(computed, {
         ...rest,
         dispose: () => {
-            stop(computedRef.effect);
-            computedRef = null!;
+            if (computedRef) {
+                stop(computedRef.effect);
+                computedRef = null!;
+            }
         },
     });
 
