@@ -11,9 +11,17 @@ enum ActionType {
 	generator
 }
 
+function isGeneratorFunction(fn: Action) {
+	return fn.constructor && fn.constructor.name === 'GeneratorFunction';
+}
+
+function isAsyncFunction(fn: Action) {
+	return fn.constructor && fn.constructor.name === 'AsyncFunction';
+}
+
 function getActionType(fn: Action): ActionType {
-	if (fn.constructor === (function* () { }).constructor) return ActionType.generator;
-	if (fn.constructor === (async function () { }).constructor) return ActionType.async;
+	if (isGeneratorFunction(fn)) return ActionType.generator;
+	if (isAsyncFunction(fn)) return ActionType.async;
 	return ActionType.sync
 }
 

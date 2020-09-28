@@ -113,17 +113,15 @@ export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => vo
 		// schduler to re render component
 		const scheduler = tickScheduler();
 
-		let oldValue: any;
-
 		let mounted = false;
 
 		let _renderEffect = coreEffect(() => {
-			const newValue = computed.value;
-			if (mounted && newValue !== oldValue) {
+			// const newValue = computed.value;
+			if (mounted) {
 				clb();
 			}
 
-			return oldValue = newValue;
+			return computed.value;
 		}, { scheduler });
 
 		mounted = true;
@@ -133,7 +131,6 @@ export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => vo
 				_renderEffect.dispose();
 				_renderEffect = null!;
 			}
-			oldValue = null;
 		};
 	}
 }

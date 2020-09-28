@@ -4,28 +4,49 @@ import {
   reactive,
   onMounted,
   onUnmounted,
-  useContext
+  useContext, onBeforePaint, onRendered, onUpdated, onBeforeRender, toBox
 } from "@re-active/react";
 
 export const Lifecycle = createComponent(() => {
-  const seconds = timer();
+  const { inc, count } = counter();
+  let span;
 
-  return () => <div>{seconds.value} seconds passed</div>;
+  onMounted(() => {
+    console.log('Lifecycle onMounted');
+  })
+
+  onBeforeRender(() => {
+    console.log('Lifecycle onBeforeRendered: count' + count.value + ' text: ' + span?.innerText );
+  })
+
+  onBeforePaint(() => {
+    console.log('Lifecycle onBeforePaint: count' + count.value + ' text: ' + span.innerText);
+  })
+
+  onRendered(() => {
+    console.log('Lifecycle onRendered');
+
+  });
+
+  onUpdated(() => {
+    console.log('Lifecycle onUpdated');
+
+  })
+
+  return () => <div>
+    <span ref={e => span = e}>{count.value}</span><span> seconds passed</span>
+    <button onClick={inc}>increment</button>
+  </div>;
 });
 
-function timer() {
+function counter() {
 
   const seconds = reactive(0);
 
-  onMounted(() => {
-    const interval = setInterval(() => {
+  return {
+    count: toBox(seconds, 'value'),
+    inc() {
       seconds.value++;
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
     }
-  });
-
-  return seconds;
+  };
 }

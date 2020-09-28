@@ -105,9 +105,8 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 
 		// call onMounted
 		useEffect(() => {
-			// const disposeEffect = setupEffect(componentState.current!, forceUpdate);
-
 			const disposers = lifecycles.onMounted.map(p => p());
+
 			return () => {
 				// call on mount disposers
 				disposers.forEach(p => {

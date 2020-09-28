@@ -1,4 +1,4 @@
-import { observer, reactive, ObserverComponent, Observer, box } from '@re-active/react';
+import { observer, reactive, ObserverComponent, Observer, box, useReactive } from '@re-active/react';
 import React, { Component, forwardRef, PureComponent, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { observable } from 'mobx';
 import { observer as mobxObserver } from "mobx-react";
@@ -10,7 +10,7 @@ interface CounterProps {
 }
 
 export const Counter = observer((props: CounterProps, ref) => {
-	const [clicks, setClicks] = useState(0);
+	const clicks = useReactive(0);
 
 	useImperativeHandle(ref, () => ({
 		alert() {
@@ -20,7 +20,7 @@ export const Counter = observer((props: CounterProps, ref) => {
 
 	return (
 		<div>
-			<button onClick={() => { setClicks(p => p + 1); setClicks(p => p + 1); }}>{clicks}</button>
+			<button onClick={() => { clicks.value++; clicks.value++ }}>XX {clicks.value}</button>
 			<button onClick={() => { count.value++; count.value++}}>{count.value}</button>
 			<div>
 				Data: {props.data}
@@ -113,6 +113,7 @@ export class Counter2 extends ObserverComponent {
 				<Observer>
 					{() => <span>{this.count.value}</span>}
 				</Observer>
+				<Counter data={3}/>
 				<button onClick={this.increment}>increment</button>
 			</div>
 		)

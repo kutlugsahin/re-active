@@ -56,29 +56,30 @@ export const values = createSelectors({
 
 export const actions = createActions({
     *loadChildren(state: Store, node: Node): ActionGenerator<Item[]> {
-        try {
-            if (node.children.length === 0) {
+        if (node.children.length === 0) {
+            try {
                 node.loading = true;
                 const newItems: Item[] = yield fetchItems(node);
                 newItems.forEach(p => state.items[p.id] = p);
                 node.children = newItems.map(p => makeTreeNode(p, node));
                 return newItems;
+            } finally {
+                node.loading = false;
             }
-        } finally {
-            node.loading = false;
         }
     },
     *selectTreeNode(state: Store, node: Node): ActionGenerator {
-
-        try {
-            state.selectedTreeNode = node;
-            state.table.loading = true;
-            yield actions.loadChildren(node);
-            state.table.selectedRow = null;
-            state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
-        } finally {
-            state.table.loading = false;
-        }
+        // if (node.selected === false) {
+            try {
+                state.selectedTreeNode = node;
+                state.table.loading = true;
+                yield actions.loadChildren(node);
+                state.table.selectedRow = null;
+                state.table.rows = state.selectedTreeNode.children.map(p => ({ selected: false, data: p.data }))
+            } finally {
+                state.table.loading = false;
+            }
+        // }
     },
     async expandTreeNode(state: Store, node: Node): Promise<Item[]> {
         node.expanded = !node.expanded;

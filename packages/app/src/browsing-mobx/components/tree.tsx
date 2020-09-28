@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Node } from '../../browsing/store/utils';
 import { observer } from "mobx-react";
 // =============== TYPES ============================
