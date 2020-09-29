@@ -56,7 +56,7 @@ export const values = createSelectors({
 
 export const actions = createActions({
     *loadChildren(state: Store, node: Node): ActionGenerator<Item[]> {
-        if (node.children.length === 0) {
+        if (node.children.length === 0 && node.loading === false) {
             try {
                 node.loading = true;
                 const newItems: Item[] = yield fetchItems(node);
@@ -69,7 +69,7 @@ export const actions = createActions({
         }
     },
     *selectTreeNode(state: Store, node: Node): ActionGenerator {
-        // if (node.selected === false) {
+        if (node.selected === false) {
             try {
                 state.selectedTreeNode = node;
                 state.table.loading = true;
@@ -79,7 +79,7 @@ export const actions = createActions({
             } finally {
                 state.table.loading = false;
             }
-        // }
+        }
     },
     async expandTreeNode(state: Store, node: Node): Promise<Item[]> {
         node.expanded = !node.expanded;

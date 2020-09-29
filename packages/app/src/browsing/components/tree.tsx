@@ -52,7 +52,9 @@ export const TreeNode = createComponent((props: TreeNodeProps) => {
     function renderTreeNode(node: Node) {
         return (
             <TreeNode
-                {...props}
+                onClick={props.onClick}
+                onExpand={props.onExpand}
+                renderNode={props.renderNode}
                 key={node.id}
                 node={node}
                 level={props.level + 1}

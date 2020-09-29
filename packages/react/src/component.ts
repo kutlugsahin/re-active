@@ -1,5 +1,5 @@
 import { Computed, isBox, Reactive } from '@re-active/core';
-import { forwardRef, ForwardRefRenderFunction, FunctionComponent, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, ForwardRefRenderFunction, FunctionComponent, memo, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 import { ReactiveProps, useReactiveProps } from './reactiveProps';
 import { computed, renderEffect } from './reactivity';
@@ -27,7 +27,7 @@ interface ComponentState {
 }
 
 // reactive react component implementation
-export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<ReactiveProps<P>> {
+export function createComponentFunction<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<ReactiveProps<P>> {
 
 	// creating a functional component
 	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
@@ -145,8 +145,12 @@ export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>)
 	return ReactiveComponent as FunctionComponent<ReactiveProps<P>>;
 }
 
+export function createComponent<P = {}>(reactiveComponent: ReactiveComponent<P>): FunctionComponent<ReactiveProps<P>> {
+	return memo(createComponentFunction(reactiveComponent));
+}
+
 createComponent.withHandle = <P = {}, H = {}>(reactiveComponent: ReactiveComponentWithHandle<P, H>) => {
-	const component = createComponent<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, ReactiveProps<P>>;
-	return forwardRef(component);
+	const component = createComponentFunction<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, ReactiveProps<P>>;
+	return memo(forwardRef(component));
 }
 

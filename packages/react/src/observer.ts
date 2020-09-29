@@ -22,17 +22,19 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, Reactive<
 		const reactiveProps = useReactiveProps(props);
 
 		useEffect(() => {
-			if (componentState.current) {
-				componentState.current.componentHandle.componentUpdated();
-				componentState.current.componentHandle.willRender = false;
-			}
-
 			return () => {
 				componentState.current?.computedRender.dispose();
 				componentState.current?.renderEffectDisposer();
 				componentState.current = null;
 			}
-		 }, []);
+		}, []);
+		
+		useEffect(() => {
+			if (componentState.current && componentState.current.componentHandle.willRender) {
+				componentState.current.componentHandle.componentUpdated();
+				componentState.current.componentHandle.willRender = false;
+			}
+		})
 
 		// first time setup computed render and effect
 		if (!componentState.current) {
@@ -45,12 +47,12 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, Reactive<
 				return component(componentProps as any, ref)
 			});
 			
-			setCurrentComponentSchedulerHandle(null);
-
 			const renderEffectDisposer = renderEffect(computedRender, () => {
 				componentState.current!.componentHandle.willRender = true;
 				setState({});
 			});
+
+			setCurrentComponentSchedulerHandle(null);
 
 			componentState.current = {
 				computedRender,
@@ -69,7 +71,7 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, Reactive<
 			// }
 		}
 		
-		componentState.current.componentHandle.willRender = false;
+		// componentState.current.componentHandle.willRender = false;
 		// reactive dept has changed, willInvalidate was true -> computed function will run
 		return componentState.current.computedRender.value;
 	}))
