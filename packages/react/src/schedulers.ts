@@ -116,3 +116,37 @@ export const tickScheduler = () => {
         }
     }
 }
+
+export const componentRenderScheduler = (forceUpdate: () => void) => {
+    let _job: Callback | null = null;
+
+    let isRunning = false;
+    let _runImmediate = false;
+
+    return {
+        runEffect() {
+            _job?.();
+        },
+        scheduler: (job: () => void) => {
+            _job = job;
+            if (_runImmediate) {
+                job();
+                _runImmediate = false;
+                return;
+            }
+
+            if (!isRunning) {
+                isRunning = true;
+
+                queueMicroTask(() => {
+                    forceUpdate();
+                    _job = null;
+                    isRunning = false;
+                })
+            }
+        },
+        runImmediate() {
+            _runImmediate = true;
+        }
+    }
+}

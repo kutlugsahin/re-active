@@ -72,25 +72,25 @@ export const WatchOptionsObserver = observer(() => {
     let span = useRef(null);
     let span2 = useRef(null);
 
-    useWatch(count, (val) => {
-        // console.log('count updated');
-        if (span.current) {
-            span.current.innerText = 'Flush: pre ==> current value:' + val + ', ' + 'current html:' + button.current.innerHTML;
-        }
-    }, {
-        flush: 'pre',
-        immediate: true,
-    })
+    // useWatch(count, (val) => {
+    //     // console.log('count updated');
+    //     if (span.current) {
+    //         span.current.innerText = 'Flush: pre ==> current value:' + val + ', ' + 'current html:' + button.current.innerHTML;
+    //     }
+    // }, {
+    //     flush: 'pre',
+    //     immediate: true,
+    // })
 
-    useWatch(count, (val) => {
-        // console.log('count updated');
-        if (span.current) {
-            span2.current.innerText = 'Flush: post ==> current value:' + val + ', ' + 'current html:' + button.current.innerHTML;
-        }
-    }, {
-        flush: 'post',
-        immediate: true,
-    })
+    // useWatch(count, (val) => {
+    //     // console.log('count updated');
+    //     if (span.current) {
+    //         span2.current.innerText = 'Flush: post ==> current value:' + val + ', ' + 'current html:' + button.current.innerHTML;
+    //     }
+    // }, {
+    //     flush: 'post',
+    //     immediate: true,
+    // })
 
     function update() {
         count.value++;

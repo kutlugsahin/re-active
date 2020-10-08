@@ -133,16 +133,15 @@ const MobxComp = mobxObserver((props: any) => {
 	)
 });
 
-export const MobxParent = () => {
-	const [data, setData] = useState({x:0});
+export const SimpleObserverFunction = observer(() => {
+	const data = useReactive(0);
 	const [x, setX] = useState(0);
 
 	return (
 		<div>
-			<div>{data.x}</div>
-			<MobxComp data={data} />
-			<button onClick={() => { data.x++; setData(data)}}>AA</button>
-			<button onClick={() => setX(x + 1)}>AA</button>
+			<div>Data: {data.value}</div>
+			<button onClick={() => { data.value++; }}>incData</button>
+			<button onClick={() => setX(x + 1)}>{x}</button>
 		</div>
 	)
-}
+});

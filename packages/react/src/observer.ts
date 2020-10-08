@@ -1,8 +1,8 @@
-import { Computed, Disposer, Reactive } from '@re-active/core';
-import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useRef, useState } from 'react';
+import { box, Computed, coreEffect, Disposer, Reactive } from '@re-active/core';
+import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PropsWithChildren, PureComponent, ReactElement, ReactNode, Ref, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactiveProps, useReactiveProps } from './reactiveProps';
 import { computed, renderEffect } from './reactivity';
-import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
+import { componentRenderScheduler, ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<ReactiveProps<P>> & React.RefAttributes<H>>;
 
@@ -13,107 +13,114 @@ interface ComponentState<P> {
 	reactiveProps: Reactive<P>,
 }
 
-const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, Reactive<P>>) => {
+const getComputedRenderState = (renderComponent: () => any, forceUpdate: () => void) => {
+	let _isRenderingByEffect = false;
 
-	return memo(forwardRef((props: PropsWithChildren<P>, ref: Ref<H>) => {
-		const [_, setState] = useState({});
-		const componentState = useRef<ComponentState<P> | null>(null);
+	const scheduler = componentRenderScheduler(() => {
+		_isRenderingByEffect = true;
+		forceUpdate();
+	});
 
-		const reactiveProps = useReactiveProps(props);
+	const reactiveInvalidate = box.shallow({});
 
-		useEffect(() => {
-			return () => {
-				componentState.current?.computedRender.dispose();
-				componentState.current?.renderEffectDisposer();
-				componentState.current = null;
-			}
-		}, []);
-		
-		useEffect(() => {
-			if (componentState.current && componentState.current.componentHandle.willRender) {
-				componentState.current.componentHandle.componentUpdated();
-				componentState.current.componentHandle.willRender = false;
-			}
-		})
+	const invalidate = () => {
+		scheduler.runImmediate();
+		reactiveInvalidate.value = {};
+	}
 
-		// first time setup computed render and effect
-		if (!componentState.current) {
-			// shared object with registered watchers or lifecycles
-			const componentHandle = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.observer))!;
-			// componentHandle.willRender = false;
+	let render = computed(() => {
+		reactiveInvalidate.value;
+		return renderComponent();
+	});
 
-			const computedRender = computed(() => {
-				const componentProps = componentState.current?.reactiveProps || reactiveProps;
-				return component(componentProps as any, ref)
-			});
-			
-			const renderEffectDisposer = renderEffect(computedRender, () => {
-				componentState.current!.componentHandle.willRender = true;
-				setState({});
-			});
+	let effect = coreEffect(() => render.value, {
+		scheduler: scheduler.scheduler
+	})
 
-			setCurrentComponentSchedulerHandle(null);
-
-			componentState.current = {
-				computedRender,
-				renderEffectDisposer,
-				reactiveProps,
-				componentHandle,
-			}
-		} else {
-			// update prop ref to be used in the computed function
-			componentState.current.reactiveProps = reactiveProps;
-
-			// // skip component render since reactive dep update. 
-			// if (!componentState.current.componentHandle.willRender) {
-			// 	// update not because reacive prop change so render component directly
-			// 	return component(props, ref);
-			// }
+	return {
+		render,
+		get isRenderingByEffect() {
+			return _isRenderingByEffect;
+		},
+		set isRenderingByEffect(val: boolean) {
+			_isRenderingByEffect = val;
+		},
+		runEffect: scheduler.runEffect,
+		invalidate,
+		dispose() {
+			render.dispose();
+			effect.dispose();
+			render = null!;
+			effect = null!;
 		}
-		
-		// componentState.current.componentHandle.willRender = false;
-		// reactive dept has changed, willInvalidate was true -> computed function will run
-		return componentState.current.computedRender.value;
+	}
+}
+
+const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
+	return memo(forwardRef((props: P, ref: Ref<H>) => {
+		const [_, setState] = useState(true);
+
+		const componentProps = useRef({ props, ref });
+		const state = useRef<ReturnType<typeof getComputedRenderState>>();
+
+		useEffect(() => {
+			return state.current!.dispose;
+		}, []);
+
+
+		if (!state.current) {
+			state.current = getComputedRenderState(() => {
+				return component(componentProps.current.props, componentProps.current.ref);
+			}, () => setState(p => !p));
+
+			return state.current.render.value;
+		} else {
+			componentProps.current = {
+				props, ref
+			};
+		}
+
+		const { render, runEffect, invalidate, isRenderingByEffect } = state.current;
+
+		if (isRenderingByEffect) {
+			runEffect();
+			state.current.isRenderingByEffect = false;
+		} else {
+			invalidate();
+		}
+
+		return render.value;
 	}))
 }
 
 function bindObserverClass(instance: any) {
-	let computedRender: Computed<ReactNode> | null = null;
-	let renderEffectDisposer: Disposer;
-	let willInvalidate = true;
-
 	const renderer = instance.render.bind(instance);
-	const baseMount = instance.componentDidMount?.bind(instance);
 	const baseUnmount = instance.componentWillUnmount?.bind(instance);
+	let computedRenderState: ReturnType<typeof getComputedRenderState>;
+
+	const updater = instance.forceUpdate.bind(instance);
 
 	instance.render = () => {
-		if (!computedRender) {
-			computedRender = computed(renderer);
-
-			renderEffectDisposer = renderEffect(computedRender, () => {
-				willInvalidate = true;
-				instance.forceUpdate();
-			})
+		if (!computedRenderState) {
+			computedRenderState = getComputedRenderState(renderer, updater);
+			return computedRenderState.render.value;
 		}
 
-		if (willInvalidate) {
-			willInvalidate = false;
-			return computedRender.value;
+		const { render, runEffect, invalidate, isRenderingByEffect } = computedRenderState
+
+		if (isRenderingByEffect) {
+			runEffect();
+			computedRenderState.isRenderingByEffect = false;
 		} else {
-			return renderer();
+			invalidate();
 		}
-	}
 
-	instance.componentDidMount = () => {
-		baseMount?.();
+		return render.value;
 	}
 
 	instance.componentWillUnmount = () => {
+		computedRenderState.dispose();
 		baseUnmount?.();
-		computedRender?.dispose();
-		computedRender = null;
-		renderEffectDisposer();
-		renderEffectDisposer = null!;
 	}
 }
 
