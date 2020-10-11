@@ -2,7 +2,7 @@ import { box, coreEffect } from '@re-active/core';
 import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PureComponent, ReactElement, Ref, useEffect, useRef, useState } from 'react';
 import { ReactiveProps } from './reactiveProps';
 import { computed } from './reactivity';
-import { componentRenderScheduler } from './schedulers';
+import { observerRenderScheduler, ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<ReactiveProps<P>> & React.RefAttributes<H>>;
 
@@ -12,7 +12,7 @@ type Updater = () => void;
 const getComputedRenderState = (renderComponent: Renderer, forceUpdate: Updater) => {
 	let _isRenderingByEffect = false;
 
-	const scheduler = componentRenderScheduler(() => {
+	const scheduler = observerRenderScheduler(() => {
 		_isRenderingByEffect = true;
 		forceUpdate();
 	});
@@ -54,11 +54,14 @@ const getComputedRenderState = (renderComponent: Renderer, forceUpdate: Updater)
 
 function renderComputed(renderer: Renderer, updater: Updater) {
 	let state: ReturnType<typeof getComputedRenderState>;
+	let componentHandle: ComponentSchedulerHandle;
 
 	return {
 		render() {
 			if (!state) {
+				componentHandle = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.observer))!;
 				state = getComputedRenderState(renderer, updater);
+				setCurrentComponentSchedulerHandle(null);
 				return state.render.value;
 			};
 
@@ -75,6 +78,9 @@ function renderComputed(renderer: Renderer, updater: Updater) {
 		},
 		dispose() {
 			state.dispose();
+		},
+		get componentSchedulerHandle() {
+			return componentHandle;
 		}
 	}
 }
@@ -83,12 +89,21 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 	return memo(forwardRef((props: P, ref: Ref<H>) => {
 		const [_, setState] = useState(true);
 
-		const componentProps = useRef({ props, ref });
+		const componentProps = useRef<{ props: P; ref: Ref<H> }>(null!);
+		componentProps.current = { props, ref };
+
 		const [state] = useState(() => renderComputed(() => {
 			return component(componentProps.current.props, componentProps.current.ref);
-		}, () => setState(p => !p)))
+		}, () => {
+			setState(p => !p);
+			state.componentSchedulerHandle.willRender = true;
+		}))
 
 		useEffect(() => state.dispose, []);
+
+		useEffect(() => {
+			state.componentSchedulerHandle.componentUpdated();
+		})
 
 		return state.render();
 	}))

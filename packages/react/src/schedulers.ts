@@ -117,7 +117,7 @@ export const tickScheduler = () => {
     }
 }
 
-export const componentRenderScheduler = (forceUpdate: () => void) => {
+export const observerRenderScheduler = (forceUpdate: () => void) => {
     let _job: Callback | null = null;
 
     let isRunning = false;
@@ -126,11 +126,12 @@ export const componentRenderScheduler = (forceUpdate: () => void) => {
     return {
         runEffect() {
             _job?.();
+            _job = null;
         },
         scheduler: (job: () => void) => {
             _job = job;
             if (_runImmediate) {
-                job();
+                job?.();
                 _runImmediate = false;
                 return;
             }
@@ -140,13 +141,42 @@ export const componentRenderScheduler = (forceUpdate: () => void) => {
 
                 queueMicroTask(() => {
                     forceUpdate();
-                    _job = null;
                     isRunning = false;
                 })
             }
         },
         runImmediate() {
             _runImmediate = true;
+        }
+    }
+}
+
+export const componentRenderScheduler = (forceUpdate: () => void) => {
+    let _job: Callback | null = null;
+
+    let isRunning = false;
+    let _noUpdate = false;
+
+    return {
+        runEffect() {
+            _job?.();
+            _job = null;
+            _noUpdate = false;
+        },
+        scheduler: (job: () => void) => {
+            _job = job;
+
+            if (!isRunning && !_noUpdate) {
+                isRunning = true;
+
+                queueMicroTask(() => {
+                    forceUpdate();
+                    isRunning = false;
+                })
+            }
+        },
+        noUpdate() {
+            _noUpdate = true;
         }
     }
 }

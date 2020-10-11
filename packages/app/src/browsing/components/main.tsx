@@ -1,4 +1,4 @@
-import { createComponent, onRendered, reactive } from '@re-active/react';
+import { createComponent } from '@re-active/react';
 import React from 'react';
 import { actions, values } from '../store';
 import { RowItem } from '../store/utils';

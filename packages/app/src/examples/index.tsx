@@ -14,6 +14,7 @@ import { Reactivity } from './Reactivity';
 import { WithReactComponents } from './WithReactComponents';
 import { Interop } from './Interop';
 import { ObserverComp, Counter, ObserverClassComp, ObserverClassComp2, Counter2, SimpleObserverFunction } from './Observer';
+import { DependencySwitch } from './DependencySwitch';
 
 const Example = (props) => {
     return (
@@ -71,6 +72,9 @@ export default () => {
                 <ObserverClassComp2 />
                 <ObserverClassComp />
                 <SimpleObserverFunction/>
+            </Example>
+            <Example title="dependency switch">
+                <DependencySwitch/>
             </Example>
         </div>
     );

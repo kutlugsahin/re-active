@@ -8,7 +8,6 @@ export {
     onUnmounted,
     onUpdated,
     useContext,
-    onRendered,
     onBeforePaint,
     onBeforeRender,
     imperativeHandle,

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { createComponent, onRendered } from "@re-active/react";
+import { createComponent } from "@re-active/react";
 
 function generateItems(count: number = 10): Item[] {
 	return Array(count).fill(null).map((_, i) => ({
@@ -30,13 +30,6 @@ interface ReactiveComponentProps {
 
 const ReactiveComponent = createComponent((props: ReactiveComponentProps) => {
 	let container: HTMLDivElement;
-
-	onRendered(() => {
-		container.classList.add('flash');
-		setTimeout(() => {
-			container.classList.remove('flash');
-		}, 500)
-	})
 
 	return () => (
 		<div

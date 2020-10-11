@@ -8,7 +8,6 @@ export interface LifeCycle {
     onMounted: MountedCallback[];
     onUnmounted: Callback[];
     onUpdated: Callback[];
-    onRendered: Callback[];
     onBeforeRender: Callback[];
     onBeforePaint: Callback[];
     context: Map<React.Context<any>, Box<any>>;
@@ -32,7 +31,6 @@ export const beginRegisterLifecyces = () => {
         onMounted: [],
         onUnmounted: [],
         onUpdated: [],
-        onRendered: [],
         context: new Map(),
         onBeforePaint: [],
         onBeforeRender: [],
@@ -56,10 +54,6 @@ export function onUnmounted(callback: Callback) {
 
 export function onUpdated(callback: Callback) {
     getCurrentLifeCycleHandle()?.onUpdated.push(callback);
-}
-
-export function onRendered(callback: Callback) {
-    getCurrentLifeCycleHandle()?.onRendered.push(callback);
 }
 
 export function onBeforeRender(callback: Callback) {

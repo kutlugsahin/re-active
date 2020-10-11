@@ -1,4 +1,4 @@
-import { observer, reactive, ObserverComponent, Observer, box, useReactive } from '@re-active/react';
+import { observer, reactive, ObserverComponent, Observer, box, useReactive, useWatch } from '@re-active/react';
 import React, { Component, forwardRef, PureComponent, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { observable } from 'mobx';
 import { observer as mobxObserver } from "mobx-react";
@@ -136,10 +136,17 @@ const MobxComp = mobxObserver((props: any) => {
 export const SimpleObserverFunction = observer(() => {
 	const data = useReactive(0);
 	const [x, setX] = useState(0);
+	const dataDiv = useRef<HTMLDivElement>(null);
+
+	useWatch(() => data.value, (newVal, oldVAl) => {
+		console.log(newVal, oldVAl, dataDiv.current?.innerHTML);
+	}, {
+		flush: 'sync'
+	})
 
 	return (
 		<div>
-			<div>Data: {data.value}</div>
+			<div ref={dataDiv}>Data: {data.value}</div>
 			<button onClick={() => { data.value++; }}>incData</button>
 			<button onClick={() => setX(x + 1)}>{x}</button>
 		</div>

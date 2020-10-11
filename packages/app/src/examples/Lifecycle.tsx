@@ -4,7 +4,7 @@ import {
   reactive,
   onMounted,
   onUnmounted,
-  useContext, onBeforePaint, onRendered, onUpdated, onBeforeRender, toBox
+  useContext, onBeforePaint, onUpdated, onBeforeRender, toBox
 } from "@re-active/react";
 
 export const Lifecycle = createComponent(() => {
@@ -23,10 +23,6 @@ export const Lifecycle = createComponent(() => {
     console.log('Lifecycle onBeforePaint: count' + count.value + ' text: ' + span.innerText);
   })
 
-  onRendered(() => {
-    console.log('Lifecycle onRendered');
-
-  });
 
   onUpdated(() => {
     console.log('Lifecycle onUpdated');

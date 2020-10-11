@@ -25,7 +25,7 @@ export const useReactiveProps = <P extends { [key: string]: any }>(props: P) => 
         const prevProps = useRef<P>(props);
 
         // update the reactive props when the component is forced to render
-        useEffect(() => {
+        // useEffect(() => {
             const prev = prevProps.current;
 
             for (const key in props) {
@@ -41,7 +41,7 @@ export const useReactiveProps = <P extends { [key: string]: any }>(props: P) => 
             }
 
             prevProps.current = props;
-        });
+        // });
 
         if (_config.readonlyProps) {
             return useMemo(() => readonly(reactiveProps), []);

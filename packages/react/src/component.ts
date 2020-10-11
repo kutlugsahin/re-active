@@ -1,9 +1,9 @@
-import { Computed, isBox, Reactive } from '@re-active/core';
+import { Computed, coreEffect, isBox, Reactive } from '@re-active/core';
 import { forwardRef, ForwardRefRenderFunction, FunctionComponent, memo, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 import { ReactiveProps, useReactiveProps } from './reactiveProps';
 import { computed, renderEffect } from './reactivity';
-import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
+import { componentRenderScheduler, ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
@@ -22,6 +22,7 @@ const setup = (setupFunction: Function): Renderer => {
 interface ComponentState {
 	computedRender: Computed<ReactElement<any, any> | null>;
 	lifecycles: LifeCycle;
+	renderScheduler: ReturnType<typeof componentRenderScheduler>;
 	componentHandle: ComponentSchedulerHandle;
 	dispose: () => void;
 }
@@ -31,10 +32,17 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 
 	// creating a functional component
 	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
+		let componentState = useRef<ComponentState>();
+		
+		if (componentState.current?.componentHandle.willRender === false) {
+			// already rendering by prop change
+			// prevent additional update by reactive props
+			componentState.current.renderScheduler.noUpdate();
+		}
+
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
 
-		let componentState = useRef<ComponentState>();
 
 		if (!componentState.current) {
 
@@ -52,29 +60,28 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			// keep the ref of the lifecycle obj
 			const lifecycles = endRegisterLifecycles();
 
+			// release the lifecycle handle to be used by other components
 			setCurrentComponentSchedulerHandle(null);
 
-			// release the lifecycle handle to be used by other components
-			// currentLifecycleHandle = null;
-
-			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
-			const computedRender = computed(renderer);
-
 			function update() {
+				componentHandle.willRender = true;
 				// call onBeforeRender data is updated but dom is not
 				lifecycles.onBeforeRender.forEach(p => p());
 				forceUpdate();
 			}
 
-			const renderEffectDispose = renderEffect(computedRender, () => {
-				componentHandle.willRender = true;
-				// re-render react component with tick scheduler
-				update();
+			const renderScheduler = componentRenderScheduler(update);
+
+			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
+			const computedRender = computed(renderer);
+
+			const renderEffectDispose = coreEffect(() => computedRender.value, {
+				scheduler: renderScheduler.scheduler
 			});
 
 			const dispose = () => {
 				computedRender.dispose();
-				renderEffectDispose();
+				renderEffectDispose.dispose();
 			}
 
 			componentState.current = {
@@ -82,6 +89,7 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 				lifecycles,
 				dispose,
 				componentHandle,
+				renderScheduler,
 			};
 		} else {
 			const { context, imperativeHandler } = componentState.current.lifecycles;
@@ -96,7 +104,7 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			}
 		}
 
-		const { computedRender, lifecycles, dispose, componentHandle } = componentState.current;
+		const { computedRender, lifecycles, dispose, componentHandle, renderScheduler } = componentState.current;
 
 		// call onBeforePaint when dom is updated but before actually painted
 		useLayoutEffect(() => {
@@ -129,12 +137,10 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			// i.e watch with flus:'post' option
 			componentHandle.componentUpdated();
 
-			if (componentHandle.willRender) {
-				lifecycles.onRendered.forEach(p => p());
-			}
-
-			componentHandle.willRender = false;
+			componentState.current!.componentHandle.willRender = false;
 		});
+
+		renderScheduler.runEffect();
 
 		// return the cached render
 		return computedRender.value;
