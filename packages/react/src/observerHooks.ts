@@ -1,33 +1,31 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { reactive, readonly } from '@re-active/core';
 import { Computed, ComputedGetterSetter, ReadonlyComputed, box } from '@re-active/core';
 import { effect, watch } from './reactivity';
 
-export const useReactive = <T>(val: T) => useMemo(() => reactive<T>(val), []);
-export const useBox = <T>(val: T) => useMemo(() => box<T>(val), []);
-export const useShallowBox = <T>(val: T) => useMemo(() => box.shallow<T>(val), []);
-export const useShallow = <T>(val: T) => useMemo(() => reactive.shallow<T>(val), []);
-export const useReadonly = <T>(val: T) => useMemo(() => readonly<T>(val), []);
+export const useReactive = <T>(val: T) => useState(() => reactive<T>(val))[0];
+export const useBox = <T>(val: T) => useState(() => box<T>(val))[0];
+export const useShallowBox = <T>(val: T) => useState(() => box.shallow<T>(val))[0];
+export const useShallow = <T>(val: T) => useState(() => reactive.shallow<T>(val))[0];
+export const useReadonly = <T>(val: T) => useState(() => readonly<T>(val))[0];
 
 export function useComputed<T>(getterSetter: ComputedGetterSetter<T>): Computed<T>;
 export function useComputed<T>(getter: () => T): ReadonlyComputed<T>;
 export function useComputed(getterSetter: any): any {
-    const computed: any = useMemo(() => computed(getterSetter), []);
+    const [computed]: any = useState(() => computed(getterSetter));
 
-    useEffect(() => {
-        computed.dispose();
-    }, []);
+    useEffect(() => computed.dispose, []);
     
     return computed;
 }
 
 export const useWatch: (...p: Parameters<typeof watch>) => void = (...p: Parameters<typeof watch>) => {
-    const dispose = useMemo(() => watch(...p), []);
+    const [dispose] = useState(() => watch(...p));
 
-    useEffect(() => dispose, []);
+    useEffect(() => dispose);
 };
 export const useReactiveEffect: (...p: Parameters<typeof effect>) => void = (...p: Parameters<typeof effect>) => {
-    const dispose = useMemo(() => effect(...p), []);
+    const [dispose] = useState(() => effect(...p));
 
     useEffect(() => dispose, []);
 };

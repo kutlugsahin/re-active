@@ -1,7 +1,7 @@
 import { Box, Computed, computed as coreComputed, ComputedGetterSetter, coreEffect, CoreEffectOptions, Disposer, isBox, ReadonlyComputed, Scheduler, watch as coreWatch, WatchCallback, WatchSource } from '@re-active/core';
 import React, { ReactNode } from 'react';
 import { onUnmounted } from "./lifecycle";
-import { combineSchedulers, ComponentType, getComponentSchedulerHandle, onUpdatedScheduler, tickScheduler } from './schedulers';
+import { combineSchedulers, ComponentType, createFlushScheduler, Flush, getComponentSchedulerHandle, onUpdatedScheduler, tickScheduler } from './schedulers';
 
 let _isStaticRendering = typeof window === 'undefined';
 
@@ -31,24 +31,9 @@ export function computed<T>(fnOrGetterSetter: any): any {
 	}
 }
 
-export type Flush = 'pre' | 'post' | 'sync';
-
 export interface WatchOptions extends Omit<CoreEffectOptions, 'scheduler'> {
 	flush?: Flush;
 	immediate?: boolean
-}
-
-function createFlushScheduler(flush: Flush): Scheduler {
-	switch (flush) {
-		case 'sync':
-			return p => p();
-		case 'pre':
-			return tickScheduler();
-		case 'post':
-			return combineSchedulers([tickScheduler(), onUpdatedScheduler()]);
-		default:
-			return p => p();
-	}
 }
 
 export function watch<T>(source: Box<T>, clb: WatchCallback<T>, options?: WatchOptions): Disposer;
@@ -103,35 +88,6 @@ export const effect = <T extends () => any>(fn: T, options?: EffectOptions): Dis
 		}
 
 		return eff.dispose
-	}
-}
-
-export const renderEffect = (computed: Computed<ReactNode | null>, clb: () => void) => {
-	if (_isStaticRendering) {
-		return () => { };
-	} else {
-		// schduler to re render component
-		const scheduler = tickScheduler();
-
-		let mounted = false;
-
-		let _renderEffect = coreEffect(() => {
-			// const newValue = computed.value;
-			if (mounted) {
-				clb();
-			}
-
-			return computed.value;
-		}, { scheduler });
-
-		mounted = true;
-
-		return () => {
-			if (_renderEffect) {
-				_renderEffect.dispose();
-				_renderEffect = null!;
-			}
-		};
 	}
 }
 

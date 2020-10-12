@@ -9,7 +9,6 @@ export {
     onUpdated,
     useContext,
     onBeforePaint,
-    onBeforeRender,
     imperativeHandle,
 } from './lifecycle';
 export {
@@ -30,4 +29,5 @@ export {
 
 export type { Computed, Reactive, Box, ShallowReactive, Scheduler, UnBox, Disposer } from '@re-active/core';
 export type { ReactiveComponent, Renderer, ReactiveComponentWithHandle } from './component';
-export type { WatchOptions, Flush, EffectOptions } from './reactivity';
+export type { WatchOptions, EffectOptions } from './reactivity';
+export type { Flush } from './schedulers';

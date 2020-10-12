@@ -9,9 +9,9 @@ const packagejsonpath = path.resolve(__dirname, '../');
 let browser;
 let page;
 
-const demo = process.argv[2] === 'redux' ? 'redux' : process.argv[2] === 'mobx' ? 'mobx' : '';
-const outputTrace = demo === 'redux' ? 'trace-redux.json' : demo === 'mobx' ? 'trace-mobx.json' : 'trace.json';
-const screenshotPath = demo === 'redux' ? 'final-redux.jpg' : demo === 'mobx' ? 'final-mobx.jpg' : 'final.jpg';
+const demo = process.argv[2] === 'redux' ? 'redux' : process.argv[2] === 'mobx' ? 'mobx' : process.argv[2] === 'observer' ? 'observer' : '';
+const outputTrace = demo === 'redux' ? 'trace-redux.json' : demo === 'mobx' ? 'trace-mobx.json' : demo === 'observer' ? 'trace-observer.json' : 'trace.json';
+const screenshotPath = demo === 'redux' ? 'final-redux.jpg' : demo === 'mobx' ? 'final-mobx.jpg' : demo === 'observer' ? 'final-observer.jpg' : 'final.jpg';
 
 function runServer() {
     execSync(`cd ${packagejsonpath}&&yarn build${demo ? ':'+demo : ''}`);

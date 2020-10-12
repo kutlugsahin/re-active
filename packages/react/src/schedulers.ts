@@ -117,6 +117,21 @@ export const tickScheduler = () => {
     }
 }
 
+export type Flush = 'pre' | 'post' | 'sync';
+
+export function createFlushScheduler(flush: Flush): Scheduler {
+    switch (flush) {
+        case 'sync':
+            return p => p();
+        case 'pre':
+            return tickScheduler();
+        case 'post':
+            return combineSchedulers([tickScheduler(), onUpdatedScheduler()]);
+        default:
+            return p => p();
+    }
+}
+
 export const observerRenderScheduler = (forceUpdate: () => void) => {
     let _job: Callback | null = null;
 

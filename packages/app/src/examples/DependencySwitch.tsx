@@ -25,7 +25,7 @@ export const ObserverComp = observer((props: any) => {
 	return (
 		<div>
 			{props.val ? dep1.value : dep2.value}
-			<button onClick={() => dep1.value ++}>inc dep1</button>
+			<button onClick={() => dep1.value++}>inc dep1</button>
 			<button onClick={() => dep2.value++}>inc dep2</button>
 		</div>
 	)

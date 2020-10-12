@@ -2,9 +2,7 @@ import React from "react";
 import {
   createComponent,
   reactive,
-  onMounted,
-  onUnmounted,
-  useContext, onBeforePaint, onUpdated, onBeforeRender, toBox
+  onMounted,onBeforePaint, onUpdated, toBox
 } from "@re-active/react";
 
 export const Lifecycle = createComponent(() => {
@@ -13,10 +11,6 @@ export const Lifecycle = createComponent(() => {
 
   onMounted(() => {
     console.log('Lifecycle onMounted');
-  })
-
-  onBeforeRender(() => {
-    console.log('Lifecycle onBeforeRendered: count' + count.value + ' text: ' + span?.innerText );
   })
 
   onBeforePaint(() => {
@@ -29,10 +23,13 @@ export const Lifecycle = createComponent(() => {
 
   })
 
-  return () => <div>
-    <span ref={e => span = e}>{count.value}</span><span> seconds passed</span>
-    <button onClick={inc}>increment</button>
-  </div>;
+  return () => {
+    console.log('rendered')
+    return <div>
+      <span ref={e => span = e}>{count.value}</span><span> seconds passed</span>
+      <button onClick={inc}>increment</button>
+    </div>
+  };
 });
 
 function counter() {

@@ -31,9 +31,9 @@ setStoreState<Store>({
     }
 });
 
-watchActions(async (actionName, params) => {
-    console.log(`action ${actionName} is called`);
-})
+// watchActions(async (actionName, params) => {
+//     console.log(`action ${actionName} is called`);
+// })
 
 // ================ SELECTORS ===========================
 export const values = createSelectors({

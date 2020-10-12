@@ -2,7 +2,7 @@ import { Computed, coreEffect, isBox, Reactive } from '@re-active/core';
 import { forwardRef, ForwardRefRenderFunction, FunctionComponent, memo, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 import { ReactiveProps, useReactiveProps } from './reactiveProps';
-import { computed, renderEffect } from './reactivity';
+import { computed } from './reactivity';
 import { componentRenderScheduler, ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type Renderer = () => ReactElement<any, any> | null;
@@ -43,7 +43,6 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
 
-
 		if (!componentState.current) {
 
 			// empty object to be filled with lifecycles
@@ -65,8 +64,6 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 
 			function update() {
 				componentHandle.willRender = true;
-				// call onBeforeRender data is updated but dom is not
-				lifecycles.onBeforeRender.forEach(p => p());
 				forceUpdate();
 			}
 
@@ -140,6 +137,7 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			componentState.current!.componentHandle.willRender = false;
 		});
 
+		// run the latest renderer effect job to recalculate and cache render
 		renderScheduler.runEffect();
 
 		// return the cached render
