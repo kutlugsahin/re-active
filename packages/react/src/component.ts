@@ -11,8 +11,8 @@ export type ReactiveComponentWithHandle<P, H> = (props: Reactive<P>, ref: Ref<H>
 
 // a hack to force component re-render
 const useForceUpdate = () => {
-	const [, forceRender] = useState({});
-	return useCallback(() => forceRender({}), [forceRender]);
+	const [, forceRender] = useState(true);
+	return useCallback(() => forceRender(p => !p), [forceRender]);
 }
 
 const setup = (setupFunction: Function): Renderer => {
