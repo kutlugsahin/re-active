@@ -22,7 +22,7 @@ export function useComputed(getterSetter: any): any {
 export const useWatch: (...p: Parameters<typeof watch>) => void = (...p: Parameters<typeof watch>) => {
     const [dispose] = useState(() => watch(...p));
 
-    useEffect(() => dispose);
+    useEffect(() => dispose, []);
 };
 export const useReactiveEffect: (...p: Parameters<typeof effect>) => void = (...p: Parameters<typeof effect>) => {
     const [dispose] = useState(() => effect(...p));
