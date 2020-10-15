@@ -1,7 +1,7 @@
 import { Box, Computed, computed as coreComputed, ComputedGetterSetter, coreEffect, CoreEffectOptions, Disposer, isBox, ReadonlyComputed, Scheduler, watch as coreWatch, WatchCallback, WatchSource } from '@re-active/core';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { onUnmounted } from "./lifecycle";
-import { combineSchedulers, ComponentType, createFlushScheduler, Flush, getComponentSchedulerHandle, onUpdatedScheduler, tickScheduler } from './schedulers';
+import { ComponentType, createFlushScheduler, Flush, getComponentSchedulerHandle } from './schedulers';
 
 let _isStaticRendering = typeof window === 'undefined';
 

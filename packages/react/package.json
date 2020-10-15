@@ -23,11 +23,9 @@
 	"license": "ISC",
 	"umd": "dist/umd/index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:types": "tsc --emitDeclarationOnly",
 		"build:rollup": "rollup -c",
-		"build": "yarn run build:types && yarn run build:rollup",
-		"lib:publish": ""
+		"build": "yarn run build:types && yarn run build:rollup"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.10.5",
@@ -41,7 +39,7 @@
 		"@types/react": "^16.9.43",
 		"rollup": "^2.23.0",
 		"typescript": "4.0.2",
-		"react": ">=16.13.1"
+		"react": "17.0.0-rc.3"
 	},
 	"dependencies": {
 		"@re-active/core": "1.0.51"

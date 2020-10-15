@@ -18,7 +18,6 @@
 	"license": "ISC",
 	"umd": "dist/umd/index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:types": "tsc --emitDeclarationOnly",
 		"build:rollup": "rollup -c",
 		"build": "yarn run build:types && yarn run build:rollup"

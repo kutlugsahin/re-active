@@ -1,4 +1,4 @@
-import { Scheduler, queueMicroTask } from '@re-active/core';
+import { Scheduler, queueMicroTask, tickScheduler } from '@re-active/core';
 import { Callback } from './lifecycle';
 
 export enum ComponentType {
@@ -93,26 +93,6 @@ export const onUpdatedScheduler = (): Scheduler => {
             }
         } else {
             job();
-        }
-    }
-}
-
-export const tickScheduler = () => {
-
-    let _job: Callback | null = null;
-
-    let isRunning = false;
-
-    return (job: () => void) => {
-        _job = job;
-        if (!isRunning) {
-            isRunning = true;
-
-            queueMicroTask(() => {
-                _job?.();
-                _job = null;
-                isRunning = false;
-            })
         }
     }
 }

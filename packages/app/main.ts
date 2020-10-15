@@ -5,5 +5,5 @@ import { App as Browser } from './src/browsing';
 import Example from './src/examples';
 import { renderStatic } from "@re-active/react";
 
-ReactDom.render(React.createElement(Example), document.getElementById('app'));
+ReactDom.render(React.createElement(Browser), document.getElementById('app'));
 
