@@ -1,9 +1,9 @@
-import { Computed, coreEffect, isBox, Reactive } from '@re-active/core';
+import { isBox, Reactive } from '@re-active/core';
 import { forwardRef, ForwardRefRenderFunction, FunctionComponent, memo, ReactElement, Ref, useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { createComputedRenderer } from './computedRender';
 import { beginRegisterLifecyces, endRegisterLifecycles, LifeCycle } from './lifecycle';
 import { ReactiveProps, useReactiveProps } from './reactiveProps';
-import { computed } from './reactivity';
-import { componentRenderScheduler, ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
+import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type Renderer = () => ReactElement<any, any> | null;
 export type ReactiveComponent<P = {}> = (props: Reactive<P>) => Renderer;
@@ -15,15 +15,10 @@ const useForceUpdate = () => {
 	return useCallback(() => forceRender(p => !p), [forceRender]);
 }
 
-const setup = (setupFunction: Function): Renderer => {
-	return setupFunction();
-}
-
 interface ComponentState {
-	computedRender: Computed<ReactElement<any, any> | null>;
 	lifecycles: LifeCycle;
-	renderScheduler: ReturnType<typeof componentRenderScheduler>;
 	componentHandle: ComponentSchedulerHandle;
+	computedRender: ReturnType<typeof createComputedRenderer>;
 	dispose: () => void;
 }
 
@@ -34,11 +29,9 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 	const ReactiveComponent = <H>(props: P, ref?: Ref<H>) => {
 		let componentState = useRef<ComponentState>();
 		
-		if (componentState.current?.componentHandle.willRender === false) {
-			// already rendering by prop change
-			// prevent additional update by reactive props
-			componentState.current.renderScheduler.noUpdate();
-		}
+		// component is rending
+		// prevent another update due to possible reactive prop change
+		componentState.current?.computedRender.willUpdate();
 
 		const reactiveProps = useReactiveProps(props);
 		const forceUpdate = useForceUpdate();
@@ -54,7 +47,7 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			// one time call for the 'reactive component' retrieving the render function which will be called for future renders
 			// in this phase we get the lifecycle calls to be referenced in lifecycle phases
 
-			const renderer = setup(() => (reactiveComponent as ReactiveComponentWithHandle<P, H>)(reactiveProps, ref!));
+			const renderer = (reactiveComponent as ReactiveComponentWithHandle<P, H>)(reactiveProps, ref!);
 
 			// keep the ref of the lifecycle obj
 			const lifecycles = endRegisterLifecycles();
@@ -67,18 +60,10 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 				forceUpdate();
 			}
 
-			const renderScheduler = componentRenderScheduler(update);
-
-			// calling the render function within 'computed' to cache the render and listen to the accessed reactive values.
-			const computedRender = computed(renderer);
-
-			const renderEffectDispose = coreEffect(() => computedRender.value, {
-				scheduler: renderScheduler.scheduler
-			});
+			const computedRender = createComputedRenderer(renderer, update, ComponentType.reactive);
 
 			const dispose = () => {
 				computedRender.dispose();
-				renderEffectDispose.dispose();
 			}
 
 			componentState.current = {
@@ -86,7 +71,6 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 				lifecycles,
 				dispose,
 				componentHandle,
-				renderScheduler,
 			};
 		} else {
 			const { context, imperativeHandler } = componentState.current.lifecycles;
@@ -101,7 +85,7 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			}
 		}
 
-		const { computedRender, lifecycles, dispose, componentHandle, renderScheduler } = componentState.current;
+		const { computedRender, lifecycles, dispose, componentHandle } = componentState.current;
 
 		// call onBeforePaint when dom is updated but before actually painted
 		useLayoutEffect(() => {
@@ -120,7 +104,6 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 					}
 				});
 				dispose();
-				// disposeEffect();
 				// call onUnmounted
 				lifecycles.onUnmounted.forEach(p => p());
 			};
@@ -133,15 +116,11 @@ export function createComponentFunction<P = {}>(reactiveComponent: ReactiveCompo
 			// notify listeners that component is updated
 			// i.e watch with flus:'post' option
 			componentHandle.componentUpdated();
-
-			componentState.current!.componentHandle.willRender = false;
+			componentHandle.willRender = false;
 		});
 
-		// run the latest renderer effect job to recalculate and cache render
-		renderScheduler.runEffect();
-
 		// return the cached render
-		return computedRender.value;
+		return computedRender.render();
 	};
 
 	(ReactiveComponent as any).displayName = reactiveComponent.name || undefined;

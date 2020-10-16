@@ -20,7 +20,6 @@ interface TreeNodeProps<T = any> {
 // =================================================
 
 export const Tree = observer((props: TreeProps<any>) => {
-    // console.log(`tree render`);
     return (
         <div>
             {props.nodes.map(node =>

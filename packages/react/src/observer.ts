@@ -1,89 +1,10 @@
-import { box, coreEffect } from '@re-active/core';
 import { Component, ComponentClass, FC, forwardRef, ForwardRefExoticComponent, ForwardRefRenderFunction, memo, PureComponent, ReactElement, Ref, useEffect, useRef, useState } from 'react';
+import { createComputedRenderer } from './computedRender';
 import { ReactiveProps } from './reactiveProps';
-import { computed } from './reactivity';
-import { observerRenderScheduler, ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
+import { ComponentSchedulerHandle, ComponentType, createComponentEffectSchedulerHandle, setCurrentComponentSchedulerHandle } from './schedulers';
 
 export type ObserverFunctionalComponent<P, H> = ForwardRefExoticComponent<React.PropsWithoutRef<ReactiveProps<P>> & React.RefAttributes<H>>;
 
-type Renderer = () => ReactElement | null;
-type Updater = () => void;
-
-const getComputedRenderState = (renderComponent: Renderer, forceUpdate: Updater) => {
-	let _isRenderingByEffect = false;
-
-	const scheduler = observerRenderScheduler(() => {
-		_isRenderingByEffect = true;
-		forceUpdate();
-	});
-
-	const reactiveInvalidate = box.shallow({});
-
-	const invalidate = () => {
-		scheduler.runImmediate();
-		reactiveInvalidate.value = {};
-	}
-
-	let render = computed(() => {
-		reactiveInvalidate.value;
-		return renderComponent();
-	});
-
-	let effect = coreEffect(() => render.value, {
-		scheduler: scheduler.scheduler
-	})
-
-	return {
-		render,
-		get isRenderingByEffect() {
-			return _isRenderingByEffect;
-		},
-		set isRenderingByEffect(val: boolean) {
-			_isRenderingByEffect = val;
-		},
-		runEffect: scheduler.runEffect,
-		invalidate,
-		dispose() {
-			render.dispose();
-			effect.dispose();
-			render = null!;
-			effect = null!;
-		}
-	}
-}
-
-function renderComputed(renderer: Renderer, updater: Updater) {
-	let state: ReturnType<typeof getComputedRenderState>;
-	let componentHandle: ComponentSchedulerHandle;
-
-	return {
-		render() {
-			if (!state) {
-				componentHandle = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.observer))!;
-				state = getComputedRenderState(renderer, updater);
-				setCurrentComponentSchedulerHandle(null);
-				return state.render.value;
-			};
-
-			const { render, runEffect, invalidate, isRenderingByEffect } = state;
-
-			if (isRenderingByEffect) {
-				runEffect();
-				state.isRenderingByEffect = false;
-			} else {
-				invalidate();
-			}
-
-			return render.value;
-		},
-		dispose() {
-			state.dispose();
-		},
-		get componentSchedulerHandle() {
-			return componentHandle;
-		}
-	}
-}
 
 const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 	return memo(forwardRef((props: P, ref: Ref<H>) => {
@@ -92,17 +13,28 @@ const observerFunction = <P, H>(component: ForwardRefRenderFunction<H, P>) => {
 		const componentProps = useRef<{ props: P; ref: Ref<H> }>(null!);
 		componentProps.current = { props, ref };
 
-		const [state] = useState(() => renderComputed(() => {
+		const schedulerHandle = useRef<ComponentSchedulerHandle>(null!);
+
+		const [state] = useState(() => createComputedRenderer(() => {
+
+			if (!schedulerHandle.current) {
+				schedulerHandle.current = setCurrentComponentSchedulerHandle(createComponentEffectSchedulerHandle(ComponentType.observer))!;
+				const renderResult = component(componentProps.current.props, componentProps.current.ref);
+				setCurrentComponentSchedulerHandle(null);
+				return renderResult;
+			}
+
 			return component(componentProps.current.props, componentProps.current.ref);
 		}, () => {
+			schedulerHandle.current.willRender = true;
 			setState(p => !p);
-			state.componentSchedulerHandle.willRender = true;
-		}))
+		}, ComponentType.observer));
 
 		useEffect(() => state.dispose, []);
 
 		useEffect(() => {
-			state.componentSchedulerHandle.componentUpdated();
+			schedulerHandle.current.componentUpdated();
+			schedulerHandle.current.willRender = false;
 		})
 
 		return state.render();
@@ -115,7 +47,7 @@ function bindObserverClass(instance: any) {
 
 	const updater = instance.forceUpdate.bind(instance);
 
-	const state = renderComputed(renderer, updater);
+	const state = createComputedRenderer(renderer, updater, ComponentType.observer);
 
 	instance.render = state.render;
 

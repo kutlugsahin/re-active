@@ -84,7 +84,7 @@ export const ObserverClassComp2 = observer(class extends Component {
 					)}
 				</Observer>
 				<div>{this.state.click}</div>
-				<button onClick={() => count.value++}>Inc</button>
+				<button onClick={() => count.value++}>Incsdasd</button>
 				<button onClick={() => this.setState({ click: this.state.click + 1 })}>Inc</button>
 				
 			</div>
