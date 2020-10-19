@@ -8,6 +8,7 @@ export const useBox = <T>(val: T) => useState(() => box<T>(val))[0];
 export const useShallowBox = <T>(val: T) => useState(() => box.shallow<T>(val))[0];
 export const useShallow = <T>(val: T) => useState(() => reactive.shallow<T>(val))[0];
 export const useReadonly = <T>(val: T) => useState(() => readonly<T>(val))[0];
+export const useShallowReadonly = (val: Object) => useState(() => readonly.shallow(val))[0];
 
 export function useComputed<T>(getterSetter: ComputedGetterSetter<T>): Computed<T>;
 export function useComputed<T>(getter: () => T): ReadonlyComputed<T>;
@@ -23,9 +24,13 @@ export const useWatch: (...p: Parameters<typeof watch>) => void = (...p: Paramet
     const [dispose] = useState(() => watch(...p));
 
     useEffect(() => dispose, []);
+
+    return dispose;
 };
 export const useReactiveEffect: (...p: Parameters<typeof effect>) => void = (...p: Parameters<typeof effect>) => {
     const [dispose] = useState(() => effect(...p));
 
     useEffect(() => dispose, []);
+
+    return dispose;
 };
