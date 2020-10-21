@@ -50,7 +50,7 @@ export const Props = createComponent((props) => {
       />
       <Label text={text} />
       <div>
-        <ObserverProps clicks={click.value} onClick={onClick} unused={unused} />
+        <ObserverProps clicks={click.value} onClick={onClick} unused={unused.value} />
       </div>
     </div>
   );
