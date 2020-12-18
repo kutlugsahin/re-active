@@ -31,3 +31,4 @@ export type { Computed, Reactive, Box, ShallowReactive, Scheduler, UnBox, Dispos
 export type { ReactiveComponent, Renderer, ReactiveComponentWithHandle } from './component';
 export type { WatchOptions, EffectOptions } from './reactivity';
 export type { Flush } from './schedulers';
+export type { ReactiveProps } from './reactiveProps';

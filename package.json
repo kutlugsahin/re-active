@@ -3,7 +3,9 @@
   "workspaces": [
     "packages/core",
     "packages/store",
+    "packages/hub",
     "packages/react",
+    "packages/hub-connect",
     "packages/app",
     "packages/test"
   ],

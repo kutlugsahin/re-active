@@ -9,7 +9,7 @@ const argsSet = new Set(process.argv);
 const packageJson = JSON.parse(package);
 const projectDirs = packageJson.workspaces;
 
-const projectNames = ['core', 'react', 'store'];
+const projectNames = ['core', 'react', 'store', 'hub', 'hub-connect'];
 const scopeName = '@re-active';
 
 console.log(projectDirs.filter(p => projectNames.some(name => p.indexOf(`/${name}`) > -1)))

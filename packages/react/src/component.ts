@@ -136,4 +136,3 @@ createComponent.withHandle = <P = {}, H = {}>(reactiveComponent: ReactiveCompone
 	const component = createComponentFunction<P>(reactiveComponent as unknown as ReactiveComponent<P>) as ForwardRefRenderFunction<H, ReactiveProps<P>>;
 	return memo(forwardRef(component));
 }
-
