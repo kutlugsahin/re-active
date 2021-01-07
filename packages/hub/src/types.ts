@@ -19,3 +19,5 @@ export type Middleware = (store: Store) => (next: (action: any) => void) => (act
 export type Handler = <S, A>(state: S, action: A) => void;
 export type HandlerDefinition = [Handler, (string | [string])];
 export type HandlerMap = HandlerDefinition[];
+
+export type Reducer = <S, A>(state: S, action: A) => S | void;
